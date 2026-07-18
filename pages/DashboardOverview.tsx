@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Lead, UserActivity, User, LeadStatus, Customer, UserRole, Service, Testimonial, Task, Branch } from '../types';
+import { Lead, UserActivity, User, LeadStatus, Customer, UserRole, Service, Testimonial, Task, Branch, City } from '../types';
 import { useGlobalFilter } from '../contexts/GlobalFilterContext';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -54,93 +54,10 @@ import {
     TrendingDown,
     ArrowDownRight
 } from 'lucide-react';
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-
-const BUSINESS_CATEGORIES = [
-  { value: 'Proprietorship', label: 'Proprietorship' },
-  { value: 'Partnership Firm', label: 'Partnership Firm' },
-  { value: 'One Person Company (OPC)', label: 'One Person Company (OPC)' },
-  { value: 'Private Limited Company', label: 'Private Limited Company' },
-  { value: 'Public Limited Company', label: 'Public Limited Company' },
-  { value: 'Limited Liability Partnership (LLP)', label: 'Limited Liability Partnership (LLP)' },
-  { value: 'Section 8 Company', label: 'Section 8 Company' },
-  { value: 'Trust Registration', label: 'Trust Registration' },
-  { value: 'Society Registration', label: 'Society Registration' },
-  { value: 'NGO Registration', label: 'NGO Registration' },
-  { value: 'Startup Registration', label: 'Startup Registration' },
-  { value: 'MSME Registration', label: 'MSME Registration' },
-  { value: 'GST Registration', label: 'GST Registration' },
-  { value: 'Trademark Registration', label: 'Trademark Registration' },
-  { value: 'Import Export Code (IEC)', label: 'Import Export Code (IEC)' },
-  { value: 'FSSAI Registration', label: 'FSSAI Registration' },
-  { value: 'Professional Tax Registration', label: 'Professional Tax Registration' },
-  { value: 'Shop & Establishment Registration', label: 'Shop & Establishment Registration' },
-  { value: 'Trade License', label: 'Trade License' },
-  { value: 'Other', label: 'Other' }
-];
-
-const INDUSTRY_TYPES = [
-  { value: 'Healthcare', label: 'Healthcare' },
-  { value: 'Information Technology (IT)', label: 'Information Technology (IT)' },
-  { value: 'Software Development', label: 'Software Development' },
-  { value: 'Construction', label: 'Construction' },
-  { value: 'Transport & Logistics', label: 'Transport & Logistics' },
-  { value: 'Manufacturing', label: 'Manufacturing' },
-  { value: 'Retail', label: 'Retail' },
-  { value: 'E-Commerce', label: 'E-Commerce' },
-  { value: 'Education', label: 'Education' },
-  { value: 'Finance & Banking', label: 'Finance & Banking' },
-  { value: 'Insurance', label: 'Insurance' },
-  { value: 'Real Estate', label: 'Real Estate' },
-  { value: 'Hospitality', label: 'Hospitality' },
-  { value: 'Travel & Tourism', label: 'Travel & Tourism' },
-  { value: 'Food & Beverage', label: 'Food & Beverage' },
-  { value: 'Agriculture', label: 'Agriculture' },
-  { value: 'Pharmaceuticals', label: 'Pharmaceuticals' },
-  { value: 'Telecommunications', label: 'Telecommunications' },
-  { value: 'Media & Entertainment', label: 'Media & Entertainment' },
-  { value: 'Marketing & Advertising', label: 'Marketing & Advertising' },
-  { value: 'Consulting Services', label: 'Consulting Services' },
-  { value: 'Legal Services', label: 'Legal Services' },
-  { value: 'Automobile', label: 'Automobile' },
-  { value: 'Textiles & Garments', label: 'Textiles & Garments' },
-  { value: 'Electronics', label: 'Electronics' },
-  { value: 'Energy & Utilities', label: 'Energy & Utilities' },
-  { value: 'Mining', label: 'Mining' },
-  { value: 'Import & Export', label: 'Import & Export' },
-  { value: 'Warehousing', label: 'Warehousing' },
-  { value: 'Security Services', label: 'Security Services' },
-  { value: 'Event Management', label: 'Event Management' },
-  { value: 'Beauty & Wellness', label: 'Beauty & Wellness' },
-  { value: 'Fitness & Sports', label: 'Fitness & Sports' },
-  { value: 'NGO / Non-Profit', label: 'NGO / Non-Profit' },
-  { value: 'Government Services', label: 'Government Services' },
-  { value: 'Other', label: 'Other' }
-];
+import { BUSINESS_CATEGORIES, INDUSTRY_TYPES } from '../constants';
+import { cn, formatCurrency, formatDate, timeAgo } from '../lib/utils';
 
 // --- UTILS ---
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-    }).format(amount);
-};
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(`${dateString}T00:00:00`).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
-};
 
 const getLocalDateString = (date: Date) => {
     const y = date.getFullYear();
@@ -169,26 +86,6 @@ const getPresetRange = (preset: string) => {
         default: return { from: '', to: '' };
     }
 };
-
-const timeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    const intervals = [
-        { label: 'year', seconds: 31536000 },
-        { label: 'month', seconds: 2592000 },
-        { label: 'day', seconds: 86400 },
-        { label: 'hour', seconds: 3600 },
-        { label: 'minute', seconds: 60 },
-        { label: 'second', seconds: 1 }
-    ];
-    for (const i of intervals) {
-        const count = Math.floor(seconds / i.seconds);
-        if (count >= 1) return `${count} ${i.label}${count !== 1 ? 's' : ''} ago`;
-    }
-    return 'Just now';
-};
-
 // --- GREET BY TIME ---
 const getGreeting = () => {
     const h = new Date().getHours();
@@ -235,27 +132,27 @@ const ColorfulKpiCard: React.FC<ColorfulKpiCardProps> = ({ title, value, subtitl
         onClick={onClick}
         disabled={!onClick}
         className={cn(
-            "relative overflow-hidden rounded-2xl p-5 text-left text-white shadow-md transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
-            gradient,
-            !onClick && "cursor-default hover:shadow-md hover:translate-y-0"
+            "relative overflow-hidden rounded-xl bg-white border border-slate-200 p-5 text-left transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group",
+            !onClick && "cursor-default hover:shadow-sm hover:translate-y-0"
         )}
     >
         <div className="relative z-10 flex flex-col h-full justify-between">
-            <div className="flex justify-between items-start">
-                {large ? (
-                    <h3 className="text-sm font-bold text-white/90 uppercase tracking-wider">{title}</h3>
-                ) : (
-                    <h3 className="text-xs font-semibold text-white/90">{title}</h3>
+            <div className="flex justify-between items-start mb-4">
+                <div className="space-y-1">
+                    <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{title}</h3>
+                    {subtitle && <p className="text-xs font-medium text-slate-400">{subtitle}</p>}
+                </div>
+                {Icon && (
+                    <div className={cn("p-2.5 rounded-lg flex-shrink-0 transition-colors", gradient.replace('bg-gradient-to-br', 'bg-gradient-to-br').replace('from-', 'from-').replace('to-', 'to-').includes('emerald') ? 'bg-emerald-50 text-emerald-600 group-hover:bg-emerald-100' : gradient.includes('blue') ? 'bg-blue-50 text-blue-600 group-hover:bg-blue-100' : gradient.includes('rose') || gradient.includes('red') || gradient.includes('pink') ? 'bg-rose-50 text-rose-600 group-hover:bg-rose-100' : gradient.includes('amber') || gradient.includes('orange') ? 'bg-amber-50 text-amber-600 group-hover:bg-amber-100' : gradient.includes('violet') || gradient.includes('purple') ? 'bg-violet-50 text-violet-600 group-hover:bg-violet-100' : 'bg-slate-50 text-slate-600 group-hover:bg-slate-100')}>
+                        <Icon className="h-5 w-5" />
+                    </div>
                 )}
-                {Icon && <Icon className={cn("text-white/70", large ? "h-6 w-6" : "h-4 w-4")} />}
             </div>
-            <div className={cn("mt-4", large ? "mt-6" : "")}>
-                <p className={cn("font-extrabold leading-none", large ? "text-4xl" : "text-2xl")}>{value}</p>
-                {subtitle && <p className="text-xs font-medium text-white/80 mt-2">{subtitle}</p>}
+            <div>
+                <p className={cn("font-bold text-slate-900 leading-tight", large ? "text-3xl" : "text-2xl")}>{value}</p>
             </div>
         </div>
-        <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-white opacity-10 rounded-full blur-2xl" />
-        <div className="absolute -left-4 -top-4 w-16 h-16 bg-black opacity-5 rounded-full blur-xl" />
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ backgroundImage: `var(--tw-gradient-stops)` }} />
     </button>
 );
 
@@ -271,44 +168,52 @@ interface PipelineFunnelProps {
 
 const PipelineFunnel: React.FC<PipelineFunnelProps> = ({ pending, inProgress, won, lost, total, onNavigate }) => {
     const stages = [
-        { label: 'Pending', value: pending, color: 'bg-amber-500', light: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: Clock, page: 'Lead Workflow' },
-        { label: 'In Progress', value: inProgress, color: 'bg-blue-500', light: 'bg-blue-50 border-blue-200', text: 'text-blue-700', icon: Play, page: 'Lead Workflow' },
-        { label: 'Converted', value: won, color: 'bg-emerald-500', light: 'bg-emerald-50 border-emerald-200', text: 'text-emerald-700', icon: CheckCircle2, page: 'Customers' },
-        { label: 'Lost', value: lost, color: 'bg-slate-400', light: 'bg-slate-50 border-slate-200', text: 'text-slate-600', icon: XCircle, page: 'All Leads' },
+        { label: 'Pending', value: pending, color: 'bg-amber-500', light: 'bg-amber-50 text-amber-700', icon: Clock, page: 'Lead Workflow' },
+        { label: 'In Progress', value: inProgress, color: 'bg-blue-500', light: 'bg-blue-50 text-blue-700', icon: Play, page: 'Lead Workflow' },
+        { label: 'Converted', value: won, color: 'bg-emerald-500', light: 'bg-emerald-50 text-emerald-700', icon: CheckCircle2, page: 'Customers' },
+        { label: 'Lost', value: lost, color: 'bg-slate-400', light: 'bg-slate-100 text-slate-700', icon: XCircle, page: 'All Leads' },
     ];
     return (
-        <div>
-            <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-slate-700 flex items-center gap-1.5">
-                    <BarChart2 className="h-4 w-4 text-slate-400" /> Pipeline Overview
-                </h3>
-                <span className="text-xs text-slate-400 font-medium">{total} total leads</span>
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-                {stages.map((s, i) => {
-                    const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
-                    const Icon = s.icon;
-                    return (
-                        <button
-                            key={i}
-                            onClick={() => onNavigate(s.page)}
-                            className={cn(
-                                'border rounded-xl p-3 flex flex-col items-center gap-1.5 hover:shadow-md transition-all duration-200 text-center group',
-                                s.light
-                            )}
-                        >
-                            <Icon className={cn('h-4 w-4', s.text)} />
-                            <span className={cn('text-2xl font-extrabold', s.text)}>{s.value}</span>
-                            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">{s.label}</span>
-                            <div className="w-full bg-white/60 rounded-full h-1.5 overflow-hidden">
-                                <div className={cn('h-full rounded-full transition-all', s.color)} style={{ width: `${pct}%` }} />
-                            </div>
-                            <span className="text-[9px] text-slate-400">{pct}%</span>
-                        </button>
-                    );
-                })}
-            </div>
-        </div>
+        <Card className="shadow-sm border border-slate-200">
+            <CardHeader className="pb-3 border-b border-slate-100 bg-slate-50/50">
+                <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                        <BarChart2 className="h-4 w-4 text-slate-400" /> Pipeline Overview
+                    </CardTitle>
+                    <span className="text-xs font-semibold text-slate-500">{total} Total Leads</span>
+                </div>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="flex flex-col">
+                    {stages.map((s, i) => {
+                        const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+                        const Icon = s.icon;
+                        return (
+                            <button
+                                key={i}
+                                onClick={() => onNavigate(s.page)}
+                                className={cn(
+                                    'flex items-center justify-between p-3.5 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors group',
+                                )}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={cn("p-2 rounded-lg", s.light)}>
+                                        <Icon className="h-4 w-4" />
+                                    </div>
+                                    <div className="text-left">
+                                        <p className="text-xs font-bold text-slate-700 uppercase tracking-wide group-hover:text-blue-600 transition-colors">{s.label}</p>
+                                        <p className="text-[10px] text-slate-400 font-medium">{pct}% of pipeline</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-xl font-extrabold text-slate-900">{s.value}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </CardContent>
+        </Card>
     );
 };
 
@@ -713,11 +618,11 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         const empMatch = employeeFilter === 'All Employees' ? true : lead.assigned_to?.id === employeeFilter;
         let branchMatch = true;
         if (branchFilter !== 'All Branches') {
-            branchMatch = lead.branch_id === branchFilter || lead.branch_name === branchFilter || (lead.assigned_to && (lead.assigned_to.branch_id === branchFilter || lead.assigned_to.branch_name === branchFilter)) || false;
+            branchMatch = (lead as any).branch_id === branchFilter || (lead as any).branch_name === branchFilter || (lead.assigned_to && ((lead.assigned_to as any).branch_id === branchFilter || (lead.assigned_to as any).branch_name === branchFilter)) || false;
         }
         let cityMatch = true;
         if (cityFilter !== 'All Cities') {
-            cityMatch = lead.city_id === cityFilter || lead.city_name === cityFilter || (lead.assigned_to && (lead.assigned_to.city_id === cityFilter || lead.assigned_to.city_name === cityFilter)) || false;
+            cityMatch = (lead as any).city_id === cityFilter || (lead as any).city_name === cityFilter || (lead.assigned_to && ((lead.assigned_to as any).city_id === cityFilter || (lead.assigned_to as any).city_name === cityFilter)) || false;
         }
         let managerMatch = true;
         if (managerFilter !== 'All Managers') {
@@ -1053,6 +958,23 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
 
     const recentActivities = filteredActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 6);
 
+    const branchPerformanceData = useMemo(() => {
+        if (!isSuperAdmin) return [];
+        return branches.map(branch => {
+            const bLeads = filteredLeads.filter(l => l.branch_id === branch.id || l.branch_name === branch.name);
+            const bSales = bLeads.filter(l => l.status === LeadStatus.SUCCESS);
+            const totalRev = bLeads.reduce((sum, lead) => sum + (lead.payments || []).reduce((pSum, p) => pSum + (p.amount || 0), 0), 0);
+            return {
+                id: branch.id,
+                name: branch.name,
+                city: branch.city_name,
+                leads: bLeads.length,
+                sales: bSales.length,
+                revenue: totalRev
+            };
+        }).sort((a, b) => b.revenue - a.revenue);
+    }, [isSuperAdmin, branches, filteredLeads]);
+
     // ── EXPORT ─────────────────────────────────────────────────────────────
     const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
         setExportOpen(false);
@@ -1300,6 +1222,45 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
                             <ColorfulKpiCard large title="Total Revenue" value={formatCurrency(currentMetrics.revenue)} subtitle="Filtered Period" gradient="bg-gradient-to-br from-rose-500 to-red-600" icon={IndianRupee} onClick={() => onNavigate('Payments')} />
                             <ColorfulKpiCard large title="Completed Payments" value={superAdminPaymentsCount} subtitle="Total Transactions" gradient="bg-gradient-to-br from-sky-500 to-blue-600" icon={CreditCard} onClick={() => onNavigate('Payments')} />
                         </div>
+                        
+                        {/* ── BRANCH PERFORMANCE TABLE (SUPER ADMIN) ──────────────────────── */}
+                        <Card className="shadow-sm border border-slate-200 mt-4">
+                            <CardHeader className="pb-2 border-b border-slate-100 bg-slate-50">
+                                <CardTitle className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                                    <Building className="h-4 w-4 text-slate-500" />
+                                    Branch Performance Overview (Selected Period)
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-0">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-white border-b border-slate-100 text-slate-500 font-semibold text-xs uppercase">
+                                            <tr>
+                                                <th className="px-4 py-3">Branch</th>
+                                                <th className="px-4 py-3">City</th>
+                                                <th className="px-4 py-3 text-right">Leads</th>
+                                                <th className="px-4 py-3 text-right">Sales</th>
+                                                <th className="px-4 py-3 text-right">Revenue (₹)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {branchPerformanceData.map((b) => (
+                                                <tr key={b.id} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="px-4 py-3 font-medium text-slate-800">{b.name}</td>
+                                                    <td className="px-4 py-3 text-slate-600">{b.city}</td>
+                                                    <td className="px-4 py-3 text-right text-slate-600">{b.leads}</td>
+                                                    <td className="px-4 py-3 text-right text-emerald-600 font-semibold">{b.sales}</td>
+                                                    <td className="px-4 py-3 text-right text-indigo-600 font-bold">{formatCurrency(b.revenue)}</td>
+                                                </tr>
+                                            ))}
+                                            {branchPerformanceData.length === 0 && (
+                                                <tr><td colSpan={5} className="px-4 py-4 text-center text-slate-500">No branches found.</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </>
                 )}
 

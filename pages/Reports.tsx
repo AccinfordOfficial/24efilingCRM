@@ -6,6 +6,7 @@ import { Popover } from '../components/ui/Popover';
 import { Calendar } from '../components/ui/Calendar';
 import { Select } from '../components/ui/Select';
 import { useApi } from '../hooks/useApi';
+import { useGlobalFilter } from '../contexts/GlobalFilterContext';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -40,27 +41,7 @@ import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { startOfWeek, startOfMonth, startOfYear, subDays, format } from 'date-fns';
 
-// --- UTILS ---
-function cn(...inputs: ClassValue[]) {
-    return twMerge(clsx(inputs));
-}
-
-const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    return new Date(`${dateString}`).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-    });
-};
-
-const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-    }).format(amount);
-};
+import { cn, formatCurrency, formatDate } from '../lib/utils';
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -103,17 +84,17 @@ const FilterBar = ({ children, title }: { children: React.ReactNode, title?: str
 );
 
 const MetricCard: React.FC<{ title: string, value: string | number, subValue?: string, icon: React.ElementType, colorClass: string }> = ({ title, value, subValue, icon: Icon, colorClass }) => (
-    <Card className="shadow-sm hover:shadow-md border-slate-200 transition-all duration-300">
-        <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-slate-500">{title}</p>
-                    <h3 className="text-3xl font-bold mt-2 text-slate-900">{value}</h3>
-                    {subValue && <p className="text-xs text-slate-400 mt-1">{subValue}</p>}
+    <Card className="shadow-sm hover:shadow-md hover:-translate-y-1 border border-slate-200 transition-all duration-300 rounded-xl bg-white group">
+        <CardContent className="p-5 flex flex-col justify-between h-full">
+            <div className="flex items-start justify-between mb-4">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{title}</p>
+                <div className={cn("p-2 rounded-lg transition-colors bg-slate-50 group-hover:bg-slate-100", colorClass.replace('text-', 'text-'))}>
+                    <Icon className="h-5 w-5" />
                 </div>
-                <div className={cn("p-3 rounded-xl bg-slate-50", colorClass)}>
-                    <Icon className="h-6 w-6" />
-                </div>
+            </div>
+            <div>
+                <h3 className="text-2xl font-bold text-slate-900 leading-tight">{value}</h3>
+                {subValue && <p className="text-xs font-medium text-slate-400 mt-1">{subValue}</p>}
             </div>
         </CardContent>
     </Card>
@@ -163,9 +144,10 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
 
     // 3. Deep Dive Filter States
     const isSalesExec = role === 'Sales Executive';
+    const isSuperAdmin = role === 'Super Admin';
+    const { branchId, employeeId, availableCities, availableBranches } = useGlobalFilter();
+
     const [filters, setFilters] = useState({
-        branch: 'All',
-        salesExecutive: isSalesExec ? currentUser.id : 'All',
         leadSource: 'All',
         leadStatus: 'All',
         paymentMode: 'All'
@@ -191,11 +173,11 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
             // Branch
             const leadBranch = lead.branch_id || lead.branch_name;
             const assignedUser = users.find(u => u.id === lead.assigned_to?.id);
-            if (filters.branch !== 'All' && (leadBranch || assignedUser?.branch_name) !== filters.branch) return false;
+            if (branchId !== 'All Branches' && (leadBranch || assignedUser?.branch_name) !== branchId) return false;
             
             // Executive
-            if (filters.salesExecutive !== 'All') {
-                if (lead.assigned_to?.id !== filters.salesExecutive && lead.created_by !== filters.salesExecutive) return false;
+            if (employeeId !== 'All Employees') {
+                if (lead.assigned_to?.id !== employeeId && lead.created_by !== employeeId) return false;
             }
 
             // Source
@@ -217,7 +199,15 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
                 if (toDate && d > toDate) return false;
                 return true;
             });
-            resultPayments = resultLeads.flatMap(l => (l.payments || []).map(p => ({ ...p, leadId: l.id })));
+            resultPayments = resultLeads.flatMap(l => 
+                (l.payments || []).filter(p => {
+                    if (!p.date) return false;
+                    const pd = new Date(p.date);
+                    if (fromDate && pd < fromDate) return false;
+                    if (toDate && pd > toDate) return false;
+                    return true;
+                }).map(p => ({ ...p, leadId: l.id }))
+            );
         } else {
             const allPossiblePayments = deepFilteredLeads.flatMap(l => (l.payments || []).map(p => ({ ...p, leadId: l.id })));
             resultPayments = allPossiblePayments.filter(p => {
@@ -232,22 +222,23 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
         }
 
         return { filteredLeads: resultLeads, filteredPayments: resultPayments };
-    }, [allLeads, dateRange, filterMode, filters, users, isSalesExec, currentUser.id]);
+    }, [allLeads, dateRange, filterMode, filters, users, isSalesExec, currentUser.id, branchId, employeeId]);
 
     // 5. METRICS CALCULATION (Global summary card stats)
     const metrics = useMemo(() => {
         const totalLeads = filteredLeads.length;
         const wonLeads = filteredLeads.filter(l => l.status === 'Success');
         const conversionRate = totalLeads > 0 ? ((wonLeads.length / totalLeads) * 100).toFixed(1) : '0.0';
-        const activePipeline = filteredLeads.filter(l => ['New Lead', 'Lead Confirmed', 'Documents & Payments', 'In-Progress'].includes(l.status)).length;
+        const pendingPipeline = filteredLeads.filter(l => ['New Lead', 'Lead Confirmed'].includes(l.status)).length;
+        const inProgressPipeline = filteredLeads.filter(l => ['Documents & Payments', 'In-Progress'].includes(l.status)).length;
         const totalRevenue = filteredPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
-        return { totalLeads, conversionRate, activePipeline, totalRevenue, wonCount: wonLeads.length };
+        return { totalLeads, conversionRate, pendingPipeline, inProgressPipeline, totalRevenue, wonCount: wonLeads.length };
     }, [filteredLeads, filteredPayments]);
 
     // 6. EMPLOYEE WISE ANALYTICS
     const employeeMetrics = useMemo(() => {
-        if (filters.salesExecutive === 'All') return null;
-        const empId = filters.salesExecutive;
+        if (employeeId === 'All Employees') return null;
+        const empId = employeeId;
         const empLeads = allLeads.filter(l => l.assigned_to?.id === empId);
         const empLeadsInRange = filteredLeads.filter(l => l.assigned_to?.id === empId);
         const empPayments = filteredPayments.filter(p => empLeads.some(l => l.id === p.leadId));
@@ -296,16 +287,44 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
             pendingFollowups,
             tasksDone,
             tasksPending,
-            avgResponseTime: '15 mins',
+
             sourceBreakdown
         };
-    }, [filters.salesExecutive, filteredLeads, filteredPayments, allLeads, leadSources]);
+    }, [employeeId, filteredLeads, filteredPayments, allLeads, leadSources]);
+
+    // 6.5 SUPER ADMIN CITY & BRANCH SUMMARY
+    const superAdminPerformanceSummary = useMemo(() => {
+        if (!isSuperAdmin || branchId !== 'All Branches') return null;
+
+        const branchStats = availableBranches.map(b => {
+            const bLeads = filteredLeads.filter(l => l.branch_id === b.id || l.branch_name === b.name);
+            const clients = bLeads.filter(l => l.status === 'Success');
+            const rev = filteredPayments.filter(p => bLeads.some(l => l.id === p.leadId)).reduce((sum, p) => sum + (p.amount || 0), 0);
+            return { id: b.id, name: b.name, cityId: b.city_id, cityName: b.city_name, leads: bLeads.length, clients: clients.length, revenue: rev };
+        });
+
+        const cityStats = availableCities.map(c => {
+            const cBranches = branchStats.filter(b => b.cityId === c.id || b.cityName === c.city_name);
+            const clients = cBranches.reduce((sum, b) => sum + b.clients, 0);
+            const rev = cBranches.reduce((sum, b) => sum + b.revenue, 0);
+            return { id: c.id, name: c.city_name, clients, revenue: rev };
+        }).sort((a, b) => b.revenue - a.revenue);
+
+        const employeeStats = users.filter(u => u.role === 'Sales Executive').map(e => {
+            const myLeads = filteredLeads.filter(l => l.assigned_to?.id === e.id);
+            const clients = myLeads.filter(l => l.status === 'Success');
+            const rev = filteredPayments.filter(p => myLeads.some(l => l.id === p.leadId)).reduce((sum, p) => sum + (p.amount || 0), 0);
+            return { id: e.id, name: e.name, leads: myLeads.length, clients: clients.length, revenue: rev };
+        }).sort((a, b) => b.revenue - a.revenue);
+
+        return { cityStats, branchStats: branchStats.sort((a, b) => b.revenue - a.revenue), employeeStats };
+    }, [isSuperAdmin, branchId, availableBranches, availableCities, filteredLeads, filteredPayments, users]);
 
     // 7. BRANCH WISE ANALYTICS
     const branchMetrics = useMemo(() => {
-        if (filters.branch === 'All') return null;
-        const bName = filters.branch;
-        const branchUsers = users.filter(u => u.branch_name === bName);
+        if (branchId === 'All Branches') return null;
+        const bName = branchId;
+        const branchUsers = users.filter(u => u.branch_name === bName || u.branch_id === bName);
         const branchUserIds = new Set(branchUsers.map(u => u.id));
 
         const branchLeads = allLeads.filter(l => {
@@ -599,7 +618,7 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
             pendingFollowups,
             tasksDone,
             tasksPending,
-            avgResponseTime: '15 mins',
+
             sourceBreakdown
         };
     }, [selectedLeaderboardExecId, filteredLeads, filteredPayments, allLeads, leadSources]);
@@ -867,7 +886,7 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
             {/* Header Controls */}
             <div className="flex flex-col xl:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
                 
-                {/* Mode Toggle */}
+                {/* Filter Mode Toggle */}
                 <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-lg">
                     <button 
                         onClick={() => setFilterMode('lead_date')}
@@ -881,29 +900,6 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
                     >
                         By Payment Date
                     </button>
-                </div>
-
-                {/* Date Picker */}
-                <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <DatePresets onSelect={setDateRange} />
-                    <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
-                    <Popover
-                        align="end"
-                        trigger={
-                            <Button variant="outline" className={cn("w-[220px] justify-start text-left font-normal border-slate-200 h-9 text-xs bg-white")}>
-                                <CalendarIcon className="mr-2 h-4 w-4 text-slate-400" />
-                                {dateRange.from ? (
-                                    dateRange.to ? `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}` : formatDate(dateRange.from)
-                                ) : <span className="text-slate-500">Select Custom Date</span>}
-                            </Button>
-                        }
-                        content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />}
-                    />
-                    {(dateRange.from || dateRange.to) && (
-                        <Button variant="ghost" size="icon" onClick={() => setDateRange({ from: '', to: '' })} className="hover:bg-red-50 hover:text-red-600 h-9 w-9">
-                             <div className="h-5 w-5 flex items-center justify-center font-bold">×</div>
-                        </Button>
-                    )}
                 </div>
             </div>
 
@@ -993,8 +989,73 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
             {/* Tab 1: KPI Summary */}
             {activeTab === 'kpis' && (
                 <div className="space-y-6">
+                    {/* SUPER ADMIN OVERVIEW (Visible only when 'All Branches' is selected) */}
+                    {superAdminPerformanceSummary && (
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2 mb-4">
+                                    <MapPin className="h-4 w-4 text-slate-400" /> City Performance Summary
+                                </h3>
+                                <div className="space-y-3">
+                                    {superAdminPerformanceSummary.cityStats.map(city => (
+                                        <div key={city.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                            <div>
+                                                <div className="font-semibold text-slate-800">{city.name}</div>
+                                                <div className="text-xs text-slate-500">{city.clients} Total Clients</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-emerald-600">{formatCurrency(city.revenue)}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {superAdminPerformanceSummary.cityStats.length === 0 && <div className="text-sm text-slate-500">No cities found.</div>}
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2 mb-4">
+                                    <Building2 className="h-4 w-4 text-slate-400" /> Branch Performance Summary
+                                </h3>
+                                <div className="space-y-3">
+                                    {superAdminPerformanceSummary.branchStats.map(branch => (
+                                        <div key={branch.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                            <div>
+                                                <div className="font-semibold text-slate-800">{branch.name}</div>
+                                                <div className="text-xs text-slate-500">{branch.leads} Leads | {branch.clients} Clients</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-indigo-600">{formatCurrency(branch.revenue)}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {superAdminPerformanceSummary.branchStats.length === 0 && <div className="text-sm text-slate-500">No branches found.</div>}
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide flex items-center gap-2 mb-4">
+                                    <Users className="h-4 w-4 text-slate-400" /> Salesperson Leads & Revenue
+                                </h3>
+                                <div className="space-y-3">
+                                    {superAdminPerformanceSummary.employeeStats.map(emp => (
+                                        <div key={emp.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-xl border border-slate-100 hover:border-slate-300 transition-colors">
+                                            <div>
+                                                <div className="font-semibold text-slate-800">{emp.name}</div>
+                                                <div className="text-xs text-slate-500">{emp.leads} Leads | {emp.clients} Clients</div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="font-bold text-violet-600">{formatCurrency(emp.revenue)}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {superAdminPerformanceSummary.employeeStats.length === 0 && <div className="text-sm text-slate-500">No salespersons found.</div>}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    
                     {/* General metrics */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
                         <MetricCard 
                             title={filterMode === 'lead_date' ? "Total Leads Created" : "Active Paying Leads"} 
                             value={metrics.totalLeads} 
@@ -1016,8 +1077,14 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
                             colorClass="text-purple-600" 
                         />
                         <MetricCard 
-                            title="Active Pipeline" 
-                            value={metrics.activePipeline} 
+                            title="Pending Pipeline" 
+                            value={metrics.pendingPipeline} 
+                            icon={Activity} 
+                            colorClass="text-indigo-600" 
+                        />
+                        <MetricCard 
+                            title="In Progress Pipeline" 
+                            value={metrics.inProgressPipeline} 
                             icon={Activity} 
                             colorClass="text-indigo-600" 
                         />
@@ -1025,18 +1092,6 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
 
                     {/* Filter controls */}
                     <FilterBar title="KPI Filtering">
-                        {!isSalesExec && (
-                            <>
-                                <Select value={filters.branch} onChange={(e) => handleFilterChange('branch', e.target.value)} className="bg-white text-xs h-9">
-                                    <option value="All">All Branches</option>
-                                    {Array.from(new Set(users.map(u => u.branch_name).filter(Boolean))).map(b => <option key={b} value={b as string}>{b}</option>)}
-                                </Select>
-                                <Select value={filters.salesExecutive} onChange={(e) => handleFilterChange('salesExecutive', e.target.value)} className="bg-white text-xs h-9">
-                                    <option value="All">All Executives</option>
-                                    {users.filter(u => u.role === 'Sales Executive').map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
-                                </Select>
-                            </>
-                        )}
                         <Select value={filters.leadSource} onChange={(e) => handleFilterChange('leadSource', e.target.value)} className="bg-white text-xs h-9">
                             <option value="All">All Sources</option>
                             {(leadSources.length > 0 
@@ -1073,10 +1128,6 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
                                 <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                                     <span className="text-[10px] uppercase font-bold text-slate-400">Tasks Completed</span>
                                     <h4 className="text-2xl font-bold mt-1 text-slate-800">{employeeMetrics.tasksDone} <span className="text-xs text-slate-400">({employeeMetrics.tasksPending} pend)</span></h4>
-                                </div>
-                                <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                    <span className="text-[10px] uppercase font-bold text-slate-400">Avg Response Time</span>
-                                    <h4 className="text-2xl font-bold mt-1 text-indigo-600">{employeeMetrics.avgResponseTime}</h4>
                                 </div>
                             </div>
                             
@@ -1239,7 +1290,7 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
 
                         {selectedLeaderboardExecId !== 'All' && leaderboardEmployeeMetrics ? (
                             <div className="space-y-6">
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                     <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                                         <span className="text-[10px] uppercase font-bold text-slate-400">Assigned Leads</span>
                                         <h4 className="text-2xl font-bold mt-1 text-slate-800">{leaderboardEmployeeMetrics.totalAssigned}</h4>
@@ -1255,10 +1306,6 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
                                     <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
                                         <span className="text-[10px] uppercase font-bold text-slate-400">Tasks Completed</span>
                                         <h4 className="text-2xl font-bold mt-1 text-slate-800">{leaderboardEmployeeMetrics.tasksDone} <span className="text-xs text-slate-400">({leaderboardEmployeeMetrics.tasksPending} pend)</span></h4>
-                                    </div>
-                                    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                                        <span className="text-[10px] uppercase font-bold text-slate-400">Avg Response Time</span>
-                                        <h4 className="text-2xl font-bold mt-1 text-indigo-600">{leaderboardEmployeeMetrics.avgResponseTime}</h4>
                                     </div>
                                 </div>
 

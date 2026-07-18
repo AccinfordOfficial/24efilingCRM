@@ -482,7 +482,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (profile?.role === 'Super Admin' || profile?.role === 'Admin' || profile?.role === 'Branch Manager') {
                 try {
                     const { data: transferLogsData, error: transferLogsError } = await supabase
-                        .from('user_transfer_logs')
+                        .from('user_transfer_logs' as any)
                         .select('*')
                         .order('created_at', { ascending: false });
 
@@ -516,7 +516,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 if (profile?.role === 'Super Admin') {
                     try {
                         const { data: auditLogsData, error: auditLogsError } = await supabase
-                            .from('audit_logs')
+                            .from('audit_logs' as any)
                             .select('*')
                             .order('created_at', { ascending: false })
                             .limit(200);
@@ -649,7 +649,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const logAuditAction = useCallback(async (action: string, entity: string, entityId: string, details: any) => {
         if (!profile) return;
         try {
-            await (supabase.from('audit_logs') as any).insert([{
+            await ((supabase as any).from('audit_logs')).insert([{
                 user_id: profile.id,
                 action,
                 entity,
@@ -1138,11 +1138,11 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         delete payload.business_category;
         delete payload.industry_type;
 
-        let { error } = await supabase.from('customers').insert([payload]);
+        let { error } = await (supabase.from('customers') as any).insert([payload]);
         if (error && (error.message.includes('reference_number') || error.message.includes('schema cache') || error.code === '42703')) {
             console.warn("Database missing 'reference_number' column, retrying customer insert without it.", error.message);
             const { reference_number, ...payloadWithoutRef } = payload;
-            const retryRes = await supabase.from('customers').insert([payloadWithoutRef]);
+            const retryRes = await (supabase.from('customers') as any).insert([payloadWithoutRef]);
             error = retryRes.error;
         }
         if (error) throw error;
@@ -1308,7 +1308,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     transferred_by: profile.id,
                     transfer_type: transferType
                 };
-                await (supabase.from('user_transfer_logs') as any).insert([logEntry]);
+                await ((supabase as any).from('user_transfer_logs')).insert([logEntry]);
 
                 // Audit Log
                 await logAuditAction('User Transferred', 'User', id, {
@@ -1414,7 +1414,7 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         };
 
         try {
-            await (supabase.from('user_transfer_logs') as any).insert([logEntry]);
+            await ((supabase as any).from('user_transfer_logs')).insert([logEntry]);
             await logAuditAction('User Transferred', 'User', userId, {
                 employee_name: userToTransfer.name,
                 from_city: userToTransfer.city_name,

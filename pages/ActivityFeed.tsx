@@ -25,6 +25,7 @@ import {
     Activity
 } from 'lucide-react';
 import { format, isToday, isYesterday, isWithinInterval, startOfDay, endOfDay, parseISO } from 'date-fns';
+import { usePagination } from '../hooks/usePagination';
 
 interface ActivityFeedProps {
     userActivities: UserActivity[];
@@ -148,7 +149,9 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
             .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }, [userActivities, users, searchQuery, userFilter, roleFilter, moduleFilter, dateRange]);
 
-    const groupedActivities = useMemo(() => groupActivitiesByDate(filteredActivities), [filteredActivities]);
+    const { currentData: paginatedActivities, next, prev, jump, currentPage, maxPage } = usePagination(filteredActivities, 50);
+
+    const groupedActivities = useMemo(() => groupActivitiesByDate(paginatedActivities), [paginatedActivities]);
 
     // Available users based on role filter (optional UX enhancement)
     const filteredUserOptions = useMemo(() => {
@@ -370,6 +373,25 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Button variant="outline" onClick={clearFilters} className="mt-6">
                             Clear All Filters
                         </Button>
+                    </div>
+                )}
+
+                {maxPage > 1 && (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm mt-8">
+                        <div className="text-xs text-slate-500">
+                            Showing <strong>{(currentPage - 1) * 50 + 1}</strong> to <strong>{Math.min(currentPage * 50, filteredActivities.length)}</strong> of <strong>{filteredActivities.length}</strong> activities
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={prev} disabled={currentPage === 1}>
+                                Previous
+                            </Button>
+                            <div className="text-sm font-medium text-slate-600 px-2">
+                                Page {currentPage} of {maxPage}
+                            </div>
+                            <Button variant="outline" size="sm" onClick={next} disabled={currentPage === maxPage}>
+                                Next
+                            </Button>
+                        </div>
                     </div>
                 )}
             </div>

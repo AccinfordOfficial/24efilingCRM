@@ -9,6 +9,7 @@ import { ConfirmationDialog } from './ui/ConfirmationDialog';
 import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { getScoreCategory } from '../lib/scoring';
+import { usePagination } from '../hooks/usePagination';
 
 
 interface LeadTableProps {
@@ -174,6 +175,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
     }
   }, [selectedLeadIds, processedLeads.length]);
 
+  const { currentData: paginatedLeads, next, prev, jump, currentPage, maxPage } = usePagination(processedLeads, 20);
 
   const assignableUsers = useMemo(() => users.filter(u => u.role === 'Sales Executive' || u.role === 'Admin'), [users]);
 
@@ -381,7 +383,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {processedLeads.map((lead) => {
+                {paginatedLeads.map((lead) => {
                   const scoreInfo = getScoreCategory(lead.score || 0);
                   return (
                     <tr
@@ -492,10 +494,23 @@ export const LeadTable: React.FC<LeadTableProps> = ({
             </table>
           </div>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100">
           <div className="text-xs text-slate-500">
-            Showing <strong>{processedLeads.length}</strong> of <strong>{leads.length}</strong> leads
+            Showing <strong>{(currentPage - 1) * 20 + 1}</strong> to <strong>{Math.min(currentPage * 20, processedLeads.length)}</strong> of <strong>{processedLeads.length}</strong> leads
           </div>
+          {maxPage > 1 && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={prev} disabled={currentPage === 1}>
+                Previous
+              </Button>
+              <div className="text-sm font-medium text-slate-600 px-2">
+                Page {currentPage} of {maxPage}
+              </div>
+              <Button variant="outline" size="sm" onClick={next} disabled={currentPage === maxPage}>
+                Next
+              </Button>
+            </div>
+          )}
         </CardFooter>
       </Card>
 

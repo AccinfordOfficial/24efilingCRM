@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Users, Briefcase, LogOut, Settings, BarChart3,
   LayoutDashboard, DollarSign, Clock, FileUp, ShieldCheck, ChevronLeft, Target, Bell, FileCheck, Layers, Package, PlusCircle, Tag,
   Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building
 } from 'lucide-react';
-import { User, Lead } from '../types';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/Avatar';
+import { useAuth } from '../context/AuthContext';
+import { useLeads } from '../hooks/queries/useLeads';
+import { useUsers } from '../hooks/queries/useUsers';
 
-// Efiling Logo Component (SVG)
-// Efiling Logo Component (Image)
 const EfilingLogo = ({ className, ...props }: React.ImgHTMLAttributes<HTMLImageElement>) => (
   <img
     src="/full-logo.png"
@@ -21,33 +22,28 @@ const EfilingLogo = ({ className, ...props }: React.ImgHTMLAttributes<HTMLImageE
 );
 
 interface SidebarProps {
-  isSidebarOpen: boolean;
-  setIsSidebarOpen: (isOpen: boolean) => void;
-  userRole: User['role'];
-  currentUser: User;
-  activePage: string;
-  setActivePage: (page: string) => void;
-  onLogout: () => void;
-  users: User[];
-  leads: Lead[];
-  unreadCount: number;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 interface NavLinkItem {
-  page: string;
+  path: string;
+  label: string;
   icon: React.ElementType;
 }
 
 const NavLink: React.FC<{
-  page: string;
+  path: string;
+  label: string;
   icon: React.ElementType;
   active?: boolean;
-  onClick: (page: string) => void;
+  onClick: () => void;
   count?: number | null;
-}> = ({ page, icon: Icon, active, onClick, count }) => {
+}> = ({ path, label, icon: Icon, active, onClick, count }) => {
   return (
-    <button
-      onClick={() => onClick(page)}
+    <Link
+      to={path}
+      onClick={onClick}
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 w-full text-left transition-all duration-200 rounded-md text-sm font-medium",
         active
@@ -56,7 +52,7 @@ const NavLink: React.FC<{
       )}
     >
       <Icon className={cn("h-4 w-4", active ? "text-primary-foreground" : "text-slate-400")} />
-      <span className="flex-1 truncate">{page}</span>
+      <span className="flex-1 truncate">{label}</span>
       {count != null && (
         <span className={cn(
           "text-xs font-semibold rounded-full px-2 py-0.5",
@@ -65,7 +61,7 @@ const NavLink: React.FC<{
           {count}
         </span>
       )}
-    </button>
+    </Link>
   );
 };
 
@@ -78,72 +74,67 @@ const getInitials = (name: string) => {
 }
 
 const superAdminNav: NavLinkItem[] = [
-  { page: 'Dashboard', icon: LayoutDashboard },
-  { page: 'Branch Management', icon: Building },
-  { page: 'User Management', icon: Users },
-  { page: 'All Leads', icon: Briefcase },
-  { page: 'Create New Lead', icon: PlusCircle },
-  { page: 'My Leads', icon: Target },
-  { page: 'Lead Workflow', icon: Target },
-  { page: 'Customers', icon: Users },
-  { page: '24eFiling Web Dropdown', icon: Globe },
-  { page: 'Offers & Coupons', icon: Tag },
-  { page: 'Payments', icon: DollarSign },
-
-  { page: 'Reports & Analytics', icon: BarChart3 },
-  { page: 'Activity Feed', icon: Clock },
-  { page: 'Notifications', icon: Bell },
-  { page: 'System Settings', icon: Settings },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/branch-management', label: 'Branch Management', icon: Building },
+  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { path: '/users', label: 'User Management', icon: Users },
+  { path: '/leads', label: 'All Leads', icon: Briefcase },
+  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+  { path: '/my-leads', label: 'My Leads', icon: Target },
+  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+  { path: '/customers', label: 'Customers', icon: Users },
+  { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
+  { path: '/offers', label: 'Offers & Coupons', icon: Tag },
+  { path: '/payments', label: 'Payments', icon: DollarSign },
+  { path: '/activity', label: 'Activity Feed', icon: Clock },
+  { path: '/notifications', label: 'Notifications', icon: Bell },
+  { path: '/settings', label: 'System Settings', icon: Settings },
 ];
 
 const adminNav: NavLinkItem[] = [
-  { page: 'Dashboard', icon: LayoutDashboard },
-  { page: 'User Management', icon: Users },
-  { page: 'All Leads', icon: Briefcase },
-  { page: 'Create New Lead', icon: PlusCircle },
-  { page: 'My Leads', icon: Target },
-  { page: 'Lead Workflow', icon: Target },
-  { page: 'Customers', icon: Users },
-  { page: '24eFiling Web Dropdown', icon: Globe },
-  { page: 'Team Management', icon: ShieldCheck },
-  { page: 'Document Verification', icon: FileCheck },
-
-  { page: 'Reports', icon: BarChart3 },
-  { page: 'Notifications', icon: Bell },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/users', label: 'User Management', icon: Users },
+  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { path: '/leads', label: 'All Leads', icon: Briefcase },
+  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+  { path: '/my-leads', label: 'My Leads', icon: Target },
+  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+  { path: '/customers', label: 'Customers', icon: Users },
+  { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
+  { path: '/team', label: 'Team Management', icon: ShieldCheck },
+  { path: '/verify-documents', label: 'Document Verification', icon: FileCheck },
+  { path: '/notifications', label: 'Notifications', icon: Bell },
 ];
 
 const salesExecNav: NavLinkItem[] = [
-  { page: 'Dashboard', icon: LayoutDashboard },
-  { page: 'All Leads', icon: Briefcase },
-  { page: 'Create New Lead', icon: PlusCircle },
-  { page: 'My Leads', icon: Target },
-  { page: 'Lead Workflow', icon: Target },
-  { page: 'Follow-ups', icon: Clock },
-  { page: 'Client Documents', icon: FileUp },
-  { page: 'Performance Report', icon: BarChart3 },
-  { page: 'Notifications', icon: Bell },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/leads', label: 'All Leads', icon: Briefcase },
+  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+  { path: '/my-leads', label: 'My Leads', icon: Target },
+  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+  { path: '/follow-ups', label: 'Follow-ups', icon: Clock },
+  { path: '/client-documents', label: 'Client Documents', icon: FileUp },
+  { path: '/notifications', label: 'Notifications', icon: Bell },
 ];
 
 const WebMenuDropdown: React.FC<{
-  activePage: string;
-  onClick: (page: string) => void;
-}> = ({ activePage, onClick }) => {
-  const [isOpen, setIsOpen] = React.useState(() => {
-    return ['24efiling Web', 'Web Leads', 'Blogs', 'Testimonials', 'Services'].includes(activePage);
-  });
+  currentPath: string;
+  onClick: () => void;
+}> = ({ currentPath, onClick }) => {
+  const isWebPath = currentPath.startsWith('/web');
+  const [isOpen, setIsOpen] = useState(isWebPath);
 
-  React.useEffect(() => {
-    if (['24efiling Web', 'Web Leads', 'Blogs', 'Testimonials', 'Services'].includes(activePage)) {
-      setIsOpen(true);
-    }
-  }, [activePage]);
+  useEffect(() => {
+    if (isWebPath) setIsOpen(true);
+  }, [isWebPath]);
 
   const subItems = [
-    { page: '24efiling Web', label: '24efiling Web', icon: Globe },
-    { page: 'Web Leads', label: 'Web Leads', icon: MessageSquare },
-    { page: 'Blogs', label: 'Blogs', icon: FileText },
-    { page: 'Testimonials', label: 'Testimonials', icon: MessageSquare },
-    { page: 'Services', label: 'Services', icon: Layers }
+    { path: '/web', label: '24efiling Web', icon: Globe },
+    { path: '/web/leads', label: 'Web Leads', icon: MessageSquare },
+    { path: '/web/blogs', label: 'Blogs', icon: FileText },
+    { path: '/web/testimonials', label: 'Testimonials', icon: MessageSquare },
+    { path: '/web/services', label: 'Services', icon: Layers }
   ];
 
   return (
@@ -152,39 +143,32 @@ const WebMenuDropdown: React.FC<{
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "flex items-center gap-3 px-3 py-2.5 w-full text-left transition-all duration-200 rounded-md text-sm font-medium",
-          ['24efiling Web', 'Web Leads', 'Blogs', 'Testimonials', 'Services'].includes(activePage)
-            ? "text-white bg-white/10"
-            : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+          isWebPath ? "text-white bg-white/10" : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
         )}
       >
         <Globe className="h-4 w-4 text-slate-400" />
         <span className="flex-1 truncate">24eFiling Web</span>
-        {isOpen ? (
-          <ChevronUp className="h-4 w-4 text-slate-400" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-slate-400" />
-        )}
+        {isOpen ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
       </button>
 
       {isOpen && (
         <div className="flex flex-col gap-1 pl-4 mt-1 border-l border-slate-800 ml-5 transition-all duration-150">
           {subItems.map((item) => {
             const Icon = item.icon;
-            const active = activePage === item.page;
+            const active = currentPath === item.path || (currentPath === '/web' && item.path === '/web');
             return (
-              <button
-                key={item.page}
-                onClick={() => onClick(item.page)}
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={onClick}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 w-full text-left transition-all duration-150 rounded-md text-xs font-medium",
-                  active
-                    ? "text-white bg-primary font-bold shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                  active ? "text-white bg-primary font-bold shadow-sm" : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
                 )}
               >
                 <Icon className={cn("h-3.5 w-3.5", active ? "text-white" : "text-slate-500")} />
                 <span className="truncate">{item.label}</span>
-              </button>
+              </Link>
             );
           })}
         </div>
@@ -193,7 +177,18 @@ const WebMenuDropdown: React.FC<{
   );
 };
 
-export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpen, userRole, currentUser, activePage, setActivePage, onLogout, users, leads, unreadCount }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const { profile: currentUser, logout } = useAuth();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
+  const { data: leads = [] } = useLeads();
+  const { data: users = [] } = useUsers();
+
+  if (!currentUser) return null;
+
+  const userRole = currentUser.role;
+
   let navLinks: NavLinkItem[] = [];
   switch (userRole) {
     case 'Super Admin':
@@ -206,45 +201,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpe
     case 'Sales Executive':
       navLinks = salesExecNav;
       break;
-    default:
-      navLinks = [];
   }
 
-  const handleNavClick = (page: string) => {
-    setActivePage(page);
-    if (window.innerWidth < 768) { // md breakpoint
-      setIsSidebarOpen(false);
-    }
+  const handleNavClick = () => {
+    if (window.innerWidth < 768) onClose();
   }
 
-  const getPageCount = (page: string): number | null => {
-    if (page === 'User Management') return users.length;
-    if (page === 'All Leads') return leads.length;
-    if (page === 'My Leads') {
-      // Count leads created by current user
+  const getPageCount = (path: string): number | null => {
+    if (path === '/users') return users.length;
+    if (path === '/leads') return leads.length;
+    if (path === '/my-leads') {
       const myLeadsCount = leads.filter(l => l.created_by === currentUser?.id).length;
       return myLeadsCount > 0 ? myLeadsCount : null;
     }
-    if (page === 'Notifications') return unreadCount > 0 ? unreadCount : null;
-    if (page === 'Follow-ups') {
+    
+    // Simplistic count calculation, would ideally come from server
+    if (path === '/follow-ups') {
+      let count = 0;
       const now = new Date();
       now.setHours(23, 59, 59, 999);
-
-      // Filter leads relevant to the user first
-      const relevantLeads = leads.filter(l => {
-        if (['Super Admin', 'Admin'].includes(userRole)) return true;
-        return l.assigned_to?.id === currentUser?.id || l.created_by === currentUser?.id;
-      });
-
-      let count = 0;
+      
+      const relevantLeads = leads.filter(l => ['Super Admin', 'Admin'].includes(userRole) || l.assigned_to?.id === currentUser?.id || l.created_by === currentUser?.id);
       relevantLeads.forEach(lead => {
-        // General Follow-up
         if (lead.next_follow_up) {
            const d = new Date(lead.next_follow_up);
-           // Count if due/overdue and not closed
            if (d <= now && lead.status !== 'Success' && lead.status !== 'Lost') count++;
         }
-        // Tasks
         lead.tasks?.forEach(task => {
            if (!task.is_completed && task.due_date) {
               const d = new Date(task.due_date);
@@ -261,13 +243,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpe
     <>
       <aside className={cn(
         "fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-slate-950 text-white transition-transform duration-300 ease-in-out border-r border-slate-800",
-        isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+        "md:static md:translate-x-0 md:flex-shrink-0",
+        isOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
         <div className="flex h-16 items-center justify-between px-6 border-b border-slate-800 shrink-0">
-          <a href="#" onClick={(e) => { e.preventDefault(); handleNavClick('Dashboard'); }} className="flex items-center gap-2 text-white px-2">
+          <Link to="/" onClick={handleNavClick} className="flex items-center gap-2 text-white px-2">
             <EfilingLogo className="h-12 w-auto" />
-          </a>
-          <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-400 hover:text-white hover:bg-slate-800">
+          </Link>
+          <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden text-slate-400 hover:text-white hover:bg-slate-800">
             <ChevronLeft className="h-5 w-5" />
           </Button>
         </div>
@@ -275,23 +258,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpe
         <nav className="flex-1 overflow-y-auto p-4 custom-scrollbar">
           <div className="space-y-1">
             {navLinks.map((link) => {
-              if (link.page === '24eFiling Web Dropdown') {
+              if (link.label === '24eFiling Web Dropdown') {
                 return (
                   <WebMenuDropdown
                     key="web-menu-dropdown"
-                    activePage={activePage}
+                    currentPath={currentPath}
                     onClick={handleNavClick}
                   />
                 );
               }
+              // Highlight exact match for root, or startsWith for subroutes
+              const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
               return (
                 <NavLink
-                  key={link.page}
-                  page={link.page}
+                  key={link.path}
+                  path={link.path}
+                  label={link.label}
                   icon={link.icon}
-                  active={activePage === link.page}
+                  active={active}
                   onClick={handleNavClick}
-                  count={getPageCount(link.page)}
+                  count={getPageCount(link.path)}
                 />
               );
             })}
@@ -310,17 +296,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isSidebarOpen, setIsSidebarOpe
               <p className="text-white font-medium text-sm truncate">{currentUser.name}</p>
               <p className="text-xs text-slate-500 truncate">{currentUser.role}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={onLogout} title="Logout" className="text-slate-400 hover:text-white hover:bg-slate-800">
+            <Button variant="ghost" size="icon" onClick={logout} title="Logout" className="text-slate-400 hover:text-white hover:bg-slate-800">
               <LogOut className="h-4 w-4" />
             </Button>
           </div>
         </div>
-
       </aside>
-      {isSidebarOpen && (
+      
+      {isOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={() => setIsSidebarOpen(false)}
+          onClick={onClose}
         ></div>
       )}
     </>

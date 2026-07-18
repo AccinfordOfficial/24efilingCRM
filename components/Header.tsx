@@ -1,20 +1,58 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import { useLocation, Link } from 'react-router-dom';
 import { MenuIcon, SearchIcon, BellIcon } from './icons';
-import { Input } from './ui/Input';
 import { Button } from './ui/Button';
-import { User } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { Avatar, AvatarImage, AvatarFallback } from './ui/Avatar';
 
 interface HeaderProps {
   onMenuClick: () => void;
-  currentUser: User;
-  setActivePage: (page: string) => void;
-  pageConfig: { title: string; subtitle: string };
-  unreadCount: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onMenuClick, currentUser, setActivePage, pageConfig, unreadCount }) => {
+const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
+  '/': { title: 'Dashboard', subtitle: 'Key metrics and recent activities at a glance.' },
+  '/branch-management': { title: 'Branch Management', subtitle: 'Manage company branches and monitor branch-wise activity.' },
+  '/users': { title: 'User Management', subtitle: 'Manage system users and their roles.' },
+  '/leads': { title: 'Leads Overview', subtitle: 'Manage and track all leads in the system.' },
+  '/leads/new': { title: 'Create New Lead', subtitle: 'Add a new potential customer to the system.' },
+  '/my-leads': { title: 'My Leads', subtitle: 'View and manage leads created by you.' },
+  '/lead-workflow': { title: 'Lead Workflow', subtitle: 'Visualize and manage your sales pipeline.' },
+  '/customers': { title: 'Customers', subtitle: 'View all converted leads and manage customer relationships.' },
+  '/payments': { title: 'Payment Tracking', subtitle: 'Manage and track all payments in the system.' },
+  '/reports': { title: 'Reports & Analytics', subtitle: 'Comprehensive business intelligence and performance metrics.' },
+  '/activity': { title: 'Activity Feed', subtitle: 'Track all user actions across the system.' },
+  '/settings': { title: 'System Settings', subtitle: 'Configure application and user settings.' },
+  '/team': { title: 'Team Management', subtitle: 'Oversee your sales executives and their performance.' },
+  '/verify-documents': { title: 'Document Verification', subtitle: 'Review and verify client documents.' },
+  '/follow-ups': { title: 'Follow-ups', subtitle: 'Track and manage your upcoming follow-ups.' },
+  '/client-documents': { title: 'Client Documents', subtitle: 'Manage all documents related to your clients.' },
+  '/notifications': { title: 'Notifications', subtitle: 'View all your recent notifications.' },
+  '/web': { title: '24eFiling Web', subtitle: 'Manage your website, articles, leads, and customer reviews.' },
+  '/web/leads': { title: 'Organic Website Leads', subtitle: 'Review organic contact form queries from the main website.' },
+  '/web/blogs': { title: 'Blogs Content Manager', subtitle: 'Compose educational resources and company updates.' },
+  '/web/testimonials': { title: 'Client Testimonials Board', subtitle: 'Moderate client reviews, star ratings, and success quotes.' },
+  '/web/services': { title: 'Manage Services', subtitle: 'Add and manage services and sub-services.' },
+  '/offers': { title: 'Offers & Coupons', subtitle: 'Manage discount campaigns, coupons, and referral offers.' },
+};
+
+export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+  const { profile: currentUser } = useAuth();
+  const location = useLocation();
+
+  // Determine title based on path
+  let config = PAGE_CONFIG[location.pathname];
+  if (!config) {
+    if (location.pathname.startsWith('/leads/')) {
+        config = { title: 'Lead Detail', subtitle: 'Viewing lead information and activity.' };
+    } else if (location.pathname.startsWith('/customers/')) {
+        config = { title: 'Customer Detail', subtitle: 'Viewing customer information and history.' };
+    } else {
+        config = { title: '24eFiling CRM', subtitle: 'Manage your business efficiently.' };
+    }
+  }
 
   const getInitials = (name: string) => {
+    if (!name) return 'U';
     const names = name.split(' ');
     if (names.length > 1) {
       return `${names[0][0]}${names[names.length - 1][0]}`.toUpperCase();
@@ -35,37 +73,29 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, currentUser, setAct
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
         <div className="hidden md:block">
-          <h1 className="text-xl font-bold text-slate-800">{pageConfig.title}</h1>
-          <p className="text-sm text-slate-500">{pageConfig.subtitle}</p>
+          <h1 className="text-xl font-bold text-slate-800">{config.title}</h1>
+          <p className="text-sm text-slate-500">{config.subtitle}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
-        <Button variant="ghost" size="icon" className="rounded-full relative" onClick={() => setActivePage('Notifications')}>
-          <BellIcon className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <span className="absolute top-2 right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold ring-2 ring-slate-50">{unreadCount}</span>
-          )}
-          <span className="sr-only">Toggle notifications</span>
-        </Button>
+        <Link to="/notifications">
+          <Button variant="ghost" size="icon" className="rounded-full relative">
+            <BellIcon className="h-5 w-5" />
+            <span className="sr-only">Toggle notifications</span>
+          </Button>
+        </Link>
         <div className="relative">
-          <div
-            className="flex items-center gap-2 p-1 rounded-full text-slate-900 select-none"
-          >
-            {currentUser.avatar_url ? (
-              <img
-                src={currentUser.avatar_url}
-                alt="User avatar"
-                className="aspect-square h-10 w-10 rounded-full object-cover"
-              />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-slate-700 text-slate-200 flex items-center justify-center font-bold flex-shrink-0">
-                {getInitials(currentUser.name)}
-              </div>
-            )}
+          <div className="flex items-center gap-2 p-1 rounded-full text-slate-900 select-none">
+            <Avatar className="h-10 w-10 border border-slate-200">
+              <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} className="object-cover" />
+              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                {getInitials(currentUser?.name || '')}
+              </AvatarFallback>
+            </Avatar>
             <div className="text-left hidden md:block">
-              <div className="text-sm font-semibold">{currentUser.name}</div>
-              <div className="text-xs text-slate-500">{currentUser.role}</div>
+              <div className="text-sm font-semibold">{currentUser?.name}</div>
+              <div className="text-xs text-slate-500">{currentUser?.role}</div>
             </div>
           </div>
         </div>

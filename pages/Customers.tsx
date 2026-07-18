@@ -14,67 +14,8 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
-const BUSINESS_CATEGORIES = [
-  { value: 'Proprietorship', label: 'Proprietorship' },
-  { value: 'Partnership Firm', label: 'Partnership Firm' },
-  { value: 'One Person Company (OPC)', label: 'One Person Company (OPC)' },
-  { value: 'Private Limited Company', label: 'Private Limited Company' },
-  { value: 'Public Limited Company', label: 'Public Limited Company' },
-  { value: 'Limited Liability Partnership (LLP)', label: 'Limited Liability Partnership (LLP)' },
-  { value: 'Section 8 Company', label: 'Section 8 Company' },
-  { value: 'Trust Registration', label: 'Trust Registration' },
-  { value: 'Society Registration', label: 'Society Registration' },
-  { value: 'NGO Registration', label: 'NGO Registration' },
-  { value: 'Startup Registration', label: 'Startup Registration' },
-  { value: 'MSME Registration', label: 'MSME Registration' },
-  { value: 'GST Registration', label: 'GST Registration' },
-  { value: 'Trademark Registration', label: 'Trademark Registration' },
-  { value: 'Import Export Code (IEC)', label: 'Import Export Code (IEC)' },
-  { value: 'FSSAI Registration', label: 'FSSAI Registration' },
-  { value: 'Professional Tax Registration', label: 'Professional Tax Registration' },
-  { value: 'Shop & Establishment Registration', label: 'Shop & Establishment Registration' },
-  { value: 'Trade License', label: 'Trade License' },
-  { value: 'Other', label: 'Other' }
-];
-
-const INDUSTRY_TYPES = [
-  { value: 'Healthcare', label: 'Healthcare' },
-  { value: 'Information Technology (IT)', label: 'Information Technology (IT)' },
-  { value: 'Software Development', label: 'Software Development' },
-  { value: 'Construction', label: 'Construction' },
-  { value: 'Transport & Logistics', label: 'Transport & Logistics' },
-  { value: 'Manufacturing', label: 'Manufacturing' },
-  { value: 'Retail', label: 'Retail' },
-  { value: 'E-Commerce', label: 'E-Commerce' },
-  { value: 'Education', label: 'Education' },
-  { value: 'Finance & Banking', label: 'Finance & Banking' },
-  { value: 'Insurance', label: 'Insurance' },
-  { value: 'Real Estate', label: 'Real Estate' },
-  { value: 'Hospitality', label: 'Hospitality' },
-  { value: 'Travel & Tourism', label: 'Travel & Tourism' },
-  { value: 'Food & Beverage', label: 'Food & Beverage' },
-  { value: 'Agriculture', label: 'Agriculture' },
-  { value: 'Pharmaceuticals', label: 'Pharmaceuticals' },
-  { value: 'Telecommunications', label: 'Telecommunications' },
-  { value: 'Media & Entertainment', label: 'Media & Entertainment' },
-  { value: 'Marketing & Advertising', label: 'Marketing & Advertising' },
-  { value: 'Consulting Services', label: 'Consulting Services' },
-  { value: 'Legal Services', label: 'Legal Services' },
-  { value: 'Automobile', label: 'Automobile' },
-  { value: 'Textiles & Garments', label: 'Textiles & Garments' },
-  { value: 'Electronics', label: 'Electronics' },
-  { value: 'Energy & Utilities', label: 'Energy & Utilities' },
-  { value: 'Mining', label: 'Mining' },
-  { value: 'Import & Export', label: 'Import & Export' },
-  { value: 'Warehousing', label: 'Warehousing' },
-  { value: 'Security Services', label: 'Security Services' },
-  { value: 'Event Management', label: 'Event Management' },
-  { value: 'Beauty & Wellness', label: 'Beauty & Wellness' },
-  { value: 'Fitness & Sports', label: 'Fitness & Sports' },
-  { value: 'NGO / Non-Profit', label: 'NGO / Non-Profit' },
-  { value: 'Government Services', label: 'Government Services' },
-  { value: 'Other', label: 'Other' }
-];
+import { BUSINESS_CATEGORIES, INDUSTRY_TYPES } from '../constants';
+import { usePagination } from '../hooks/usePagination';
 
 
 
@@ -182,6 +123,8 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
             return [];
         }
     }, [customers, searchQuery, serviceFilter, assigneeFilter, sourceFilter, dateRange, amountRange, paymentStatus]);
+
+    const { currentData: paginatedCustomers, next, prev, jump, currentPage, maxPage } = usePagination(filteredCustomers, 20);
 
     const lostLeads = useMemo(() => leads.filter(l => l.status === 'Lost'), [leads]);
 
@@ -649,7 +592,7 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredCustomers.map((customer, index) => (
+                                {paginatedCustomers.map((customer, index) => (
                                     <tr
                                         key={customer.id}
                                         onClick={() => onViewCustomer(customer.id)}
@@ -720,10 +663,23 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                         </table>
                     </div>
                 </CardContent>
-                <CardFooter>
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100">
                     <div className="text-xs text-slate-500">
-                        Showing <strong>{filteredCustomers.length}</strong> of <strong>{customers.length}</strong> customers
+                        Showing <strong>{(currentPage - 1) * 20 + 1}</strong> to <strong>{Math.min(currentPage * 20, filteredCustomers.length)}</strong> of <strong>{filteredCustomers.length}</strong> customers
                     </div>
+                    {maxPage > 1 && (
+                        <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={prev} disabled={currentPage === 1}>
+                            Previous
+                        </Button>
+                        <div className="text-sm font-medium text-slate-600 px-2">
+                            Page {currentPage} of {maxPage}
+                        </div>
+                        <Button variant="outline" size="sm" onClick={next} disabled={currentPage === maxPage}>
+                            Next
+                        </Button>
+                        </div>
+                    )}
                 </CardFooter>
             </Card>
 

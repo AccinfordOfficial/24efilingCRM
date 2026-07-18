@@ -1,8 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Layout } from './components/Layout';
 import { supabase } from './lib/supabaseClient'; // Import supabase for storage operations
-import { Sidebar } from './components/Sidebar';
-import { Header } from './components/Header';
-import { User, Lead, Document, Customer, Task, TaskPriority } from './types';
+import { User, Lead, Document, Customer, Task, TaskPriority, City, Branch } from './types';
 import { useToast } from './components/Toast';
 import { useAuth } from './context/AuthContext';
 import { useApi } from './hooks/useApi';
@@ -129,9 +129,19 @@ const uploadBranchLogo = async (file: File): Promise<string> => {
   }
 };
 
-export default function App() {
+function App() {
   const authData = useAuth();
   const apiData = useApi();
+  const navigate = useNavigate();
+
+  // Gracefully handle old hash routes by redirecting them
+  useEffect(() => {
+    if (window.location.hash && window.location.hash.startsWith('#/')) {
+      const path = window.location.hash.replace('#', '');
+      window.history.replaceState(null, '', path);
+      navigate(path, { replace: true });
+    }
+  }, [navigate]);
 
   if (!authData.profile) {
     return <FilteredAppContent authData={authData} apiData={apiData} />;
@@ -305,81 +315,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     return res;
   }, [roleScopedActivities, employeeId, globalDateRange]);
 
-  // Routing helper functions
-  const pageToHash = useCallback((page: string, leadId?: string | null, customerId?: string | null) => {
-    if (page === 'Lead Detail' && leadId) {
-      return `#/lead-detail/${leadId}`;
-    }
-    if (page === 'Customer Detail' && customerId) {
-      return `#/customer-detail/${customerId}`;
-    }
-    const clean = page.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-');
-    return `#/${clean}`;
-  }, []);
 
-  const hashToState = useCallback((hash: string) => {
-    if (!hash || hash === '#/' || hash === '#') {
-      return { page: 'Dashboard', leadId: null, customerId: null };
-    }
-    
-    if (hash.startsWith('#/lead-detail/')) {
-      const id = hash.replace('#/lead-detail/', '');
-      return { page: 'Lead Detail', leadId: id, customerId: null };
-    }
-    if (hash.startsWith('#/customer-detail/')) {
-      const id = hash.replace('#/customer-detail/', '');
-      return { page: 'Customer Detail', leadId: null, customerId: id };
-    }
 
-    const kebab = hash.replace('#/', '');
-    
-    const kebabMap: Record<string, string> = {
-      'dashboard': 'Dashboard',
-      'branch-management': 'Branch Management',
-      'user-management': 'User Management',
-      'leads-overview': 'Leads Overview',
-      'all-leads': 'All Leads',
-      'lead-workflow': 'Lead Workflow',
-      'customers': 'Customers',
-      'payments': 'Payments',
-      'reports-analytics': 'Reports & Analytics',
-      'activity-feed': 'Activity Feed',
-      'system-settings': 'System Settings',
-      'lead-management': 'Lead Management',
-      'team-management': 'Team Management',
-      'document-verification': 'Document Verification',
-      'reports': 'Reports',
-      'my-leads': 'My Leads',
-      'follow-ups': 'Follow-ups',
-      'client-documents': 'Client Documents',
-      'performance-report': 'Performance Report',
-      'support': 'Support',
-      'notifications': 'Notifications',
-      'services': 'Services',
-      'offers-coupons': 'Offers & Coupons',
-      '24efiling-web': '24efiling Web',
-      '24efiling-web-dropdown': '24efiling Web',
-      'web-leads': 'Web Leads',
-      'blogs': 'Blogs',
-      'testimonials': 'Testimonials',
-      'create-new-lead': 'Create New Lead',
-      'create-lead': 'Create New Lead'
-    };
-
-    return {
-      page: kebabMap[kebab] || 'Dashboard',
-      leadId: null,
-      customerId: null
-    };
-  }, []);
-
-  const initialRoutingState = useMemo(() => hashToState(window.location.hash), [hashToState]);
-
-  const [activePage, _setActivePage] = useState(() => initialRoutingState.page);
-  const [previousPage, setPreviousPage] = useState('Dashboard');
   const [userManagementBranchFilter, setUserManagementBranchFilter] = useState<string | null>(null);
-  const [viewingLeadId, _setViewingLeadId] = useState<string | null>(() => initialRoutingState.leadId);
-  const [viewingCustomerId, _setViewingCustomerId] = useState<string | null>(() => initialRoutingState.customerId);
   const [dateRange, setDateRange] = useState<{ from: string; to: string }>({ from: '', to: '' });
 
   const [isUserFormOpen, setIsUserFormOpen] = useState(false);
@@ -388,62 +326,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
   const [leadForCustomerCreation, setLeadForCustomerCreation] = useState<Lead | null>(null);
 
-  const [initialPageSet, setInitialPageSet] = useState(false);
 
-  // Wrapper functions to update location hash (source of truth)
-  const setActivePage = useCallback((page: string) => {
-    window.location.hash = pageToHash(page, viewingLeadId, viewingCustomerId);
-  }, [pageToHash, viewingLeadId, viewingCustomerId]);
-
-  const setViewingLeadId = useCallback((leadId: string | null) => {
-    _setViewingLeadId(leadId);
-    window.location.hash = pageToHash(leadId ? 'Lead Detail' : activePage, leadId, viewingCustomerId);
-  }, [activePage, pageToHash, viewingCustomerId]);
-
-  const setViewingCustomerId = useCallback((customerId: string | null) => {
-    _setViewingCustomerId(customerId);
-    window.location.hash = pageToHash(customerId ? 'Customer Detail' : activePage, viewingLeadId, customerId);
-  }, [activePage, pageToHash, viewingLeadId]);
-
-  // Keep previousPage updated on page transition
-  useEffect(() => {
-    if (activePage && activePage !== 'Lead Detail' && activePage !== 'Customer Detail' && activePage !== 'Create New Lead') {
-      setPreviousPage(activePage);
-    }
-  }, [activePage]);
-
-  // Clear any existing URL parameters (e.g. ?branch=) on mount
-  useEffect(() => {
-    if (window.location.search) {
-      const url = new URL(window.location.href);
-      url.search = '';
-      window.history.replaceState({}, '', url.toString());
-    }
-  }, []);
-
-  // Listen for browser navigation changes (Back/Forward)
-  useEffect(() => {
-    const handleHashChange = () => {
-      const { page, leadId, customerId } = hashToState(window.location.hash);
-      
-      _setActivePage((currentActive) => currentActive !== page ? page : currentActive);
-      _setViewingLeadId((currentLead) => currentLead !== leadId ? leadId : currentLead);
-      _setViewingCustomerId((currentCustomer) => currentCustomer !== customerId ? customerId : currentCustomer);
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [hashToState]);
-
-  // ===== ALL HOOKS MUST BE CALLED BEFORE CONDITIONAL RETURNS =====
-  useEffect(() => {
-    if (profile && !initialPageSet) {
-      if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
-        window.location.hash = '#/dashboard';
-      }
-      setInitialPageSet(true);
-    }
-  }, [profile, initialPageSet]);
 
 
   // Daily birthday scheduler check upon login/load
@@ -636,34 +519,58 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     await signOut();
   }, [updateUserPassword, toast, signOut]);
 
-  const handleNavigate = useCallback((page: string) => {
-    setActivePage(page);
-  }, [setActivePage]);
+  const navigate = useNavigate();
 
   const handleLogout = useCallback(async () => {
     await signOut();
-    setActivePage('Dashboard');
-  }, [signOut, setActivePage]);
+    navigate('/');
+  }, [signOut, navigate]);
+  const handleNavigate = useCallback((page: string) => {
+    const pageToPath: Record<string, string> = {
+      'Dashboard': '/',
+      'All Leads': '/leads',
+      'Create New Lead': '/leads/new',
+      'My Leads': '/my-leads',
+      'Lead Workflow': '/lead-workflow',
+      'Customers': '/customers',
+      'Reports & Analytics': '/reports',
+      'Payments': '/payments',
+      'Activity Feed': '/activity',
+      'User Management': '/users',
+      'Branch Management': '/branch-management',
+      'Team': '/team',
+      'Verify Documents': '/verify-documents',
+      'Follow-ups': '/follow-ups',
+      'Client Documents': '/client-documents',
+      'Notifications': '/notifications',
+      'Settings': '/settings',
+      'Offers': '/offers',
+      'Web Leads': '/web'
+    };
+    if (pageToPath[page]) {
+      navigate(pageToPath[page]);
+    }
+  }, [navigate]);
 
   const handleViewLead = useCallback((leadId: string) => {
-    setViewingLeadId(leadId);
-  }, [setViewingLeadId]);
+    navigate('/leads/' + leadId);
+  }, [navigate]);
 
   const handleViewCustomer = useCallback((customerId: string) => {
-    setViewingCustomerId(customerId);
-  }, [setViewingCustomerId]);
+    navigate('/customers/' + customerId);
+  }, [navigate]);
 
   const handleBackFromDetail = useCallback(() => {
-    window.location.hash = pageToHash(previousPage);
-  }, [previousPage, pageToHash]);
+    navigate(-1);
+  }, [navigate]);
 
   const handleNavigateToCreateLead = useCallback(() => {
-    setActivePage('Create New Lead');
-  }, [setActivePage]);
+    navigate('/leads/new');
+  }, [navigate]);
 
   const handleCancelCreateLead = useCallback(() => {
-    window.location.hash = pageToHash(previousPage);
-  }, [previousPage, pageToHash]);
+    navigate(-1);
+  }, [navigate]);
 
   const handleAddLead = useCallback(async (leadData: Omit<Lead, 'id' | 'created_at' | 'last_contacted' | 'status' | 'assigned_to'>, assignedToId: string | null) => {
     if (!profile) return;
@@ -698,11 +605,11 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
       await addLead(newLeadData);
       toast.addToast('Lead created successfully!', 'success');
-      setActivePage(previousPage);
+      navigate(-1);
     } catch (error: any) {
       toast.addToast(`Error: ${error.message}`, 'error');
     }
-  }, [profile, users, addLead, toast, previousPage]);
+  }, [profile, users, addLead, toast, navigate]);
 
   const handleUpdateLead = useCallback(async (leadData: Lead) => {
     const originalLead = leads.find(l => l.id === leadData.id);
@@ -991,328 +898,320 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     );
   }
 
-  const renderPage = () => {
-    if (dataLoading) {
-      return <div className="p-8 text-center text-slate-500">Loading data...</div>;
-    }
-    if (dataError) {
-      return <div className="p-8 text-center text-red-500">Error: {dataError}</div>
-    }
 
-    if (activePage === 'Lead Detail' && viewingLeadId) {
-      const lead = leads.find(l => l.id === viewingLeadId);
-      if (lead) {
-        return <LeadDetail
-          lead={lead}
-          onBack={handleBackFromDetail}
-          onUpdateLead={handleUpdateLead}
-          onAddActivity={(content) => handleAddActivity(lead.id, content)}
-          onUploadDocument={(file, docType) => handleUploadDocument(lead.id, file, docType)}
-          onDeleteDocument={(docId) => handleDeleteDocument(lead.id, docId)}
-          onEditLead={() => handleOpenLeadForm(lead)}
-          onAddTask={(content, dueDate, priority) => handleAddTask(lead.id, content, dueDate, priority)}
-          onUpdateTask={(task) => handleUpdateTask(lead.id, task)}
-          onDeleteTask={(taskId) => handleDeleteTask(lead.id, taskId)}
-        />;
-      }
-      // Lead not found – show friendly fallback instead of "Page not found"
+  const isAdminOrAbove = viewProfile?.role === 'Super Admin' || viewProfile?.role === 'Admin' || viewProfile?.role === 'Branch Manager';
+  const isSuperAdmin = viewProfile?.role === 'Super Admin';
+  const AccessDenied = ({ requiredRole }: { requiredRole: string }) => (
+    <div className="p-8 text-center text-red-500">
+      <h2 className="text-xl font-bold">Access Denied</h2>
+      <p>You need {requiredRole} privileges to view this page.</p>
+    </div>
+  );
+
+  const LeadDetailRoute = () => {
+    const { id } = useParams();
+    const lead = leads.find(l => l.id === id);
+    if (!lead) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
           <div className="text-6xl">🔍</div>
           <h2 className="text-2xl font-bold text-slate-800">Lead Not Found</h2>
           <p className="text-slate-500 max-w-md">This lead may have been removed or you may not have permission to view it.</p>
-          <button onClick={handleBackFromDetail} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
+          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
         </div>
       );
     }
+    return <LeadDetail
+      lead={lead}
+      onBack={() => navigate(-1)}
+      onUpdateLead={handleUpdateLead}
+      onAddActivity={(content) => handleAddActivity(lead.id, content)}
+      onUploadDocument={(file, docType) => handleUploadDocument(lead.id, file, docType)}
+      onDeleteDocument={(docId) => handleDeleteDocument(lead.id, docId)}
+      onEditLead={() => handleOpenLeadForm(lead)}
+      onAddTask={(content, dueDate, priority) => handleAddTask(lead.id, content, dueDate, priority)}
+      onUpdateTask={(task) => handleUpdateTask(lead.id, task)}
+      onDeleteTask={(taskId) => handleDeleteTask(lead.id, taskId)}
+    />;
+  };
 
-    if (activePage === 'Customer Detail' && viewingCustomerId) {
-      // Try direct ID match first, then fallback to lead_id match (for notifications that store lead ID)
-      const customer = customers.find(c => c.id === viewingCustomerId) ||
-                       customers.find(c => c.lead_id === viewingCustomerId);
-      if (customer) {
-        return <CustomerDetail 
-          customer={customer} 
-          onBack={handleBackFromDetail} 
-          leads={leads} 
-          onAddActivityToLead={addActivityToLead} 
-          refreshData={refreshData} 
-          onUpdateCustomer={updateCustomer}
-        />;
-      }
-      // Customer not found – show friendly fallback instead of "Page not found"
+  const CustomerDetailRoute = () => {
+    const { id } = useParams();
+    const customer = customers.find(c => c.id === id) || customers.find(c => c.lead_id === id);
+    if (!customer) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
           <div className="text-6xl">🔍</div>
           <h2 className="text-2xl font-bold text-slate-800">Customer Not Found</h2>
           <p className="text-slate-500 max-w-md">This customer record may have been removed or you may not have permission to view it.</p>
-          <button onClick={handleBackFromDetail} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
+          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
         </div>
       );
     }
-
-    if (activePage === 'Create New Lead') {
-      return <CreateLead onAddLead={handleAddLead} onCancel={handleCancelCreateLead} salesExecutives={activeSalesExecutives} services={services} leads={leads} offers={offers} />;
-    }
-
-    if (activePage === 'Dashboard') {
-      return <DashboardOverview
-        leads={roleScopedLeads}
-        users={users}
-        customers={customers}
-        branches={branches}
-        cities={cities}
-        userActivities={userActivities}
-        currentUser={viewProfile!}
-        dateRange={dateRange}
-        setDateRange={setDateRange}
-        onViewCustomer={handleViewCustomer}
-        onViewLead={handleViewLead}
-        onNavigate={setActivePage}
-        services={services}
-        onAddActivityToLead={addActivityToLead}
-        refreshData={refreshData}
-        testimonials={testimonials}
-      />;
-    }
-
-    // --- Page-Level Role Guards ---
-    const isSuperAdmin = viewProfile!.role === 'Super Admin';
-    const isAdminOrAbove = ['Super Admin', 'Admin', 'Branch Manager'].includes(viewProfile!.role);
-    const isSalesExec = viewProfile!.role === 'Sales Executive';
-
-    const AccessDenied = ({ requiredRole }: { requiredRole: string }) => (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
-        <div className="text-6xl">🔒</div>
-        <h2 className="text-2xl font-bold text-slate-800">Access Denied</h2>
-        <p className="text-slate-500 max-w-md">You don't have permission to view this page. This section requires <strong>{requiredRole}</strong> access.</p>
-        <button onClick={() => setActivePage('Dashboard')} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go to Dashboard</button>
-      </div>
-    );
-
-    switch (activePage) {
-      case 'Branch Management':
-        if (!isSuperAdmin) return <AccessDenied requiredRole="Super Admin" />;
-        return <BranchManagement 
-              branches={branches} 
-              users={users} 
-              cities={cities}
-              onAddBranch={addBranch} 
-              onAddCity={addCity}
-              onUpdateBranch={updateBranch} 
-              onDeleteBranch={deleteBranch} 
-              onNavigateToUsers={(branchName) => {
-                setUserManagementBranchFilter(branchName);
-                handleNavigate('User Management');
-              }}
-              onUploadLogo={(file) => uploadBranchLogo(file)}
-            />;
-      case 'User Management':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <UserManagement 
-                 users={globallyFilteredUsers} 
-                 cities={availableCities}
-                 branches={availableBranches}
-                 onOpenUserForm={handleOpenUserForm} 
-                 onUpdateUser={handleUpdateUser} 
-                 onDeleteUsers={handleBulkDeleteUsers} 
-                 dateRange={dateRange} 
-                 setDateRange={setDateRange} 
-                 userActivities={globallyFilteredActivities} 
-                 currentUserRole={viewProfile!.role} 
-                 currentUser={viewProfile!}
-                 initialBranchFilter={userManagementBranchFilter}
-                 onFilterClear={() => setUserManagementBranchFilter(null)}
-                 onTransferUser={transferUser}
-               />;
-      case 'All Leads':
-      case 'Leads Overview':
-        return <LeadsOverview currentUser={viewProfile!} leads={globallyFilteredLeads} users={globallyFilteredUsers} services={services} offers={offers} onAddLead={handleNavigateToCreateLead} onUpdateLead={handleUpdateLead} onViewLead={handleViewLead} onUpdateMultipleLeads={handleBulkUpdateLeads} onDeleteMultipleLeads={handleBulkDeleteLeads} dateRange={dateRange} setDateRange={setDateRange} title="All Leads" />;
-      case 'Lead Workflow':
-        return <LeadWorkflow
-          currentUser={viewProfile!}
-          leads={globallyFilteredLeads}
-          onUpdateLead={handleUpdateLead}
-          onViewLead={handleViewLead}
-          onAddLead={handleNavigateToCreateLead}
-          onDeleteLeads={handleBulkDeleteLeads}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          onOpenLeadForm={handleOpenLeadForm}
-        />;
-      case 'Customers':
-        return <Customers customers={globallyFilteredCustomers} users={globallyFilteredUsers} onViewCustomer={handleViewCustomer} leads={globallyFilteredLeads} onViewLead={handleViewLead} services={services} />;
-      case 'Reports & Analytics':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <Reports userRole={viewProfile!.role} users={globallyFilteredUsers} allLeads={globallyFilteredLeads} customers={globallyFilteredCustomers} dateRange={dateRange} setDateRange={setDateRange} currentUser={viewProfile!} />;
-      case 'Activity Feed':
-        if (!isSuperAdmin) return <AccessDenied requiredRole="Super Admin" />;
-        return <ActivityFeed userActivities={globallyFilteredActivities} users={globallyFilteredUsers} />;
-      case 'System Settings':
-        if (!isSuperAdmin) return <AccessDenied requiredRole="Super Admin" />;
-        return <Settings currentUser={viewProfile!} transferLogs={transferLogs} auditLogs={auditLogs} />;
-      case 'Lead Management':
-        return <LeadsOverview currentUser={viewProfile!} leads={globallyFilteredLeads} users={globallyFilteredUsers} services={services} offers={offers} onAddLead={handleNavigateToCreateLead} onUpdateLead={handleUpdateLead} title="Lead Management" onViewLead={handleViewLead} onUpdateMultipleLeads={handleBulkUpdateLeads} onDeleteMultipleLeads={handleBulkDeleteLeads} dateRange={dateRange} setDateRange={setDateRange} />;
-      case 'Team Management':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <TeamManagement teamMembers={globallyFilteredUsers.filter((u: any) => u.role === 'Sales Executive')} allLeads={globallyFilteredLeads} dateRange={dateRange} setDateRange={setDateRange} onDeleteUsers={handleBulkDeleteUsers} />;
-      case 'Document Verification':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <DocumentVerification
-          leads={globallyFilteredLeads}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          onUpdateDocumentStatus={handleUpdateDocumentStatus}
-        />;
-      case 'Payments':
-        if (!isSuperAdmin) return <AccessDenied requiredRole="Super Admin" />;
-        return <PaymentTracker leads={globallyFilteredLeads} users={globallyFilteredUsers} currentUser={viewProfile!} onViewLead={handleViewLead} dateRange={dateRange} setDateRange={setDateRange} />;
-      case 'Reports':
-        return <Reports userRole={viewProfile!.role} users={globallyFilteredUsers} allLeads={globallyFilteredLeads} customers={globallyFilteredCustomers} dateRange={dateRange} setDateRange={setDateRange} currentUser={viewProfile!} />;
-      case 'My Leads':
-        return <LeadsOverview currentUser={viewProfile!} leads={globallyFilteredLeads.filter((l: any) => l.assigned_to?.id === viewProfile?.id)} users={globallyFilteredUsers} services={services} offers={offers} onAddLead={handleNavigateToCreateLead} onUpdateLead={handleUpdateLead} title="My Leads" onViewLead={handleViewLead} onUpdateMultipleLeads={handleBulkUpdateLeads} onDeleteMultipleLeads={handleBulkDeleteLeads} dateRange={dateRange} setDateRange={setDateRange} />;
-      case 'Follow-ups':
-        return <FollowUps leads={globallyFilteredLeads} dateRange={dateRange} setDateRange={setDateRange} onUpdateTask={(leadId, task) => handleUpdateTask(leadId, task)} onUpdateLead={handleUpdateLead} onViewLead={handleViewLead} />;
-      case 'Client Documents':
-        return <ClientDocuments
-          leads={globallyFilteredLeads}
-          dateRange={dateRange}
-          setDateRange={setDateRange}
-          onUploadDocument={(leadId, file) => handleUploadDocument(leadId, file, 'Other Documents')}
-          onDeleteDocument={handleDeleteDocument}
-          onViewLead={handleViewLead}
-        />;
-      case 'Performance Report':
-        return <Reports userRole={viewProfile!.role} leads={globallyFilteredLeads} customers={globallyFilteredCustomers} dateRange={dateRange} setDateRange={setDateRange} currentUser={viewProfile!} users={globallyFilteredUsers} />;
-      case 'Notifications':
-        return <Notifications
-          notifications={userNotifications}
-          onMarkAllRead={handleMarkNotificationsRead}
-          onNavigate={(page, id) => {
-            if (page === 'Lead Detail') handleViewLead(id);
-            if (page === 'Customer Detail') handleViewCustomer(id);
-          }}
-        />;
-      case 'Services':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <ServiceManagement
-          services={services}
-          onAddService={addService}
-          onUpdateService={updateService}
-          onDeleteService={deleteService}
-          onAddSubService={addSubService}
-          onUpdateSubService={updateSubService}
-          onDeleteSubService={deleteSubService}
-        />;
-      case 'Offers & Coupons':
-        if (!isSuperAdmin) return <AccessDenied requiredRole="Super Admin" />;
-        return <OffersManagement
-          offers={offers}
-          services={services}
-          onAddOffer={addOffer}
-          onUpdateOffer={updateOffer}
-          onDeleteOffer={deleteOffer}
-        />;
-      case '24efiling Web':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <WebOverview
-          services={services}
-          onAddWebLead={addWebLead}
-          webLeads={webLeads}
-          blogs={blogs}
-          testimonials={testimonials}
-          onUpdateWebLead={updateWebLead}
-          onDeleteWebLeads={deleteMultipleWebLeads}
-        />;
-      case 'Web Leads':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <WebLeadsManagement
-          webLeads={webLeads}
-          salesExecutives={users}
-          onAssignWebLead={assignWebLead}
-          onUpdateWebLeadStatus={updateWebLeadStatus}
-          onConvertWebLeadToCrmLead={convertWebLeadToCrmLead}
-        />;
-      case 'Blogs':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <BlogsManagement
-          blogs={blogs}
-          onAddBlog={addBlog}
-          onUpdateBlog={updateBlog}
-          onDeleteBlog={deleteBlog}
-        />;
-      case 'Testimonials':
-        if (!isAdminOrAbove) return <AccessDenied requiredRole="Admin or Super Admin" />;
-        return <TestimonialsManagement
-          testimonials={testimonials}
-          onAddTestimonial={addTestimonial}
-          onUpdateTestimonialStatus={updateTestimonialStatus}
-          onDeleteTestimonial={deleteTestimonial}
-        />;
-      default:
-        return <div className="p-4"><h1 className="text-xl font-bold">Page not found</h1><p>The requested page '{activePage}' does not exist.</p></div>;
-    }
+    return <CustomerDetail 
+      customer={customer} 
+      onBack={() => navigate(-1)} 
+      leads={leads} 
+      onAddActivityToLead={addActivityToLead} 
+      refreshData={refreshData} 
+      onUpdateCustomer={updateCustomer}
+    />;
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-50">
-      <Sidebar
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
-        userRole={viewProfile.role}
-        currentUser={viewProfile}
-        activePage={activePage}
-        setActivePage={setActivePage}
-        onLogout={handleLogout}
-        users={globallyFilteredUsers}
-        leads={globallyFilteredLeads}
-        unreadCount={unreadCount}
-      />
-      <div className="flex flex-col md:ml-64 transition-all duration-300">
-        <Header
-          onMenuClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          currentUser={viewProfile}
-          setActivePage={setActivePage}
-          pageConfig={PAGE_CONFIG[activePage] || { title: activePage, subtitle: '' }}
-          unreadCount={unreadCount}
-        />
-        {['Dashboard', 'All Leads', 'Customers', 'Payments', 'Reports', 'Activity Feed', 'User Management', 'Web Leads'].includes(activePage) && (
-          <div className="w-full bg-white border-b border-slate-200">
-            <GlobalFilterBar currentUserRole={viewProfile.role} />
-          </div>
-        )}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-slate-50">
-          {renderPage()}
-        </main>
-      </div>
-      <UserForm
-        isOpen={isUserFormOpen}
-        onClose={() => setIsUserFormOpen(false)}
-        onSave={handleSaveUser}
-        user={editingUser}
-        branches={branches}
-        cities={cities}
-        initialBranchName={userManagementBranchFilter}
-        allUsers={users}
-      />
-      <LeadForm
-        isOpen={isLeadFormOpen}
-        onClose={() => setIsLeadFormOpen(false)}
-        onSave={handleSaveLead}
-        lead={editingLead}
-        users={activeUsers}
-        currentUser={viewProfile}
-        services={services}
-        offers={offers}
-        onUploadDocument={editingLead ? (file) => handleUploadDocument(editingLead.id, file, 'Other Documents') : undefined}
-        onDeleteDocument={editingLead ? (docId) => handleDeleteDocument(editingLead.id, docId) : undefined}
-      />
-      <SuccessConversionModal
-        isOpen={!!leadForCustomerCreation}
-        onClose={handleCancelCustomerCreation}
-        onConfirm={handleConfirmCustomerCreation}
-        lead={leadForCustomerCreation}
-      />
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={
+          <DashboardOverview
+            leads={roleScopedLeads}
+            users={users}
+            customers={customers}
+            branches={branches}
+            cities={cities}
+            userActivities={userActivities}
+            currentUser={viewProfile!}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            onViewCustomer={handleViewCustomer}
+            onViewLead={handleViewLead}
+            onNavigate={handleNavigate}
+            services={services}
+            onAddActivityToLead={addActivityToLead}
+            refreshData={refreshData}
+            onUpdateLead={handleUpdateLead}
+            onUpdateCustomer={updateCustomer}
+          />
+        } />
+        <Route path="/leads" element={
+          <LeadsOverview
+            leads={roleScopedLeads}
+            users={users}
+            currentUser={viewProfile!}
+            onUpdateLead={handleUpdateLead}
+            onUpdateMultipleLeads={updateMultipleLeads}
+            onDeleteMultipleLeads={deleteMultipleLeads}
+            onViewLead={handleViewLead}
+            onAddActivity={addActivityToLead}
+            dateRange={dateRange}
+            services={services}
+            offers={offers}
+          />
+        } />
+        <Route path="/leads/new" element={
+          <CreateLead 
+            onAddLead={handleAddLead} 
+            onCancel={handleCancelCreateLead} 
+            salesExecutives={activeSalesExecutives} 
+            services={services} 
+            leads={leads} 
+            offers={offers} 
+          />
+        } />
+        <Route path="/leads/:id" element={<LeadDetailRoute />} />
+        <Route path="/my-leads" element={
+          <LeadsOverview
+            leads={roleScopedLeads.filter(l => l.assigned_to?.id === viewProfile?.id)}
+            users={users}
+            currentUser={viewProfile!}
+            onUpdateLead={handleUpdateLead}
+            onUpdateMultipleLeads={updateMultipleLeads}
+            onDeleteMultipleLeads={deleteMultipleLeads}
+            onViewLead={handleViewLead}
+            onAddActivity={addActivityToLead}
+            dateRange={dateRange}
+            services={services}
+            offers={offers}
+          />
+        } />
+        <Route path="/lead-workflow" element={
+          <LeadWorkflow
+            leads={roleScopedLeads}
+            currentUser={viewProfile!}
+            onUpdateLead={handleUpdateLead}
+            onViewLead={handleViewLead}
+            onAddLead={() => setIsLeadFormOpen(true)}
+            onDeleteLeads={handleBulkDeleteLeads}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            onOpenLeadForm={handleOpenLeadForm}
+          />
+        } />
+        <Route path="/customers" element={
+          <Customers
+            customers={roleScopedCustomers}
+            leads={roleScopedLeads}
+            users={users}
+            onViewCustomer={handleViewCustomer}
+            onUpdateCustomer={updateCustomer}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/customers/:id" element={<CustomerDetailRoute />} />
+        <Route path="/reports" element={
+          <Reports
+            leads={roleScopedLeads}
+            users={roleScopedUsers}
+            currentUser={viewProfile!}
+            dateRange={dateRange}
+            services={services}
+          />
+        } />
+        <Route path="/payments" element={
+          <PaymentTracker
+            leads={roleScopedLeads}
+            customers={roleScopedCustomers}
+            users={users}
+            currentUser={viewProfile!}
+            onUpdateLead={handleUpdateLead}
+          />
+        } />
+        <Route path="/activity" element={
+          <ActivityFeed
+            userActivities={roleScopedActivities}
+            users={users}
+            leads={leads}
+            customers={customers}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/users" element={
+          isAdminOrAbove ? (
+            <UserManagement
+              users={roleScopedUsers}
+              currentUser={viewProfile!}
+              branches={branches}
+              cities={cities}
+              onAddUser={() => setIsUserFormOpen(true)}
+              onEditUser={(user) => { setEditingUser(user); setIsUserFormOpen(true); }}
+              onDeleteUsers={deleteMultipleUsers}
+              onTransferUser={transferUser}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/branch-management" element={
+          isSuperAdmin ? (
+            <BranchManagement
+              branches={branches}
+              cities={cities}
+              users={users}
+              onAddBranch={addBranch}
+              onUpdateBranch={updateBranch}
+              onDeleteBranch={deleteBranch}
+              onAddCity={addCity}
+            />
+          ) : <AccessDenied requiredRole="Super Admin" />
+        } />
+        <Route path="/team" element={
+          isAdminOrAbove ? (
+            <TeamManagement
+              users={roleScopedUsers}
+              currentUser={viewProfile!}
+              leads={roleScopedLeads}
+              onUpdateUser={updateUser}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/verify-documents" element={
+          isAdminOrAbove ? (
+            <DocumentVerification
+              leads={roleScopedLeads}
+              onUpdateDocumentStatus={updateDocumentStatus}
+              currentUser={viewProfile!}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/follow-ups" element={
+          <FollowUps
+            leads={roleScopedLeads}
+            users={users}
+            currentUser={viewProfile!}
+            onViewLead={handleViewLead}
+            onUpdateLead={handleUpdateLead}
+            onAddActivity={addActivityToLead}
+          />
+        } />
+        <Route path="/client-documents" element={
+          <ClientDocuments
+            leads={roleScopedLeads}
+            customers={roleScopedCustomers}
+            currentUser={viewProfile!}
+            onViewLead={handleViewLead}
+            onViewCustomer={handleViewCustomer}
+            onUploadDocument={(leadId, file, docType) => handleUploadDocument(leadId, file, docType)}
+          />
+        } />
+        <Route path="/notifications" element={
+          <Notifications
+            notifications={notifications}
+            onMarkAsRead={markNotificationsAsRead}
+            onViewLead={handleViewLead}
+            onViewCustomer={handleViewCustomer}
+          />
+        } />
+        <Route path="/settings" element={
+          <Settings
+            currentUser={viewProfile!}
+            transferLogs={[]} // TODO: wire up actual transfer logs
+            auditLogs={[]} // TODO: wire up actual audit logs
+          />
+        } />
+        <Route path="/web/leads" element={
+          <WebLeadsManagement 
+            webLeads={webLeads}
+            salesExecutives={users.filter(u => u.role === 'Sales Executive')}
+            onAssignWebLead={assignWebLead}
+            onUpdateWebLeadStatus={updateWebLeadStatus}
+            onConvertWebLeadToCrmLead={convertWebLeadToCrmLead}
+          />
+        } />
+        <Route path="/web/blogs" element={
+          <BlogsManagement 
+            blogs={blogs}
+            onAddBlog={addBlog}
+            onUpdateBlog={updateBlog}
+            onDeleteBlog={deleteBlog}
+          />
+        } />
+        <Route path="/web/testimonials" element={
+          <TestimonialsManagement 
+            testimonials={testimonials}
+            onAddTestimonial={addTestimonial}
+            onUpdateTestimonialStatus={updateTestimonialStatus}
+            onDeleteTestimonial={deleteTestimonial}
+          />
+        } />
+        <Route path="/web/services" element={
+          <ServiceManagement 
+            services={services}
+            onAddService={addService}
+            onUpdateService={updateService}
+            onDeleteService={deleteService}
+            onAddSubService={addSubService}
+            onUpdateSubService={updateSubService}
+            onDeleteSubService={deleteSubService}
+          />
+        } />
+        <Route path="/offers" element={
+          <OffersManagement
+            offers={offers}
+            onAddOffer={addOffer}
+            onUpdateOffer={updateOffer}
+            onDeleteOffer={deleteOffer}
+            services={services}
+          />
+        } />
+        <Route path="/web" element={
+          <WebLeadsManagement
+            webLeads={webLeads}
+            salesExecutives={activeSalesExecutives}
+            onAssignWebLead={assignWebLead}
+            onUpdateWebLeadStatus={updateWebLeadStatus}
+            onConvertWebLeadToCrmLead={convertWebLeadToCrmLead}
+          />
+        } />
+      </Route>
+    </Routes>
   );
 }
+
+export default App;

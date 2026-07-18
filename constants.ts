@@ -168,6 +168,17 @@ export const ROLE_PERMISSIONS: Partial<Record<User['role'], string[]>> = {
   'Sales Executive': ['Manage Assigned Leads', 'Add Follow-ups', 'Upload Documents', 'View Customers'],
 };
 
+export const COUNTRIES = [
+  { code: 'IN', name: 'India' },
+  { code: 'US', name: 'United States' },
+  { code: 'UK', name: 'United Kingdom' },
+  { code: 'AE', name: 'United Arab Emirates' },
+  { code: 'AU', name: 'Australia' },
+  { code: 'CA', name: 'Canada' },
+  { code: 'SG', name: 'Singapore' },
+  { code: 'Other', name: 'Other' }
+];
+
 export const LEAD_SOURCES = ['New Lead', 'Website', 'Referral', 'Cold Call', 'Social Media', 'Advertisement', 'Other'];
 
 export const DOCUMENT_TYPES = [
@@ -255,3 +266,49 @@ export const getRoleDotColor = (role: User['role']) => {
       return 'bg-gray-400';
   }
 };
+
+export const BUSINESS_CATEGORIES = [
+  { value: 'Proprietorship', label: 'Proprietorship' },
+  { value: 'Partnership Firm', label: 'Partnership Firm' },
+  { value: 'One Person Company (OPC)', label: 'One Person Company (OPC)' },
+  { value: 'Private Limited Company', label: 'Private Limited Company' },
+  { value: 'Public Limited Company', label: 'Public Limited Company' },
+  { value: 'Limited Liability Partnership (LLP)', label: 'Limited Liability Partnership (LLP)' },
+  { value: 'Section 8 Company', label: 'Section 8 Company' },
+  { value: 'Trust Registration', label: 'Trust Registration' },
+  { value: 'Society Registration', label: 'Society Registration' },
+  { value: 'NGO Registration', label: 'NGO Registration' },
+  { value: 'Startup Registration', label: 'Startup Registration' },
+  { value: 'MSME Registration', label: 'MSME Registration' },
+  { value: 'GST Registration', label: 'GST Registration' },
+  { value: 'Trademark Registration', label: 'Trademark Registration' },
+  { value: 'Import Export Code (IEC)', label: 'Import Export Code (IEC)' },
+  { value: 'FSSAI Registration', label: 'FSSAI Registration' },
+  { value: 'Professional Tax Registration', label: 'Professional Tax Registration' },
+  { value: 'Shop & Establishment Registration', label: 'Shop & Establishment Registration' },
+  { value: 'Trade License', label: 'Trade License' },
+  { value: 'Other', label: 'Other' }
+];
+
+export const INDUSTRY_TYPES = [
+  { value: 'Healthcare', label: 'Healthcare' },
+  { value: 'Information Technology (IT)', label: 'Information Technology (IT)' },
+  { value: 'Software Development', label: 'Software Development' },
+  { value: 'Construction', label: 'Construction' },
+  { value: 'Transport & Logistics', label: 'Transport & Logistics' },
+  { value: 'Manufacturing', label: 'Manufacturing' },
+  { value: 'Retail', label: 'Retail' },
+  { value: 'E-Commerce', label: 'E-Commerce' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Finance & Banking', label: 'Finance & Banking' },
+  { value: 'Insurance', label: 'Insurance' },
+  { value: 'Real Estate', label: 'Real Estate' },
+  { value: 'Hospitality', label: 'Hospitality' },
+  { value: 'Travel & Tourism', label: 'Travel & Tourism' },
+  { value: 'Food & Beverage', label: 'Food & Beverage' },
+  { value: 'Agriculture', label: 'Agriculture' },
+  { value: 'Pharmaceuticals', label: 'Pharmaceuticals' },
+  { value: 'Telecommunications', label: 'Telecommunications' },
+  { value: 'Media & Entertainment', label: 'Media & Entertainment' },
+  { value: 'Marketing & Advertising', label: 'Marketing & Advertising' }
+];
