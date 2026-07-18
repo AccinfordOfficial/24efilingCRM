@@ -47,16 +47,16 @@ const NavLink: React.FC<{
       className={cn(
         "flex items-center gap-3 px-3 py-2.5 w-full text-left transition-all duration-200 rounded-md text-sm font-medium",
         active
-          ? "bg-primary text-primary-foreground shadow-sm"
-          : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
+          ? "bg-blue-50 text-blue-700 shadow-sm"
+          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
       )}
     >
-      <Icon className={cn("h-4 w-4", active ? "text-primary-foreground" : "text-slate-400")} />
+      <Icon className={cn("h-4 w-4", active ? "text-blue-700" : "text-slate-400 group-hover:text-slate-600")} />
       <span className="flex-1 truncate">{label}</span>
       {count != null && (
         <span className={cn(
           "text-xs font-semibold rounded-full px-2 py-0.5",
-          active ? "bg-primary-foreground/20 text-primary-foreground" : "bg-slate-800 text-slate-400"
+          active ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"
         )}>
           {count}
         </span>
@@ -242,15 +242,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   return (
     <>
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-slate-950 text-white transition-transform duration-300 ease-in-out border-r border-slate-800",
+        "fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-white text-slate-900 transition-transform duration-300 ease-in-out border-r border-slate-200 shadow-sm",
         "md:static md:translate-x-0 md:flex-shrink-0",
         isOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
-        <div className="flex h-16 items-center justify-between px-6 border-b border-slate-800 shrink-0">
-          <Link to="/" onClick={handleNavClick} className="flex items-center gap-2 text-white px-2">
+        <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200 shrink-0">
+          <Link to="/" onClick={handleNavClick} className="flex items-center gap-2 px-2">
             <EfilingLogo className="h-12 w-auto" />
           </Link>
-          <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden text-slate-400 hover:text-white hover:bg-slate-800">
+          <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden text-slate-500 hover:text-slate-900 hover:bg-slate-100">
             <ChevronLeft className="h-5 w-5" />
           </Button>
         </div>
@@ -284,28 +284,33 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           </div>
         </nav>
 
-        <div className="p-4 border-t border-slate-800 bg-slate-950">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-slate-700">
+        <div className="p-4 border-t border-slate-200 bg-white">
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar className="h-9 w-9 border border-slate-200">
               <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} />
-              <AvatarFallback className="bg-primary/20 text-primary text-xs font-bold">
+              <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold">
                 {getInitials(currentUser?.name || 'U')}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 overflow-hidden">
-              <p className="text-white font-medium text-sm truncate">{currentUser.name}</p>
+              <p className="text-slate-900 font-medium text-sm truncate">{currentUser.name}</p>
               <p className="text-xs text-slate-500 truncate">{currentUser.role}</p>
             </div>
-            <Button variant="ghost" size="icon" onClick={logout} title="Logout" className="text-slate-400 hover:text-white hover:bg-slate-800">
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
+          <Button
+            variant="ghost"
+            onClick={logout}
+            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 gap-3 px-3 py-2.5"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
         </div>
       </aside>
       
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden transition-opacity"
           onClick={onClose}
         ></div>
       )}
