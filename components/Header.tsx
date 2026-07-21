@@ -36,6 +36,10 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   '/web/testimonials': { title: 'Client Testimonials Board', subtitle: 'Moderate client reviews, star ratings, and success quotes.' },
   '/web/services': { title: 'Manage Services', subtitle: 'Add and manage services and sub-services.' },
   '/offers': { title: 'Offers & Coupons', subtitle: 'Manage discount campaigns, coupons, and referral offers.' },
+  '/forecast': { title: 'Revenue & Pipeline Forecast', subtitle: 'AI weighted probability and time-series revenue forecast.' },
+  '/churn': { title: 'Churn Risk Prediction', subtitle: 'Identify at-risk accounts and automate client retention.' },
+  '/gst-calendar': { title: 'GST Compliance Calendar', subtitle: 'Statutory GST filing deadlines and late fee calculator.' },
+  '/team-chat': { title: 'Internal Team Chat', subtitle: 'Real-time internal collaboration and team channels.' },
 };
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick }) => {

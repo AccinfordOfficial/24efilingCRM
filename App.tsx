@@ -68,6 +68,11 @@ import { ExpenseManager } from './pages/ExpenseManager';
 import { AutomationRules } from './pages/AutomationRules';
 import { DocumentTemplates } from './pages/DocumentTemplates';
 import { IntegrationsCenter } from './pages/IntegrationsCenter';
+import { RevenueForecasting } from './pages/RevenueForecasting';
+import { ChurnPrediction } from './pages/ChurnPrediction';
+import { GstComplianceCalendar } from './pages/GstComplianceCalendar';
+import { TeamChat } from './pages/TeamChat';
+import { CompanyProvider } from './contexts/CompanyContext';
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -187,14 +192,16 @@ function App() {
   }
 
   return (
-    <GlobalFilterProvider 
-      currentUser={authData.profile} 
-      allUsers={apiData.users} 
-      allCities={apiData.cities} 
-      allBranches={apiData.branches}
-    >
+    <CompanyProvider>
+      <GlobalFilterProvider 
+        currentUser={authData.profile} 
+        allUsers={apiData.users} 
+        allCities={apiData.cities} 
+        allBranches={apiData.branches}
+      >
       <FilteredAppContent authData={authData} apiData={apiData} />
-    </GlobalFilterProvider>
+      </GlobalFilterProvider>
+    </CompanyProvider>
   );
 }
 
@@ -1448,6 +1455,10 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/automation" element={<AutomationRules />} />
         <Route path="/templates" element={<DocumentTemplates />} />
         <Route path="/integrations" element={<IntegrationsCenter />} />
+        <Route path="/forecast" element={<RevenueForecasting />} />
+        <Route path="/churn" element={<ChurnPrediction />} />
+        <Route path="/gst-calendar" element={<GstComplianceCalendar />} />
+        <Route path="/team-chat" element={<TeamChat />} />
       </Route>
         </Routes>
         <UserForm

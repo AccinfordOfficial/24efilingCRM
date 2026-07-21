@@ -105,6 +105,8 @@ const superAdminNav: NavSection[] = [
     title: 'Analytics',
     items: [
       { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
+      { path: '/forecast', label: 'Revenue & Pipeline Forecast', icon: DollarSign },
+      { path: '/churn', label: 'Churn Prediction', icon: ShieldCheck },
       { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
       { path: '/reports', label: 'Reports & Analytics', icon: FileText },
     ]
@@ -122,6 +124,7 @@ const superAdminNav: NavSection[] = [
     title: 'Operations',
     items: [
       { path: '/my-day', label: 'My Day', icon: Calendar },
+      { path: '/gst-calendar', label: 'GST Compliance Calendar', icon: Calendar },
       { path: '/service-delivery', label: 'Service Delivery', icon: Package },
       { path: '/renewals', label: 'Renewals & Recurring', icon: Clock },
       { path: '/attendance', label: 'Attendance & Leave', icon: Clock },
@@ -145,6 +148,7 @@ const superAdminNav: NavSection[] = [
     title: 'Communication',
     items: [
       { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare },
+      { path: '/team-chat', label: 'Internal Team Chat', icon: MessageSquare },
       { path: '/automation', label: 'Workflow Automations', icon: Layers }
     ]
   },
