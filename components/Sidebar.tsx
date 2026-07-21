@@ -113,6 +113,8 @@ const superAdminNav: NavSection[] = [
     title: 'Management',
     items: [
       { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
+      { path: '/expenses', label: 'Expense Manager', icon: DollarSign },
+      { path: '/client-portal', label: 'Client Portal Simulator', icon: Users },
     ]
   },
   {
@@ -121,6 +123,7 @@ const superAdminNav: NavSection[] = [
       { path: '/my-day', label: 'My Day', icon: Calendar },
       { path: '/service-delivery', label: 'Service Delivery', icon: Package },
       { path: '/renewals', label: 'Renewals & Recurring', icon: Clock },
+      { path: '/attendance', label: 'Attendance & Leave', icon: Clock },
       { path: '/reminders', label: 'Reminders', icon: Calendar },
       { path: '/work-status', label: 'Work Status', icon: Briefcase },
       { path: '/announcements', label: 'Announcements', icon: Megaphone },
@@ -140,7 +143,8 @@ const superAdminNav: NavSection[] = [
   {
     title: 'Communication',
     items: [
-      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
+      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare },
+      { path: '/automation', label: 'Workflow Automations', icon: Layers }
     ]
   },
   {

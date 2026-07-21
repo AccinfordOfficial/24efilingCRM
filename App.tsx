@@ -62,6 +62,10 @@ import { TargetsDashboard } from './pages/TargetsDashboard';
 import { ServiceDelivery } from './pages/ServiceDelivery';
 import { RenewalsPipeline } from './pages/RenewalsPipeline';
 import { MyDay } from './pages/MyDay';
+import { ClientPortalView } from './pages/ClientPortalView';
+import { Attendance } from './pages/Attendance';
+import { ExpenseManager } from './pages/ExpenseManager';
+import { AutomationRules } from './pages/AutomationRules';
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -1436,7 +1440,10 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/targets" element={<TargetsDashboard />} />
         <Route path="/service-delivery" element={<ServiceDelivery />} />
         <Route path="/renewals" element={<RenewalsPipeline />} />
-        <Route path="/my-day" element={<MyDay />} />
+        <Route path="/client-portal" element={<ClientPortalView />} />
+        <Route path="/attendance" element={<Attendance />} />
+        <Route path="/expenses" element={<ExpenseManager />} />
+        <Route path="/automation" element={<AutomationRules />} />
       </Route>
         </Routes>
         <UserForm
