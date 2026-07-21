@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Lead, User, Customer, Branch, City, UserActivity, Service, Testimonial, Announcement, Reminder } from '../types';
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics';
+import AICopilot from '../components/AICopilot';
+import WidgetGrid, { WidgetLayout } from '../components/dashboards/WidgetGrid';
+import { Sparkles } from 'lucide-react';
 import { DashboardGreeting } from '../components/dashboard/DashboardGreeting';
 import { KpiStrip } from '../components/dashboard/KpiStrip';
 import { BusinessAnalyticsChart } from '../components/dashboard/BusinessAnalyticsChart';
@@ -48,6 +51,17 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
         userActivities,
         currentUser,
         services
+    });
+
+    const [isCopilotOpen, setIsCopilotOpen] = useState(false);
+    const [widgetLayout, setWidgetLayout] = useState<WidgetLayout>({
+        kpiStrip: true,
+        analyticsChart: true,
+        todayAgenda: true,
+        branchPerformance: true,
+        activityFeed: true,
+        reminders: true,
+        aiInsights: true
     });
 
     // Handle birthday wish call
@@ -142,101 +156,149 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Local Dashboard Filters */}
             <DashboardFilterBar currentUserRole={currentUser.role} />
 
+            {/* Custom Control Bar (AI Copilot & Customize Layout) */}
+            <div className="flex justify-between items-center gap-4 bg-slate-900/10 border border-white/5 p-3 rounded-xl backdrop-blur-md relative z-20">
+                <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-400" />
+                    <span className="text-xs text-slate-300">Need AI-powered predictions or layouts?</span>
+                </div>
+                <div className="flex gap-2">
+                    <WidgetGrid
+                        userId={currentUser.id}
+                        onLayoutChange={setWidgetLayout}
+                        isSuperAdmin={metrics.isSuperAdmin}
+                    />
+                    <button
+                        onClick={() => setIsCopilotOpen(true)}
+                        className="flex items-center gap-1.5 text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg border-none shadow-md shadow-blue-500/10 transition-all cursor-pointer"
+                    >
+                        <Sparkles className="h-4 w-4" /> Ask Gemini Copilot
+                    </button>
+                </div>
+            </div>
+
             {/* KPI Cards Row */}
-            <KpiStrip
-                role={kpiRole}
-                metrics={kpiMetrics}
-                trends={metrics.parsedTrends || undefined}
-                onNavigate={onNavigate}
-            />
+            {widgetLayout.kpiStrip && (
+                <KpiStrip
+                    role={kpiRole}
+                    metrics={kpiMetrics}
+                    trends={metrics.parsedTrends || undefined}
+                    onNavigate={onNavigate}
+                />
+            )}
 
             {/* Main content grid (Row 1: Business Analytics and Today's Agenda side by side) */}
-            <div className="grid gap-5 lg:grid-cols-5 relative z-10">
-                <div className="lg:col-span-3">
-                    <BusinessAnalyticsChart
-                        trendData={metrics.trendData}
-                        sourceData={metrics.sourceData}
-                        isSuperAdmin={metrics.isSuperAdmin}
-                        activeTab={metrics.activeChartTab}
-                        onTabChange={metrics.setActiveChartTab}
-                    />
+            {(widgetLayout.analyticsChart || widgetLayout.todayAgenda) && (
+                <div className="grid gap-5 lg:grid-cols-5 relative z-10">
+                    {widgetLayout.analyticsChart && (
+                        <div className={widgetLayout.todayAgenda ? 'lg:col-span-3' : 'lg:col-span-5'}>
+                            <BusinessAnalyticsChart
+                                trendData={metrics.trendData}
+                                sourceData={metrics.sourceData}
+                                isSuperAdmin={metrics.isSuperAdmin}
+                                activeTab={metrics.activeChartTab}
+                                onTabChange={metrics.setActiveChartTab}
+                            />
+                        </div>
+                    )}
+                    {widgetLayout.todayAgenda && (
+                        <div className={widgetLayout.analyticsChart ? 'lg:col-span-2' : 'lg:col-span-5'}>
+                            <TodayAgendaCard
+                                agendaData={metrics.agendaData}
+                                birthdayCustomers={metrics.birthdayCustomers}
+                                isWishSent={metrics.isWishSent}
+                                onSendWish={handleSendWish}
+                                onViewLead={onViewLead}
+                                onViewCustomer={onViewCustomer}
+                                onNavigate={onNavigate}
+                            />
+                        </div>
+                    )}
                 </div>
-                <div className="lg:col-span-2">
-                    <TodayAgendaCard
-                        agendaData={metrics.agendaData}
-                        birthdayCustomers={metrics.birthdayCustomers}
-                        isWishSent={metrics.isWishSent}
-                        onSendWish={handleSendWish}
-                        onViewLead={onViewLead}
-                        onViewCustomer={onViewCustomer}
-                        onNavigate={onNavigate}
-                    />
-                </div>
-            </div>
+            )}
 
             {/* Main content grid (Row 2: Branch Performance, Recent Activity, and AI Insights) */}
-            <div className="grid gap-5 lg:grid-cols-5 relative z-0">
-                <div className="lg:col-span-3 space-y-5">
-                    {metrics.isSuperAdmin && (
-                        <BranchPerformanceTable data={metrics.branchPerformanceData} />
-                    )}
-                    <RecentActivityFeed
-                        activities={metrics.recentActivities}
-                        users={users}
-                        onNavigate={onNavigate}
-                    />
-                </div>
-                <div className="lg:col-span-2 space-y-5">
-                    {/* Active Schedule Reminders Widget */}
-                    <div className="rounded-xl border border-white/5 bg-slate-900/30 backdrop-blur-md p-6">
-                        <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
-                            <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                                Active Schedule Reminders
-                            </h3>
-                            <button
-                                onClick={() => onNavigate('Reminders')}
-                                className="text-xs text-blue-400 font-semibold hover:underline bg-transparent border-none cursor-pointer"
-                            >
-                                View All
-                            </button>
-                        </div>
-                        
-                        {reminders.filter(r => r.status !== 'completed' && (r.user_id === currentUser.id || r.assigned_to === currentUser.id)).length === 0 ? (
-                            <p className="text-xs text-slate-500 text-center py-4">No active reminders.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {reminders
-                                    .filter(r => r.status !== 'completed' && (r.user_id === currentUser.id || r.assigned_to === currentUser.id))
-                                    .slice(0, 3)
-                                    .map(rem => (
-                                        <div
-                                            key={rem.id}
-                                            onClick={() => onNavigate('Reminders')}
-                                            className="p-3 bg-slate-950/20 hover:bg-slate-950/40 border border-white/5 rounded-lg transition-colors cursor-pointer flex justify-between items-center"
-                                        >
-                                            <div>
-                                                <p className="font-bold text-xs text-slate-200">{rem.title}</p>
-                                                <p className="text-[10px] text-slate-500 mt-0.5">Due: {rem.due_date} {rem.due_time || ''}</p>
-                                            </div>
-                                            <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase border ${
-                                                rem.priority === 'high'
-                                                    ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                                                    : rem.priority === 'medium'
-                                                    ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                                                    : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
-                                            }`}>
-                                                {rem.priority}
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
+            {(widgetLayout.branchPerformance || widgetLayout.activityFeed || widgetLayout.reminders || widgetLayout.aiInsights) && (
+                <div className="grid gap-5 lg:grid-cols-5 relative z-0">
+                    <div className="lg:col-span-3 space-y-5">
+                        {widgetLayout.branchPerformance && metrics.isSuperAdmin && (
+                            <BranchPerformanceTable data={metrics.branchPerformanceData} />
+                        )}
+                        {widgetLayout.activityFeed && (
+                            <RecentActivityFeed
+                                activities={metrics.recentActivities}
+                                users={users}
+                                onNavigate={onNavigate}
+                            />
                         )}
                     </div>
+                    <div className="lg:col-span-2 space-y-5">
+                        {/* Active Schedule Reminders Widget */}
+                        {widgetLayout.reminders && (
+                            <div className="rounded-xl border border-white/5 bg-slate-900/30 backdrop-blur-md p-6">
+                                <div className="flex justify-between items-center border-b border-white/5 pb-4 mb-4">
+                                    <h3 className="text-sm font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
+                                        <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                                        Active Schedule Reminders
+                                    </h3>
+                                    <button
+                                        onClick={() => onNavigate('Reminders')}
+                                        className="text-xs text-blue-400 font-semibold hover:underline bg-transparent border-none cursor-pointer"
+                                    >
+                                        View All
+                                    </button>
+                                </div>
+                                
+                                {reminders.filter(r => r.status !== 'completed' && (r.user_id === currentUser.id || r.assigned_to === currentUser.id)).length === 0 ? (
+                                    <p className="text-xs text-slate-500 text-center py-4">No active reminders.</p>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {reminders
+                                            .filter(r => r.status !== 'completed' && (r.user_id === currentUser.id || r.assigned_to === currentUser.id))
+                                            .slice(0, 3)
+                                            .map(rem => (
+                                                <div
+                                                    key={rem.id}
+                                                    onClick={() => onNavigate('Reminders')}
+                                                    className="p-3 bg-slate-950/20 hover:bg-slate-950/40 border border-white/5 rounded-lg transition-colors cursor-pointer flex justify-between items-center"
+                                                >
+                                                    <div>
+                                                        <p className="font-bold text-xs text-slate-200">{rem.title}</p>
+                                                        <p className="text-[10px] text-slate-500 mt-0.5">Due: {rem.due_date} {rem.due_time || ''}</p>
+                                                    </div>
+                                                    <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase border ${
+                                                        rem.priority === 'high'
+                                                            ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                                                            : rem.priority === 'medium'
+                                                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                                            : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                                                    }`}>
+                                                        {rem.priority}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                    <AiInsightsPanel insights={metrics.aiInsights} />
+                        {widgetLayout.aiInsights && (
+                            <AiInsightsPanel insights={metrics.aiInsights} />
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* AI Copilot slide drawer */}
+            <AICopilot
+                isOpen={isCopilotOpen}
+                onClose={() => setIsCopilotOpen(false)}
+                leads={leads}
+                customers={customers}
+                tasks={userActivities}
+                reminders={reminders}
+                currentUser={currentUser}
+            />
         </div>
     );
 };
