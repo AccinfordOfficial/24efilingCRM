@@ -51,6 +51,9 @@ const PoliciesManagement = lazy(() => import('./pages/PoliciesManagement'));
 const Reminders = lazy(() => import('./pages/Reminders'));
 const WorkStatus = lazy(() => import('./pages/WorkStatus'));
 const Announcements = lazy(() => import('./pages/Announcements'));
+const Support = lazy(() => import('./pages/Support'));
+const EmployeeFeedback = lazy(() => import('./pages/EmployeeFeedback'));
+const WorkOrders = lazy(() => import('./pages/WorkOrders'));
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -75,7 +78,6 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Follow-ups': { title: 'Follow-ups', subtitle: 'Track and manage your upcoming follow-ups.' },
   'Client Documents': { title: 'Client Documents', subtitle: 'Manage all documents related to your clients.' },
   'Performance Report': { title: 'Performance Report', subtitle: 'Review your personal sales performance.' },
-  'Support': { title: 'Support', subtitle: 'Get help and find answers to your questions.' },
   'Notifications': { title: 'Notifications', subtitle: 'View all your recent notifications.' },
   'Lead Detail': { title: 'Lead Detail', subtitle: 'Viewing lead information and activity.' },
   'Customer Detail': { title: 'Customer Detail', subtitle: 'Viewing customer information and history.' },
@@ -90,6 +92,9 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Web Leads': { title: 'Organic Website Leads', subtitle: 'Review organic contact form queries from the main website.' },
   'Blogs': { title: 'Blogs Content Manager', subtitle: 'Compose educational resources and company updates.' },
   'Testimonials': { title: 'Client Testimonials Board', subtitle: 'Moderate client reviews, star ratings, and success quotes.' },
+  'Support': { title: 'Support Center', subtitle: 'Ticket tracking, conversation threads, and FAQ knowledge base.' },
+  'Employee Feedback': { title: 'Employee Performance Feedback', subtitle: 'Manager scorecards, self-assessments, and quarterly performance reviews.' },
+  'Work Orders': { title: 'Work Orders Dispatch', subtitle: 'Manage client service orders, dispatch assignments, and invoice conversions.' },
   'Reminders': { title: 'Reminders', subtitle: 'Manage personal schedule tasks and assigned team events.' },
   'Work Status': { title: 'Work Status Tracker', subtitle: 'Monitor task completion stages, workload distribution, and Kanban updates.' },
   'Announcements': { title: 'Company Announcements', subtitle: 'Corporate announcements feed, target distribution, and read receipts.' },
@@ -261,6 +266,18 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     addAnnouncement,
     deleteAnnouncement,
     markAnnouncementAsRead,
+    tickets,
+    addSupportTicket,
+    updateSupportTicket,
+    addTicketComment,
+    addKbArticle,
+    feedback,
+    addEmployeeFeedback,
+    updateFeedbackStatus,
+    workOrders,
+    addWorkOrder,
+    updateWorkOrder,
+    addWorkOrderNote,
     transferUser,
     transferLogs,
     auditLogs
@@ -590,7 +607,10 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       'Policies Management': '/policies',
       'Reminders': '/reminders',
       'Work Status': '/work-status',
-      'Announcements': '/announcements'
+      'Announcements': '/announcements',
+      'Support': '/support',
+      'Employee Feedback': '/feedback',
+      'Work Orders': '/work-orders'
     };
     if (pageToPath[page]) {
       navigate(pageToPath[page]);
@@ -1208,6 +1228,41 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onAddAnnouncement={addAnnouncement}
             onDeleteAnnouncement={deleteAnnouncement}
             onMarkAsRead={markAnnouncementAsRead}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/support" element={
+          <Support
+            tickets={tickets}
+            onAddTicket={addSupportTicket}
+            onUpdateTicket={updateSupportTicket}
+            onAddComment={addTicketComment}
+            onAddKbArticle={addKbArticle}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/feedback" element={
+          <EmployeeFeedback
+            feedback={feedback}
+            onAddFeedback={addEmployeeFeedback}
+            onUpdateStatus={updateFeedbackStatus}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/work-orders" element={
+          <WorkOrders
+            workOrders={workOrders}
+            onAddWorkOrder={addWorkOrder}
+            onUpdateWorkOrder={updateWorkOrder}
+            onAddNote={addWorkOrderNote}
+            customers={customers}
+            services={services}
             users={users}
             branches={branches}
             currentUser={viewProfile!}

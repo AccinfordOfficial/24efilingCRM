@@ -118,6 +118,9 @@ const superAdminNav: NavSection[] = [
       { path: '/reminders', label: 'Reminders', icon: Calendar },
       { path: '/work-status', label: 'Work Status', icon: Briefcase },
       { path: '/announcements', label: 'Announcements', icon: Megaphone },
+      { path: '/support', label: 'Support Center', icon: MessageSquare },
+      { path: '/feedback', label: 'Employee Feedback', icon: ShieldCheck },
+      { path: '/work-orders', label: 'Work Orders', icon: Package }
     ]
   },
   {
@@ -183,6 +186,9 @@ const adminNav: NavSection[] = [
       { path: '/reminders', label: 'Reminders', icon: Calendar },
       { path: '/work-status', label: 'Work Status', icon: Briefcase },
       { path: '/announcements', label: 'Announcements', icon: Megaphone },
+      { path: '/support', label: 'Support Center', icon: MessageSquare },
+      { path: '/feedback', label: 'Employee Feedback', icon: ShieldCheck },
+      { path: '/work-orders', label: 'Work Orders', icon: Package }
     ]
   },
   {
@@ -238,6 +244,9 @@ const salesExecNav: NavSection[] = [
       { path: '/reminders', label: 'Reminders', icon: Calendar },
       { path: '/work-status', label: 'Work Status', icon: Briefcase },
       { path: '/announcements', label: 'Announcements', icon: Megaphone },
+      { path: '/support', label: 'Support Center', icon: MessageSquare },
+      { path: '/feedback', label: 'Employee Feedback', icon: ShieldCheck },
+      { path: '/work-orders', label: 'Work Orders', icon: Package }
     ]
   },
   {

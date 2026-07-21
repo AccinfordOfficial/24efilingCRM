@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement } from '../types';
+import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement, SupportTicket, TicketComment, KnowledgeBaseArticle, EmployeeFeedback, FeedbackTemplate, WorkOrder, WorkOrderNote } from '../types';
 import { Database, Json } from '../lib/supabaseClient';
 import { calculateLeadScore } from '../lib/scoring';
 
@@ -232,6 +232,10 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const [companyPolicies, setCompanyPolicies] = useState<CompanyPolicy[]>([]);
     const [reminders, setReminders] = useState<Reminder[]>([]);
     const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+    const [tickets, setTickets] = useState<SupportTicket[]>([]);
+    const [kbArticles, setKbArticles] = useState<KnowledgeBaseArticle[]>([]);
+    const [feedback, setFeedback] = useState<EmployeeFeedback[]>([]);
+    const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
 
 
     const hasLoaded = useRef(false);
@@ -260,6 +264,10 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     setCompanyPolicies(d.companyPolicies || []);
                     setReminders(d.reminders || []);
                     setAnnouncements(d.announcements || []);
+                    setTickets(d.tickets || []);
+                    setKbArticles(d.kbArticles || []);
+                    setFeedback(d.feedback || []);
+                    setWorkOrders(d.workOrders || []);
                     // If we have cache, show it immediately!
                     setLoading(false);
                 } catch (e) {
@@ -354,6 +362,43 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 console.warn("Announcements fetch failed (run SETUP_ANNOUNCEMENTS_TABLE.sql if missing):", e);
             }
 
+            let ticketsData: any[] | null = null;
+            let kbArticlesData: any[] | null = null;
+            let feedbackData: any[] | null = null;
+            let workOrdersData: any[] | null = null;
+
+            try {
+                const res = await (supabase.from('support_tickets' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                ticketsData = res.data;
+            } catch (e) {
+                console.warn("Support tickets fetch failed (run SETUP_SUPPORT_TICKETS_TABLE.sql if missing):", e);
+            }
+
+            try {
+                const res = await (supabase.from('knowledge_base' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                kbArticlesData = res.data;
+            } catch (e) {
+                console.warn("KB articles fetch failed:", e);
+            }
+
+            try {
+                const res = await (supabase.from('employee_feedback' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                feedbackData = res.data;
+            } catch (e) {
+                console.warn("Employee feedback fetch failed (run SETUP_FEEDBACK_TABLE.sql if missing):", e);
+            }
+
+            try {
+                const res = await (supabase.from('work_orders' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                workOrdersData = res.data;
+            } catch (e) {
+                console.warn("Work orders fetch failed (run SETUP_WORK_ORDERS_TABLE.sql if missing):", e);
+            }
+
             // PHASE 2: Fetch leads with FK joins — use explicit constraint names for reliability.
             // Falls back to a plain select if schema cache doesn't know the FK yet.
             // FIX: Run FIX_SCHEMA_CACHE_RELOAD.sql in Supabase to permanently resolve this.
@@ -406,6 +451,10 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (policiesData) setCompanyPolicies(policiesData as any[]);
             if (remindersData) setReminders(remindersData as any[]);
             if (announcementsData) setAnnouncements(announcementsData as any[]);
+            if (ticketsData) setTickets(ticketsData as any[]);
+            if (kbArticlesData) setKbArticles(kbArticlesData as any[]);
+            if (feedbackData) setFeedback(feedbackData as any[]);
+            if (workOrdersData) setWorkOrders(workOrdersData as any[]);
 
             // Fetch Web Leads with LocalStorage fallback and seeds
             let webLeadsList: WebLead[] = [];
@@ -629,7 +678,11 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     invoices: invoices || [],
                     companyPolicies: companyPolicies || [],
                     reminders: reminders || [],
-                    announcements: announcements || []
+                    announcements: announcements || [],
+                    tickets: tickets || [],
+                    kbArticles: kbArticles || [],
+                    feedback: feedback || [],
+                    workOrders: workOrders || []
                 });
 
                 if (cacheData.length < 4500000) {
@@ -2448,6 +2501,118 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             } catch (e) {
                 console.warn("DB insert failed for announcement read", e);
             }
-        }, [profile, fetchData])
+        }, [profile, fetchData]),
+
+        // Support Tickets CRUD
+        tickets,
+        addSupportTicket: useCallback(async (ticketData: Omit<SupportTicket, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('support_tickets' as any) as any).insert([ticketData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Support Ticket Created', `Created support ticket: ${data.title}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for support ticket", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updateSupportTicket: useCallback(async (id: string, ticketData: Partial<SupportTicket>) => {
+            try {
+                const { error } = await (supabase.from('support_tickets' as any) as any).update(ticketData).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Support Ticket Updated', `Updated ticket ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for support ticket", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        addTicketComment: useCallback(async (commentData: Omit<TicketComment, 'id' | 'created_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('ticket_comments' as any) as any).insert([commentData]).select().single();
+                if (error) throw error;
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for ticket comment", e);
+                throw e;
+            }
+        }, [fetchData]),
+        addKbArticle: useCallback(async (articleData: Omit<KnowledgeBaseArticle, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('knowledge_base' as any) as any).insert([articleData]).select().single();
+                if (error) throw error;
+                await logUserActivity('KB Article Created', `Created FAQ article: ${data.title}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for KB article", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+
+        // Employee Feedback CRUD
+        feedback,
+        addEmployeeFeedback: useCallback(async (feedbackData: Omit<EmployeeFeedback, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('employee_feedback' as any) as any).insert([feedbackData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Feedback Submitted', `Submitted feedback for employee ID: ${data.employee_id}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for feedback", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updateFeedbackStatus: useCallback(async (id: string, status: 'draft' | 'submitted' | 'acknowledged') => {
+            try {
+                const { error } = await (supabase.from('employee_feedback' as any) as any).update({ status }).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Feedback Status Updated', `Updated feedback ID: ${id} status to ${status}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for feedback status", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+
+        // Work Orders CRUD
+        workOrders,
+        addWorkOrder: useCallback(async (workOrderData: Omit<WorkOrder, 'id' | 'created_at' | 'updated_at' | 'reference_number'>) => {
+            try {
+                const { data, error } = await (supabase.from('work_orders' as any) as any).insert([workOrderData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Work Order Created', `Created work order: ${data.reference_number || data.id}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for work order", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updateWorkOrder: useCallback(async (id: string, workOrderData: Partial<WorkOrder>) => {
+            try {
+                const { error } = await (supabase.from('work_orders' as any) as any).update(workOrderData).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Work Order Updated', `Updated work order ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for work order", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        addWorkOrderNote: useCallback(async (noteData: Omit<WorkOrderNote, 'id' | 'created_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('work_order_notes' as any) as any).insert([noteData]).select().single();
+                if (error) throw error;
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for work order note", e);
+                throw e;
+            }
+        }, [fetchData])
     };
 };

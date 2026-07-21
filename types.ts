@@ -638,3 +638,123 @@ export type AnnouncementRead = {
   user_id: string;
   read_at: string;
 };
+
+export type SupportTicket = {
+  id: string;
+  title: string;
+  description: string;
+  category: 'Technical' | 'Account' | 'Service' | 'General';
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  status: 'open' | 'assigned' | 'in_progress' | 'resolved' | 'closed';
+  created_by: string;
+  assigned_to?: string | null;
+  branch_id?: string | null;
+  attachments?: string[];
+  sla_response_deadline?: string | null;
+  sla_resolution_deadline?: string | null;
+  first_response_at?: string | null;
+  resolved_at?: string | null;
+  closed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+
+  // Joins
+  creator_name?: string;
+  assignee_name?: string;
+};
+
+export type TicketComment = {
+  id: string;
+  ticket_id: string;
+  user_id: string;
+  content: string;
+  attachments?: string[];
+  created_at: string;
+  user_name?: string;
+  user_avatar?: string;
+};
+
+export type KnowledgeBaseArticle = {
+  id: string;
+  title: string;
+  content: string;
+  category: string;
+  created_by?: string | null;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type FeedbackRating = {
+  teamwork: number;
+  communication: number;
+  customer_handling: number;
+  punctuality: number;
+  initiative: number;
+  technical: number;
+};
+
+export type EmployeeFeedback = {
+  id: string;
+  employee_id: string;
+  reviewer_id: string;
+  feedback_type: 'self' | 'manager' | 'peer';
+  period: string;
+  ratings: FeedbackRating;
+  overall_score: number;
+  comments?: string;
+  is_anonymous: boolean;
+  status: 'draft' | 'submitted' | 'acknowledged';
+  created_at: string;
+  updated_at: string;
+
+  // Joins
+  employee_name?: string;
+  reviewer_name?: string;
+};
+
+export type FeedbackTemplate = {
+  id: string;
+  name: string;
+  categories: string[];
+  created_by?: string;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type WorkOrder = {
+  id: string;
+  reference_number?: string;
+  customer_id: string;
+  customer_name?: string;
+  customer_phone?: string;
+  service_id: string | null;
+  sub_service_id: string | null;
+  description?: string;
+  priority: 'urgent' | 'normal' | 'low';
+  status: 'submitted' | 'accepted' | 'assigned' | 'in_progress' | 'completed' | 'invoiced';
+  assigned_to?: string | null;
+  branch_id?: string | null;
+  estimated_completion?: string | null;
+  actual_completion?: string | null;
+  total_amount: number;
+  invoice_id?: string | null;
+  source: 'crm' | 'whatsapp' | 'web';
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+
+  // Joins
+  service_name?: string;
+  sub_service_name?: string;
+  assignee_name?: string;
+};
+
+export type WorkOrderNote = {
+  id: string;
+  work_order_id: string;
+  user_id: string;
+  content: string;
+  created_at: string;
+  user_name?: string;
+};
