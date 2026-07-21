@@ -8,6 +8,7 @@ import { LogOut } from 'lucide-react';
 
 interface HeaderProps {
   onMenuClick: () => void;
+  onSearchClick: () => void;
 }
 
 const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
@@ -37,7 +38,7 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   '/offers': { title: 'Offers & Coupons', subtitle: 'Manage discount campaigns, coupons, and referral offers.' },
 };
 
-export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
+export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick }) => {
   const { profile: currentUser, logout } = useAuth();
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -93,6 +94,17 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
+        <button 
+          onClick={onSearchClick}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900/60 hover:bg-slate-800 border border-white/5 text-slate-400 hover:text-slate-200 transition-colors text-xs font-medium cursor-pointer"
+        >
+          <SearchIcon className="h-4 w-4" />
+          <span className="hidden sm:inline">Search...</span>
+          <kbd className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-800 text-[10px] font-mono border border-white/10 text-slate-500">
+            <span>⌘</span><span>K</span>
+          </kbd>
+        </button>
+
         <Link to="/notifications">
           <Button variant="ghost" size="icon" className="rounded-full relative text-slate-400 hover:text-white hover:bg-white/5">
             <BellIcon className="h-5 w-5" />
