@@ -48,6 +48,9 @@ const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
 const EmployeePerformance = lazy(() => import('./pages/EmployeePerformance'));
 const InvoiceManagement = lazy(() => import('./pages/InvoiceManagement'));
 const PoliciesManagement = lazy(() => import('./pages/PoliciesManagement'));
+const Reminders = lazy(() => import('./pages/Reminders'));
+const WorkStatus = lazy(() => import('./pages/WorkStatus'));
+const Announcements = lazy(() => import('./pages/Announcements'));
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -87,6 +90,9 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Web Leads': { title: 'Organic Website Leads', subtitle: 'Review organic contact form queries from the main website.' },
   'Blogs': { title: 'Blogs Content Manager', subtitle: 'Compose educational resources and company updates.' },
   'Testimonials': { title: 'Client Testimonials Board', subtitle: 'Moderate client reviews, star ratings, and success quotes.' },
+  'Reminders': { title: 'Reminders', subtitle: 'Manage personal schedule tasks and assigned team events.' },
+  'Work Status': { title: 'Work Status Tracker', subtitle: 'Monitor task completion stages, workload distribution, and Kanban updates.' },
+  'Announcements': { title: 'Company Announcements', subtitle: 'Corporate announcements feed, target distribution, and read receipts.' },
 };
 
 
@@ -247,6 +253,14 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     addPolicy,
     updatePolicy,
     deletePolicy,
+    reminders,
+    addReminder,
+    updateReminder,
+    deleteReminder,
+    announcements,
+    addAnnouncement,
+    deleteAnnouncement,
+    markAnnouncementAsRead,
     transferUser,
     transferLogs,
     auditLogs
@@ -573,7 +587,10 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       'Revenue Dashboard': '/revenue',
       'Employee Performance': '/performance',
       'Invoices & Policies': '/invoices',
-      'Policies Management': '/policies'
+      'Policies Management': '/policies',
+      'Reminders': '/reminders',
+      'Work Status': '/work-status',
+      'Announcements': '/announcements'
     };
     if (pageToPath[page]) {
       navigate(pageToPath[page]);
@@ -1010,6 +1027,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             refreshData={refreshData}
             onUpdateLead={handleUpdateLead}
             onUpdateCustomer={updateCustomer}
+            announcements={announcements}
+            reminders={reminders}
           />
         } />
         <Route path="/leads" element={
@@ -1156,6 +1175,41 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onAddPolicy={addPolicy}
             onUpdatePolicy={updatePolicy}
             onDeletePolicy={deletePolicy}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/reminders" element={
+          <Reminders
+            reminders={reminders}
+            onAddReminder={addReminder}
+            onUpdateReminder={updateReminder}
+            onDeleteReminder={deleteReminder}
+            leads={roleScopedLeads}
+            customers={roleScopedCustomers}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/work-status" element={
+          <WorkStatus
+            leads={roleScopedLeads}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+            onAddTask={addTaskToLead}
+            onUpdateTask={updateTaskOnLead}
+            onDeleteTask={deleteTaskFromLead}
+          />
+        } />
+        <Route path="/announcements" element={
+          <Announcements
+            announcements={announcements}
+            onAddAnnouncement={addAnnouncement}
+            onDeleteAnnouncement={deleteAnnouncement}
+            onMarkAsRead={markAnnouncementAsRead}
+            users={users}
+            branches={branches}
             currentUser={viewProfile!}
           />
         } />

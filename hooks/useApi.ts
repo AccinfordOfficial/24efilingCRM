@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy } from '../types';
+import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement } from '../types';
 import { Database, Json } from '../lib/supabaseClient';
 import { calculateLeadScore } from '../lib/scoring';
 
@@ -230,6 +230,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const [leadSources, setLeadSources] = useState<any[]>([]);
     const [invoices, setInvoices] = useState<Invoice[]>([]);
     const [companyPolicies, setCompanyPolicies] = useState<CompanyPolicy[]>([]);
+    const [reminders, setReminders] = useState<Reminder[]>([]);
+    const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
 
     const hasLoaded = useRef(false);
@@ -256,6 +258,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     setTestimonials(d.testimonials || []);
                     setInvoices(d.invoices || []);
                     setCompanyPolicies(d.companyPolicies || []);
+                    setReminders(d.reminders || []);
+                    setAnnouncements(d.announcements || []);
                     // If we have cache, show it immediately!
                     setLoading(false);
                 } catch (e) {
@@ -320,6 +324,36 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 console.warn("Policies fetch failed (run SETUP_INVOICES_TABLE.sql if missing):", e);
             }
 
+            let remindersData: any[] | null = null;
+            let announcementsData: any[] | null = null;
+            try {
+                const res = await (supabase.from('reminders' as any) as any).select('*').order('due_date', { ascending: true });
+                if (res.error) throw res.error;
+                remindersData = res.data;
+            } catch (e) {
+                console.warn("Reminders fetch failed (run SETUP_REMINDERS_TABLE.sql if missing):", e);
+            }
+
+            try {
+                const res = await (supabase.from('announcements' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                
+                let announcementsList = res.data || [];
+                if (announcementsList.length > 0 && profile?.id) {
+                    const readsRes = await (supabase.from('announcement_reads' as any) as any).select('announcement_id').eq('user_id', profile.id);
+                    if (!readsRes.error && readsRes.data) {
+                        const readIds = new Set(readsRes.data.map((r: any) => r.announcement_id));
+                        announcementsList = announcementsList.map((ann: any) => ({
+                            ...ann,
+                            is_read: readIds.has(ann.id)
+                        }));
+                    }
+                }
+                announcementsData = announcementsList;
+            } catch (e) {
+                console.warn("Announcements fetch failed (run SETUP_ANNOUNCEMENTS_TABLE.sql if missing):", e);
+            }
+
             // PHASE 2: Fetch leads with FK joins — use explicit constraint names for reliability.
             // Falls back to a plain select if schema cache doesn't know the FK yet.
             // FIX: Run FIX_SCHEMA_CACHE_RELOAD.sql in Supabase to permanently resolve this.
@@ -370,6 +404,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (leadSourcesData) setLeadSources(leadSourcesData);
             if (invoicesData) setInvoices(invoicesData as any[]);
             if (policiesData) setCompanyPolicies(policiesData as any[]);
+            if (remindersData) setReminders(remindersData as any[]);
+            if (announcementsData) setAnnouncements(announcementsData as any[]);
 
             // Fetch Web Leads with LocalStorage fallback and seeds
             let webLeadsList: WebLead[] = [];
@@ -591,7 +627,9 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     blogs: blogsList,
                     testimonials: testimonialsList,
                     invoices: invoices || [],
-                    companyPolicies: companyPolicies || []
+                    companyPolicies: companyPolicies || [],
+                    reminders: reminders || [],
+                    announcements: announcements || []
                 });
 
                 if (cacheData.length < 4500000) {
@@ -1572,43 +1610,62 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         await fetchData();
     }, [fetchData]);
 
-    const addTaskToLead = useCallback(async (leadId: string, taskData: Omit<Task, 'id' | 'created_at' | 'is_completed' | 'completed_at'>) => {
+    const addTaskToLead = useCallback(async (leadId: string | null, taskData: Omit<Task, 'id' | 'created_at' | 'is_completed' | 'completed_at'>) => {
         if (!profile) throw new Error("User not authenticated");
-        const { error } = await (supabase.from('tasks') as any).insert([{
-            lead_id: leadId,
+        const { error } = await (supabase.from('tasks' as any) as any).insert([{
+            lead_id: leadId || null,
             content: taskData.content,
             due_date: taskData.due_date,
             created_by: profile.id,
-            branch_id: profile.branch_id || null,
+            branch_id: taskData.branch_id || profile.branch_id || null,
             is_completed: false,
             priority: taskData.priority,
-            depends_on_task_id: (taskData as any).depends_on_task_id
+            depends_on_task_id: (taskData as any).depends_on_task_id,
+            assigned_to: taskData.assigned_to?.id || (taskData.assigned_to as any) || null,
+            status: taskData.status || 'todo',
+            category: taskData.category || 'client_task',
+            estimated_hours: taskData.estimated_hours || null,
+            actual_hours: taskData.actual_hours || null
         }]);
         if (error) throw error;
 
-        try {
-            const formattedDate = taskData.due_date 
-                ? new Date(taskData.due_date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-                : 'No date specified';
-            await addActivityToLead(leadId, {
-                type: 'Note',
-                content: `Scheduled a task: "${taskData.content}" due on ${formattedDate}.`
-            }, profile);
-        } catch (e) {
-            console.error("Failed to log task activity", e);
+        if (leadId) {
+            try {
+                const formattedDate = taskData.due_date 
+                    ? new Date(taskData.due_date).toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : 'No date specified';
+                await addActivityToLead(leadId, {
+                    type: 'Note',
+                    content: `Scheduled a task: "${taskData.content}" due on ${formattedDate}.`
+                }, profile);
+            } catch (e) {
+                console.error("Failed to log task activity", e);
+            }
         }
 
         await fetchData();
     }, [profile, addActivityToLead, fetchData]);
 
-    const updateTaskOnLead = useCallback(async (leadId: string, updatedTask: Task) => {
+    const updateTaskOnLead = useCallback(async (leadId: string | null, updatedTask: Task) => {
         if (!profile) throw new Error("User not authenticated");
         const { id, content, due_date, is_completed, completed_at, priority } = updatedTask;
-        const dbUpdates = { content, due_date, is_completed, completed_at, priority };
-        const { error } = await (supabase.from('tasks') as any).update(dbUpdates).eq('id', id);
+        const dbUpdates = { 
+            content, 
+            due_date, 
+            is_completed, 
+            completed_at, 
+            priority,
+            assigned_to: updatedTask.assigned_to?.id || (updatedTask.assigned_to as any) || null,
+            status: updatedTask.status || 'todo',
+            category: updatedTask.category || 'client_task',
+            estimated_hours: updatedTask.estimated_hours || null,
+            actual_hours: updatedTask.actual_hours || null,
+            branch_id: updatedTask.branch_id || null
+        };
+        const { error } = await (supabase.from('tasks' as any) as any).update(dbUpdates).eq('id', id);
         if (error) throw error;
 
-        if (is_completed) {
+        if (is_completed && leadId) {
             try {
                 await addActivityToLead(leadId, {
                     type: 'Note',
@@ -1622,8 +1679,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         await fetchData();
     }, [profile, addActivityToLead, fetchData]);
 
-    const deleteTaskFromLead = useCallback(async (leadId: string, taskId: string) => {
-        const { error } = await supabase.from('tasks').delete().eq('id', taskId);
+    const deleteTaskFromLead = useCallback(async (leadId: string | null, taskId: string) => {
+        const { error } = await (supabase.from('tasks' as any) as any).delete().eq('id', taskId);
         if (error) throw error;
         await fetchData();
     }, [fetchData]);
@@ -2318,6 +2375,79 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 console.warn("DB insert failed for invoice payment", e);
                 throw e;
             }
-        }, [fetchData])
+        }, [fetchData]),
+
+        // Reminders CRUD
+        reminders,
+        addReminder: useCallback(async (reminderData: Omit<Reminder, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('reminders' as any) as any).insert([reminderData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Reminder Created', `Created reminder: ${data.title}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for reminder", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updateReminder: useCallback(async (id: string, reminderData: Partial<Reminder>) => {
+            try {
+                const { error } = await (supabase.from('reminders' as any) as any).update(reminderData).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Reminder Updated', `Updated reminder ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for reminder", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        deleteReminder: useCallback(async (id: string) => {
+            try {
+                const { error } = await (supabase.from('reminders' as any) as any).delete().eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Reminder Deleted', `Deleted reminder ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB delete failed for reminder", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+
+        // Announcements CRUD
+        announcements,
+        addAnnouncement: useCallback(async (announcementData: Omit<Announcement, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('announcements' as any) as any).insert([announcementData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Announcement Created', `Created announcement: ${data.title}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for announcement", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        deleteAnnouncement: useCallback(async (id: string) => {
+            try {
+                const { error } = await (supabase.from('announcements' as any) as any).delete().eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Announcement Deleted', `Deleted announcement ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB delete failed for announcement", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        markAnnouncementAsRead: useCallback(async (id: string) => {
+            if (!profile) return;
+            try {
+                const { error } = await (supabase.from('announcement_reads' as any) as any).insert([{ announcement_id: id, user_id: profile.id }]);
+                if (error && error.code !== '23505') throw error;
+                await fetchData();
+            } catch (e) {
+                console.warn("DB insert failed for announcement read", e);
+            }
+        }, [profile, fetchData])
     };
 };

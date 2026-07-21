@@ -94,6 +94,13 @@ export type Task = {
   completed_at?: string;
   created_by: User;
   priority: TaskPriority;
+  assigned_to?: User;
+  status?: 'todo' | 'in_progress' | 'review' | 'done';
+  category?: 'work_order' | 'internal' | 'client_task';
+  estimated_hours?: number;
+  actual_hours?: number;
+  branch_id?: string;
+  depends_on_task_id?: string;
 }
 
 export type Notification = {
@@ -576,4 +583,58 @@ export type CompanyPolicy = {
   created_at: string;
   updated_at: string;
   creator_name?: string;
+};
+
+export type Reminder = {
+  id: string;
+  user_id: string;
+  title: string;
+  description?: string;
+  type: 'personal' | 'task_assigned';
+  due_date: string;
+  due_time?: string;
+  priority: 'high' | 'medium' | 'low';
+  status: 'pending' | 'snoozed' | 'completed' | 'overdue';
+  is_recurring?: boolean;
+  recurrence_pattern?: string;
+  assigned_by?: string;
+  assigned_to?: string;
+  related_lead_id?: string;
+  related_customer_id?: string;
+  branch_id?: string;
+  completed_at?: string;
+  snoozed_until?: string;
+  created_at: string;
+  updated_at: string;
+  
+  // Display helpers
+  assigned_by_name?: string;
+  assigned_to_name?: string;
+  lead_name?: string;
+  customer_name?: string;
+};
+
+export type Announcement = {
+  id: string;
+  title: string;
+  content: string;
+  type: 'general' | 'policy_update' | 'urgent';
+  target_roles: string[];
+  target_branches: string[];
+  is_pinned: boolean;
+  expires_at?: string;
+  created_by?: string;
+  created_at: string;
+  updated_at: string;
+  
+  // Display helpers
+  creator_name?: string;
+  is_read?: boolean;
+};
+
+export type AnnouncementRead = {
+  id: string;
+  announcement_id: string;
+  user_id: string;
+  read_at: string;
 };

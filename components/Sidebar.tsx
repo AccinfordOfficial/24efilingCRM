@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Users, Briefcase, LogOut, Settings, BarChart3,
   LayoutDashboard, DollarSign, Clock, FileUp, ShieldCheck, ChevronLeft, Target, Bell, FileCheck, Layers, Package, PlusCircle, Tag,
-  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building, MapPin
+  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building, MapPin, Calendar, Megaphone
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
@@ -113,6 +113,14 @@ const superAdminNav: NavSection[] = [
     ]
   },
   {
+    title: 'Operations',
+    items: [
+      { path: '/reminders', label: 'Reminders', icon: Calendar },
+      { path: '/work-status', label: 'Work Status', icon: Briefcase },
+      { path: '/announcements', label: 'Announcements', icon: Megaphone },
+    ]
+  },
+  {
     title: 'Business & Web',
     items: [
       { path: '/offers', label: 'Offers & Coupons', icon: Tag },
@@ -170,6 +178,14 @@ const adminNav: NavSection[] = [
     ]
   },
   {
+    title: 'Operations',
+    items: [
+      { path: '/reminders', label: 'Reminders', icon: Calendar },
+      { path: '/work-status', label: 'Work Status', icon: Briefcase },
+      { path: '/announcements', label: 'Announcements', icon: Megaphone },
+    ]
+  },
+  {
     title: 'Business & Web',
     items: [
       { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
@@ -214,6 +230,14 @@ const salesExecNav: NavSection[] = [
       { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
       { path: '/follow-ups', label: 'Follow-ups', icon: Clock },
       { path: '/client-documents', label: 'Client Documents', icon: FileUp },
+    ]
+  },
+  {
+    title: 'Operations',
+    items: [
+      { path: '/reminders', label: 'Reminders', icon: Calendar },
+      { path: '/work-status', label: 'Work Status', icon: Briefcase },
+      { path: '/announcements', label: 'Announcements', icon: Megaphone },
     ]
   },
   {
