@@ -60,27 +60,27 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
   };
 
   return (
-    <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6 flex flex-col gap-4">
+    <div className="glass-card p-4 rounded-xl border border-white/5 mb-6 flex flex-col gap-4">
       {/* Top Row: Search & View Toggle */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="relative flex-1 w-full max-w-2xl">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
           <input
             type="text"
-            placeholder="Search by name, email, phone, code..."
-            className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1c398e] focus:border-[#1c398e] outline-none transition-all text-sm"
+            placeholder="Search by name, email, phone..."
+            className="w-full pl-10 pr-4 py-2.5 border border-white/10 rounded-lg bg-slate-900 text-white placeholder-slate-500 focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
 
-        <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shrink-0">
+        <div className="flex bg-slate-900 p-1 rounded-lg border border-white/5 shrink-0">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 rounded-md flex items-center justify-center transition-all ${
               viewMode === 'grid' 
-                ? 'bg-white text-[#1c398e] shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-primary text-white shadow-sm' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
             title="Grid View"
           >
@@ -90,8 +90,8 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
             onClick={() => setViewMode('table')}
             className={`p-2 rounded-md flex items-center justify-center transition-all ${
               viewMode === 'table' 
-                ? 'bg-white text-[#1c398e] shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-primary text-white shadow-sm' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
             title="Table View"
           >
@@ -101,8 +101,8 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
             onClick={() => setViewMode('tree')}
             className={`p-2 rounded-md flex items-center justify-center transition-all ${
               viewMode === 'tree' 
-                ? 'bg-white text-[#1c398e] shadow-sm' 
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-primary text-white shadow-sm' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
             title="Organization Tree View"
           >
@@ -115,45 +115,45 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* City Filter */}
         <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
           <select
-            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1c398e] focus:border-[#1c398e] outline-none appearance-none text-sm text-slate-700"
+            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200"
             value={selectedCity}
             onChange={handleCityChange}
           >
             {cityOptions.map((city, idx) => (
-              <option key={idx} value={city}>{city}</option>
+              <option key={idx} value={city} className="bg-slate-950 text-white">{city}</option>
             ))}
           </select>
         </div>
 
         {/* Branch Filter */}
         <div className="relative">
-          <Building className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${selectedCity === 'All Cities' ? 'text-slate-300' : 'text-slate-400'}`} />
+          <Building className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${selectedCity === 'All Cities' ? 'text-slate-700' : 'text-slate-500'}`} />
           <select
-            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1c398e] focus:border-[#1c398e] outline-none appearance-none text-sm text-slate-700 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200 disabled:bg-slate-950/40 disabled:text-slate-500 disabled:cursor-not-allowed"
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
             disabled={selectedCity === 'All Cities'}
             title={selectedCity === 'All Cities' ? "Select a city first" : ""}
           >
             {branchOptions.map((branch, idx) => (
-              <option key={idx} value={branch}>{branch}</option>
+              <option key={idx} value={branch} className="bg-slate-950 text-white">{branch}</option>
             ))}
           </select>
         </div>
 
         {/* Role Filter */}
         <div className="relative">
-          <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
           <select
-            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1c398e] focus:border-[#1c398e] outline-none appearance-none text-sm text-slate-700"
+            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200"
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value)}
           >
-            <option value="All Roles">All Roles</option>
+            <option value="All Roles" className="bg-slate-950 text-white">All Roles</option>
             {USER_ROLES_WITH_DESCRIPTIONS.map((roleObj, idx) => (
-              <option key={idx} value={roleObj.role}>{roleObj.role}</option>
+              <option key={idx} value={roleObj.role} className="bg-slate-950 text-white">{roleObj.role}</option>
             ))}
           </select>
         </div>
@@ -162,13 +162,13 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
         <div className="relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 h-2 w-2 rounded-full bg-emerald-500 pointer-events-none" />
           <select
-            className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-[#1c398e] focus:border-[#1c398e] outline-none appearance-none text-sm text-slate-700"
+            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200"
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
           >
-            <option value="All Status">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Inactive">Inactive</option>
+            <option value="All Status" className="bg-slate-950 text-white">All Status</option>
+            <option value="Active" className="bg-slate-950 text-white">Active</option>
+            <option value="Inactive" className="bg-slate-950 text-white">Inactive</option>
           </select>
         </div>
       </div>

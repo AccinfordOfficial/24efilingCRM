@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Users, Briefcase, LogOut, Settings, BarChart3,
   LayoutDashboard, DollarSign, Clock, FileUp, ShieldCheck, ChevronLeft, Target, Bell, FileCheck, Layers, Package, PlusCircle, Tag,
-  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building
+  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building, MapPin
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
@@ -32,6 +32,11 @@ interface NavLinkItem {
   icon: React.ElementType;
 }
 
+interface NavSection {
+  title: string;
+  items: NavLinkItem[];
+}
+
 const NavLink: React.FC<{
   path: string;
   label: string;
@@ -45,18 +50,18 @@ const NavLink: React.FC<{
       to={path}
       onClick={onClick}
       className={cn(
-        "flex items-center gap-3 px-3 py-2.5 w-full text-left transition-all duration-200 rounded-md text-sm font-medium",
+        "flex items-center gap-3 px-3 py-2 w-full text-left transition-all duration-200 rounded-lg text-sm font-medium",
         active
-          ? "bg-blue-50 text-blue-700 shadow-sm"
-          : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+          ? "bg-primary text-white shadow-sm font-bold border-l-2 border-primary"
+          : "text-slate-400 hover:text-slate-100 hover:bg-white/5"
       )}
     >
-      <Icon className={cn("h-4 w-4", active ? "text-blue-700" : "text-slate-400 group-hover:text-slate-600")} />
+      <Icon className={cn("h-4 w-4", active ? "text-white" : "text-slate-400")} />
       <span className="flex-1 truncate">{label}</span>
       {count != null && (
         <span className={cn(
           "text-xs font-semibold rounded-full px-2 py-0.5",
-          active ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-500"
+          active ? "bg-primary-foreground/20 text-white" : "bg-slate-800 text-slate-400"
         )}>
           {count}
         </span>
@@ -73,49 +78,131 @@ const getInitials = (name: string) => {
   return name.substring(0, 2).toUpperCase();
 }
 
-const superAdminNav: NavLinkItem[] = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/branch-management', label: 'Branch Management', icon: Building },
-  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { path: '/users', label: 'User Management', icon: Users },
-  { path: '/leads', label: 'All Leads', icon: Briefcase },
-  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
-  { path: '/my-leads', label: 'My Leads', icon: Target },
-  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
-  { path: '/customers', label: 'Customers', icon: Users },
-  { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
-  { path: '/offers', label: 'Offers & Coupons', icon: Tag },
-  { path: '/payments', label: 'Payments', icon: DollarSign },
-  { path: '/activity', label: 'Activity Feed', icon: Clock },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
-  { path: '/settings', label: 'System Settings', icon: Settings },
+const superAdminNav: NavSection[] = [
+  {
+    title: 'Core',
+    items: [
+      { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { path: '/cities', label: 'City Management', icon: MapPin },
+      { path: '/branch-management', label: 'Branch Management', icon: Building },
+      { path: '/users', label: 'User Management', icon: Users },
+    ]
+  },
+  {
+    title: 'Sales',
+    items: [
+      { path: '/leads', label: 'All Leads', icon: Briefcase },
+      { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+      { path: '/my-leads', label: 'My Leads', icon: Target },
+      { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+      { path: '/customers', label: 'Customers', icon: Users },
+    ]
+  },
+  {
+    title: 'Analytics',
+    items: [
+      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+    ]
+  },
+  {
+    title: 'Business & Web',
+    items: [
+      { path: '/offers', label: 'Offers & Coupons', icon: Tag },
+      { path: '/payments', label: 'Payments', icon: DollarSign },
+      { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { path: '/activity', label: 'Activity Feed', icon: Clock },
+      { path: '/notifications', label: 'Notifications', icon: Bell },
+      { path: '/settings', label: 'System Settings', icon: Settings },
+    ]
+  }
 ];
 
-const adminNav: NavLinkItem[] = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/users', label: 'User Management', icon: Users },
-  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { path: '/leads', label: 'All Leads', icon: Briefcase },
-  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
-  { path: '/my-leads', label: 'My Leads', icon: Target },
-  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
-  { path: '/customers', label: 'Customers', icon: Users },
-  { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
-  { path: '/team', label: 'Team Management', icon: ShieldCheck },
-  { path: '/verify-documents', label: 'Document Verification', icon: FileCheck },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
+const adminNav: NavSection[] = [
+  {
+    title: 'Core',
+    items: [
+      { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+      { path: '/users', label: 'User Management', icon: Users },
+    ]
+  },
+  {
+    title: 'Sales',
+    items: [
+      { path: '/leads', label: 'All Leads', icon: Briefcase },
+      { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+      { path: '/my-leads', label: 'My Leads', icon: Target },
+      { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+      { path: '/customers', label: 'Customers', icon: Users },
+    ]
+  },
+  {
+    title: 'Analytics',
+    items: [
+      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+    ]
+  },
+  {
+    title: 'People',
+    items: [
+      { path: '/team', label: 'Team Management', icon: ShieldCheck },
+      { path: '/verify-documents', label: 'Document Verification', icon: FileCheck },
+    ]
+  },
+  {
+    title: 'Business & Web',
+    items: [
+      { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { path: '/notifications', label: 'Notifications', icon: Bell },
+    ]
+  }
 ];
 
-const salesExecNav: NavLinkItem[] = [
-  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { path: '/leads', label: 'All Leads', icon: Briefcase },
-  { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
-  { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
-  { path: '/my-leads', label: 'My Leads', icon: Target },
-  { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
-  { path: '/follow-ups', label: 'Follow-ups', icon: Clock },
-  { path: '/client-documents', label: 'Client Documents', icon: FileUp },
-  { path: '/notifications', label: 'Notifications', icon: Bell },
+const salesExecNav: NavSection[] = [
+  {
+    title: 'Core',
+    items: [
+      { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    ]
+  },
+  {
+    title: 'Sales',
+    items: [
+      { path: '/leads', label: 'All Leads', icon: Briefcase },
+      { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
+      { path: '/my-leads', label: 'My Leads', icon: Target },
+      { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
+      { path: '/customers', label: 'Customers', icon: Users },
+    ]
+  },
+  {
+    title: 'Analytics',
+    items: [
+      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+    ]
+  },
+  {
+    title: 'Management',
+    items: [
+      { path: '/follow-ups', label: 'Follow-ups', icon: Clock },
+      { path: '/client-documents', label: 'Client Documents', icon: FileUp },
+    ]
+  },
+  {
+    title: 'System',
+    items: [
+      { path: '/notifications', label: 'Notifications', icon: Bell },
+    ]
+  }
 ];
 
 const WebMenuDropdown: React.FC<{
@@ -189,17 +276,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   const userRole = currentUser.role;
 
-  let navLinks: NavLinkItem[] = [];
+  let navSections: NavSection[] = [];
   switch (userRole) {
     case 'Super Admin':
-      navLinks = superAdminNav;
+      navSections = superAdminNav;
       break;
     case 'Admin':
     case 'Branch Manager':
-      navLinks = adminNav;
+      navSections = adminNav;
       break;
     case 'Sales Executive':
-      navLinks = salesExecNav;
+      navSections = salesExecNav;
       break;
   }
 
@@ -242,75 +329,60 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   return (
     <>
       <aside className={cn(
-        "fixed inset-y-0 left-0 z-40 w-64 flex flex-col bg-white text-slate-900 transition-transform duration-300 ease-in-out border-r border-slate-200 shadow-sm",
+        "fixed inset-y-0 left-0 z-40 w-64 flex flex-col glass-sidebar text-slate-100 transition-transform duration-300 ease-in-out border-r border-white/5",
         "md:static md:translate-x-0 md:flex-shrink-0",
         isOpen ? 'translate-x-0' : '-translate-x-full'
       )}>
-        <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200 shrink-0">
-          <Link to="/" onClick={handleNavClick} className="flex items-center gap-2 px-2">
+        <div className="flex h-16 items-center justify-between px-6 border-b border-white/5 shrink-0">
+          <Link to="/" onClick={handleNavClick} className="flex items-center gap-2 text-white px-2">
             <EfilingLogo className="h-12 w-auto" />
           </Link>
-          <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden text-slate-500 hover:text-slate-900 hover:bg-slate-100">
+          <Button variant="ghost" size="icon" onClick={onClose} className="md:hidden text-slate-400 hover:text-white hover:bg-white/5">
             <ChevronLeft className="h-5 w-5" />
           </Button>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-4 custom-scrollbar">
-          <div className="space-y-1">
-            {navLinks.map((link) => {
-              if (link.label === '24eFiling Web Dropdown') {
-                return (
-                  <WebMenuDropdown
-                    key="web-menu-dropdown"
-                    currentPath={currentPath}
-                    onClick={handleNavClick}
-                  />
-                );
-              }
-              // Highlight exact match for root, or startsWith for subroutes
-              const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
-              return (
-                <NavLink
-                  key={link.path}
-                  path={link.path}
-                  label={link.label}
-                  icon={link.icon}
-                  active={active}
-                  onClick={handleNavClick}
-                  count={getPageCount(link.path)}
-                />
-              );
-            })}
+          <div className="space-y-6">
+            {navSections.map((section, sIdx) => (
+              <div key={sIdx} className="space-y-1.5">
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2">
+                  {section.title}
+                </h4>
+                {section.items.map((link) => {
+                  if (link.label === '24eFiling Web Dropdown') {
+                    return (
+                      <WebMenuDropdown
+                        key="web-menu-dropdown"
+                        currentPath={currentPath}
+                        onClick={handleNavClick}
+                      />
+                    );
+                  }
+                  // Highlight exact match for root, or startsWith for subroutes
+                  const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
+                  return (
+                    <NavLink
+                      key={link.path}
+                      path={link.path}
+                      label={link.label}
+                      icon={link.icon}
+                      active={active}
+                      onClick={handleNavClick}
+                      count={getPageCount(link.path)}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </nav>
 
-        <div className="p-4 border-t border-slate-200 bg-white">
-          <div className="flex items-center gap-3 mb-4">
-            <Avatar className="h-9 w-9 border border-slate-200">
-              <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} />
-              <AvatarFallback className="bg-slate-100 text-slate-600 text-xs font-bold">
-                {getInitials(currentUser?.name || 'U')}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-slate-900 font-medium text-sm truncate">{currentUser.name}</p>
-              <p className="text-xs text-slate-500 truncate">{currentUser.role}</p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={logout}
-            className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 gap-3 px-3 py-2.5"
-          >
-            <LogOut className="h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
       </aside>
       
       {isOpen && (
         <div
-          className="fixed inset-0 z-30 bg-slate-900/50 backdrop-blur-sm md:hidden transition-opacity"
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden transition-opacity"
           onClick={onClose}
         ></div>
       )}

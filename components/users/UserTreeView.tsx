@@ -314,9 +314,9 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
               return '#fff';
             }}
           />
-          <Panel position="top-left" className="bg-white/90 backdrop-blur-sm p-3 rounded-lg border border-slate-200 shadow-sm m-4">
-             <h3 className="font-bold text-slate-800 text-sm">Organization Graph</h3>
-             <p className="text-xs text-slate-500">Scroll to zoom, drag to pan</p>
+          <Panel position="top-left" className="glass-card backdrop-blur-sm p-3 rounded-lg border border-white/5 shadow-sm m-4">
+             <h3 className="font-bold text-white text-sm">Organization Graph</h3>
+             <p className="text-xs text-slate-400">Scroll to zoom, drag to pan</p>
           </Panel>
         </ReactFlow>
       </div>
@@ -324,7 +324,7 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
       {/* Drawer Overlay (optional, for mobile) */}
       {selectedNodeData && selectedNodeData.type !== 'root' && (
         <div 
-          className="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px] z-40 lg:hidden"
+          className="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] z-40 lg:hidden"
           onClick={() => setSelectedNodeData(null)}
         />
       )}
@@ -332,18 +332,18 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
       {/* Details Collapsible Drawer */}
       <div 
         className={cn(
-          "absolute top-0 right-0 bottom-0 w-[400px] max-w-[90vw] bg-white border-l border-slate-200 shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-in-out",
+          "absolute top-0 right-0 bottom-0 w-[400px] max-w-[90vw] glass-card border-l border-white/10 shadow-2xl flex flex-col z-50 transition-transform duration-300 ease-in-out text-white",
           selectedNodeData && selectedNodeData.type !== 'root' ? "translate-x-0" : "translate-x-full"
         )}
       >
         {selectedNodeData && selectedNodeData.type !== 'root' && (
           <>
-            <div className="p-5 border-b border-slate-100 flex justify-between items-start bg-slate-50/80">
+            <div className="p-5 border-b border-white/5 flex justify-between items-start bg-white/5">
             <div className="flex items-center gap-3">
                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                   selectedNodeData.type === 'city' ? 'bg-indigo-100 text-indigo-600' : 
-                   selectedNodeData.type === 'branch' ? 'bg-blue-100 text-blue-600' : 
-                   'bg-slate-100 text-slate-600'
+                   selectedNodeData.type === 'city' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 
+                   selectedNodeData.type === 'branch' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' : 
+                   'bg-slate-500/10 text-slate-400 border border-slate-500/20'
                }`}>
                   {selectedNodeData.type === 'user' && selectedNodeData.data.avatar_url ? (
                       <img src={selectedNodeData.data.avatar_url} alt={selectedNodeData.data.name} className="w-full h-full rounded-full object-cover" />
@@ -354,12 +354,12 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
                   )}
                </div>
                <div>
-                 <h3 className="font-semibold text-slate-900 text-lg leading-tight">
+                 <h3 className="font-semibold text-white text-lg leading-tight">
                     {selectedNodeData.type === 'user' ? selectedNodeData.data.name : 
                      selectedNodeData.type === 'city' ? selectedNodeData.data.city_name : 
                      selectedNodeData.data.name}
                  </h3>
-                 <p className="text-sm text-slate-500 capitalize">{selectedNodeData.type}</p>
+                 <p className="text-sm text-slate-400 capitalize">{selectedNodeData.type}</p>
                </div>
             </div>
             <button 
@@ -367,34 +367,34 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
                 setSelectedNodeData(null);
                 setNodes(nds => nds.map(n => ({ ...n, data: { ...n.data, selected: false } })));
               }} 
-              className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+              className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 border border-white/5 rounded-md transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-slate-50/30">
+          <div className="flex-1 overflow-y-auto p-5 custom-scrollbar bg-white/[0.01]">
              <div className="space-y-6">
                 
                 {/* Additional Info based on type */}
                 {selectedNodeData.type === 'user' && (
                   <div className="space-y-4">
-                     <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Employee Details</h4>
-                     <div className="bg-white rounded-lg border border-slate-100 p-4 space-y-3 shadow-sm">
+                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Employee Details</h4>
+                     <div className="bg-slate-900/40 rounded-lg border border-white/5 p-4 space-y-3 shadow-sm">
                         <DetailRow label="Role" value={selectedNodeData.data.role} />
                         <DetailRow label="Employee Code" value={selectedNodeData.data.employee_code || 'N/A'} />
                         <DetailRow label="Department" value={selectedNodeData.data.department || 'N/A'} />
                         <DetailRow label="Email" value={selectedNodeData.data.email} />
                         <DetailRow label="Phone" value={selectedNodeData.data.phone_number || 'N/A'} />
-                        <DetailRow label="Status" value={selectedNodeData.data.is_active ? 'Active' : 'Inactive'} valueColor={selectedNodeData.data.is_active ? 'text-emerald-600' : 'text-rose-600'} />
+                        <DetailRow label="Status" value={selectedNodeData.data.is_active ? 'Active' : 'Inactive'} valueColor={selectedNodeData.data.is_active ? 'text-emerald-400' : 'text-rose-400'} />
                      </div>
                   </div>
                 )}
 
                 {selectedNodeData.type === 'branch' && (
                   <div className="space-y-4">
-                     <h4 className="text-sm font-semibold text-slate-900 uppercase tracking-wider">Branch Details</h4>
-                     <div className="bg-white rounded-lg border border-slate-100 p-4 space-y-3 shadow-sm">
+                     <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Branch Details</h4>
+                     <div className="bg-slate-900/40 rounded-lg border border-white/5 p-4 space-y-3 shadow-sm">
                         <DetailRow label="Branch Name" value={selectedNodeData.data.name} />
                         <DetailRow label="Branch Code" value={selectedNodeData.data.code || 'N/A'} />
                         <DetailRow label="Status" value={selectedNodeData.data.status} />
@@ -410,9 +410,9 @@ export const UserTreeView: React.FC<UserTreeViewProps> = ({ users, cities, branc
   );
 };
 
-const DetailRow = ({ label, value, valueColor = "text-slate-900" }: { label: string, value: string, valueColor?: string }) => (
-  <div className="flex justify-between items-center text-sm border-b border-slate-50 pb-2 last:border-0 last:pb-0">
-    <span className="text-slate-500">{label}</span>
+const DetailRow = ({ label, value, valueColor = "text-white" }: { label: string, value: string, valueColor?: string }) => (
+  <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+    <span className="text-slate-400">{label}</span>
     <span className={`font-medium ${valueColor}`}>{value}</span>
   </div>
 );

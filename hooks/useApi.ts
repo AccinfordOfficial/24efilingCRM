@@ -2011,6 +2011,35 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         }
     }, [fetchData]);
 
+    const updateCity = useCallback(async (id: string, updates: Partial<City>) => {
+        try {
+            const payload = {
+                ...updates,
+                updated_at: new Date().toISOString()
+            };
+            const { error } = await (supabase.from('cities') as any).update(payload).eq('id', id);
+            if (error) throw error;
+        } catch (e) {
+            console.warn("DB update failed for city", e);
+            throw e;
+        }
+        await logUserActivity('City Updated', `Updated city ID: ${id}`);
+        await fetchData();
+    }, [logUserActivity, fetchData]);
+
+    const deleteCity = useCallback(async (id: string) => {
+        try {
+            const { error } = await (supabase.from('cities') as any).delete().eq('id', id);
+            if (error) throw error;
+        } catch (e) {
+            console.warn("DB delete failed for city", e);
+            throw e;
+        }
+        await logUserActivity('City Deleted', `Deleted city ID: ${id}`);
+        await fetchData();
+    }, [logUserActivity, fetchData]);
+
+
     const addBranch = useCallback(async (branch: Omit<any, 'id' | 'created_at' | 'updated_at'>) => {
         const managerId = branch.manager_id || null;
         const payload = {
@@ -2173,6 +2202,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         uploadBranchLogo,
         addBranch,
         addCity,
+        updateCity,
+        deleteCity,
         updateBranch,
         deleteBranch,
     };

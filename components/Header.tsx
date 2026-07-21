@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { MenuIcon, SearchIcon, BellIcon } from './icons';
 import { Button } from './ui/Button';
 import { useAuth } from '../context/AuthContext';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/Avatar';
+import { LogOut } from 'lucide-react';
 
 interface HeaderProps {
   onMenuClick: () => void;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   '/': { title: 'Dashboard', subtitle: 'Key metrics and recent activities at a glance.' },
+  '/cities': { title: 'City Management', subtitle: 'Configure operational cities and regional parameters.' },
   '/branch-management': { title: 'Branch Management', subtitle: 'Manage company branches and monitor branch-wise activity.' },
   '/users': { title: 'User Management', subtitle: 'Manage system users and their roles.' },
   '/leads': { title: 'Leads Overview', subtitle: 'Manage and track all leads in the system.' },
@@ -36,8 +38,20 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
 };
 
 export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
-  const { profile: currentUser } = useAuth();
+  const { profile: currentUser, logout } = useAuth();
   const location = useLocation();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Determine title based on path
   let config = PAGE_CONFIG[location.pathname];
@@ -61,43 +75,56 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200/80 bg-slate-50/80 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-white/5 bg-slate-950/20 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
           size="icon"
-          className="shrink-0 md:hidden bg-white/70"
+          className="shrink-0 md:hidden bg-slate-900/50 hover:bg-slate-800/50 border-white/10 text-white"
           onClick={onMenuClick}
         >
           <MenuIcon className="h-5 w-5" />
           <span className="sr-only">Toggle navigation menu</span>
         </Button>
         <div className="hidden md:block">
-          <h1 className="text-xl font-bold text-slate-800">{config.title}</h1>
-          <p className="text-sm text-slate-500">{config.subtitle}</p>
+          <h1 className="text-xl font-extrabold tracking-tight text-white">{config.title}</h1>
+          <p className="text-xs text-slate-400 mt-0.5">{config.subtitle}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
         <Link to="/notifications">
-          <Button variant="ghost" size="icon" className="rounded-full relative">
+          <Button variant="ghost" size="icon" className="rounded-full relative text-slate-400 hover:text-white hover:bg-white/5">
             <BellIcon className="h-5 w-5" />
             <span className="sr-only">Toggle notifications</span>
           </Button>
         </Link>
-        <div className="relative">
-          <div className="flex items-center gap-2 p-1 rounded-full text-slate-900 select-none">
-            <Avatar className="h-10 w-10 border border-slate-200">
-              <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} className="object-cover" />
-              <AvatarFallback className="bg-primary/10 text-primary font-bold">
+        <div className="relative" ref={dropdownRef}>
+          <div 
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="flex items-center gap-3 p-1 rounded-full text-slate-100 select-none cursor-pointer hover:bg-white/5 transition-colors"
+          >
+            <Avatar className="h-9 w-9 border border-white/10">
+              <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} className="object-cover animate-fade-in" />
+              <AvatarFallback className="bg-primary/20 text-primary font-bold">
                 {getInitials(currentUser?.name || '')}
               </AvatarFallback>
             </Avatar>
             <div className="text-left hidden md:block">
-              <div className="text-sm font-semibold">{currentUser?.name}</div>
-              <div className="text-xs text-slate-500">{currentUser?.role}</div>
+              <div className="text-sm font-semibold text-white">{currentUser?.name}</div>
+              <div className="text-[10px] text-slate-400 leading-none">{currentUser?.role}</div>
             </div>
           </div>
+          {dropdownOpen && (
+            <div className="absolute right-0 top-12 z-50 w-44 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
+              <button 
+                onClick={logout} 
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-colors text-left"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

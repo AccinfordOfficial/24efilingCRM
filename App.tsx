@@ -1,6 +1,8 @@
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { PageLoader } from './components/ui/PageLoader';
+import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { supabase } from './lib/supabaseClient'; // Import supabase for storage operations
 import { User, Lead, Document, Customer, Task, TaskPriority, City, Branch } from './types';
 import { useToast } from './components/Toast';
@@ -13,38 +15,41 @@ import ResetPassword from './pages/ResetPassword';
 import { ConfirmationDialog } from './components/ui/ConfirmationDialog';
 import { SuccessConversionModal } from './components/ui/SuccessConversionModal';
 
-// Import all page components
-import DashboardOverview from './pages/DashboardOverview';
-import UserManagement from './pages/UserManagement';
-import LeadsOverview from './pages/LeadsOverview';
-import Reports from './pages/Reports';
-import Settings from './pages/Settings';
-import TeamManagement from './pages/TeamManagement';
-import DocumentVerification from './pages/DocumentVerification';
-import PaymentTracker from './pages/PaymentTracker';
-import FollowUps from './pages/FollowUps';
-import ClientDocuments from './pages/ClientDocuments';
-import Notifications from './pages/Notifications';
-import LeadDetail from './pages/LeadDetail';
-import CreateLead from './pages/CreateLead';
-import LeadWorkflow from './pages/LeadWorkflow';
-import Customers from './pages/Customers';
-import CustomerDetail from './pages/CustomerDetail';
-import ActivityFeed from './pages/ActivityFeed';
-import ServiceManagement from './pages/ServiceManagement';
 import { checkAndTriggerBirthdays } from './lib/birthdayScheduler';
-import OffersManagement from './pages/OffersManagement';
 import { checkAndTriggerOfferStatus } from './lib/offerScheduler';
-import WebOverview from './pages/WebOverview';
-import WebLeadsManagement from './pages/WebLeadsManagement';
-import BlogsManagement from './pages/BlogsManagement';
-import TestimonialsManagement from './pages/TestimonialsManagement';
-import BranchManagement from './pages/BranchManagement';
+
+// Lazy loaded page components
+const DashboardOverview = lazy(() => import('./pages/DashboardOverview'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const LeadsOverview = lazy(() => import('./pages/LeadsOverview'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Settings = lazy(() => import('./pages/Settings'));
+const TeamManagement = lazy(() => import('./pages/TeamManagement'));
+const DocumentVerification = lazy(() => import('./pages/DocumentVerification'));
+const PaymentTracker = lazy(() => import('./pages/PaymentTracker'));
+const FollowUps = lazy(() => import('./pages/FollowUps'));
+const ClientDocuments = lazy(() => import('./pages/ClientDocuments'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const LeadDetail = lazy(() => import('./pages/LeadDetail'));
+const CreateLead = lazy(() => import('./pages/CreateLead'));
+const LeadWorkflow = lazy(() => import('./pages/LeadWorkflow'));
+const Customers = lazy(() => import('./pages/Customers'));
+const CustomerDetail = lazy(() => import('./pages/CustomerDetail'));
+const ActivityFeed = lazy(() => import('./pages/ActivityFeed'));
+const ServiceManagement = lazy(() => import('./pages/ServiceManagement'));
+const OffersManagement = lazy(() => import('./pages/OffersManagement'));
+const WebOverview = lazy(() => import('./pages/WebOverview'));
+const WebLeadsManagement = lazy(() => import('./pages/WebLeadsManagement'));
+const BlogsManagement = lazy(() => import('./pages/BlogsManagement'));
+const TestimonialsManagement = lazy(() => import('./pages/TestimonialsManagement'));
+const BranchManagement = lazy(() => import('./pages/BranchManagement'));
+const CityManagement = lazy(() => import('./pages/CityManagement'));
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
 const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Dashboard': { title: 'Dashboard', subtitle: 'Key metrics and recent activities at a glance.' },
+  'City Management': { title: 'City Management', subtitle: 'Manage company operating cities.' },
   'Branch Management': { title: 'Branch Management', subtitle: 'Manage company branches and monitor branch-wise activity.' },
   'User Management': { title: 'User Management', subtitle: 'Manage system users and their roles.' },
   'Leads Overview': { title: 'Leads Overview', subtitle: 'Manage and track all leads in the system.' },
@@ -222,6 +227,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     addBranch,
     updateBranch,
     addCity,
+    updateCity,
+    deleteCity,
     deleteBranch,
     transferUser,
     transferLogs,
@@ -959,7 +966,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
   };
 
   return (
-    <Routes>
+    <ErrorBoundary>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={
           <DashboardOverview
@@ -1079,14 +1088,26 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             <UserManagement
               users={roleScopedUsers}
               currentUser={viewProfile!}
+              currentUserRole={viewProfile?.role}
               branches={branches}
               cities={cities}
-              onAddUser={() => setIsUserFormOpen(true)}
-              onEditUser={(user) => { setEditingUser(user); setIsUserFormOpen(true); }}
+              onOpenUserForm={handleOpenUserForm}
+              onUpdateUser={updateUser}
               onDeleteUsers={deleteMultipleUsers}
               onTransferUser={transferUser}
             />
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/cities" element={
+          isSuperAdmin ? (
+            <CityManagement
+              cities={cities}
+              branches={branches}
+              onAddCity={addCity}
+              onUpdateCity={updateCity}
+              onDeleteCity={deleteCity}
+            />
+          ) : <AccessDenied requiredRole="Super Admin" />
         } />
         <Route path="/branch-management" element={
           isSuperAdmin ? (
@@ -1210,7 +1231,31 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
       </Route>
-    </Routes>
+        </Routes>
+        <UserForm
+          isOpen={isUserFormOpen}
+          onClose={() => setIsUserFormOpen(false)}
+          onSave={handleSaveUser}
+          user={editingUser}
+          branches={branches}
+          cities={cities}
+          initialBranchName={userManagementBranchFilter}
+          allUsers={users}
+        />
+        <LeadForm
+          isOpen={isLeadFormOpen}
+          onClose={() => setIsLeadFormOpen(false)}
+          onSave={handleSaveLead}
+          lead={editingLead}
+          users={activeUsers}
+          currentUser={viewProfile!}
+          services={services}
+          offers={offers}
+          onUploadDocument={editingLead ? (file) => handleUploadDocument(editingLead.id, file, 'Other Documents') : undefined}
+          onDeleteDocument={editingLead ? (docId) => handleDeleteDocument(editingLead.id, docId) : undefined}
+        />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

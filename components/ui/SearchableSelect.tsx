@@ -66,38 +66,38 @@ export const SearchableSelect: React.FC<SearchableSelectProps> = ({
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white px-3 py-2 text-sm ring-offset-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1c398e] focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 text-left ${
-          error ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
+        className={`flex h-10 w-full items-center justify-between rounded-lg border bg-white dark:bg-slate-950/60 border-slate-300 dark:border-white/10 px-3 py-2 text-sm ring-offset-white dark:ring-offset-slate-950 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#1c398e] dark:focus:ring-primary/40 focus:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50 text-left ${
+          error ? 'border-red-500 focus:ring-red-500' : ''
         }`}
       >
-        <span className={`truncate ${(!value || value === '') ? 'text-slate-400' : 'text-slate-900'}`}>{selectedLabel}</span>
+        <span className={`truncate ${(!value || value === '') ? 'text-slate-400' : 'text-slate-900 dark:text-slate-200'}`}>{selectedLabel}</span>
         <ChevronDown className={`h-4 w-4 opacity-50 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
-
+ 
       {isOpen && !disabled && (
-        <div className="absolute z-50 mt-1 w-full rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 max-h-60 flex flex-col">
-          <div className="p-2 border-b">
+        <div className="absolute z-50 mt-1 w-full rounded-md bg-white dark:bg-slate-900 border dark:border-white/10 shadow-lg ring-1 ring-black ring-opacity-5 dark:ring-white/5 max-h-60 flex flex-col">
+          <div className="p-2 border-b dark:border-white/5 bg-transparent">
             <Input
               type="text"
               placeholder="Search..."
-              className="h-8"
+              className="h-8 dark:bg-slate-950/50 dark:border-white/10 dark:text-white"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
             />
           </div>
-          <ul className="overflow-y-auto py-1 flex-1">
+          <ul className="overflow-y-auto py-1 flex-1 bg-transparent">
             {filteredOptions.length > 0 ? (
               filteredOptions.map(option => (
                 <li
                   key={option.value}
                   onClick={() => handleSelect(option.value)}
-                  className={`flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-100 cursor-pointer ${
-                    option.value === value ? 'bg-slate-50 font-semibold text-[#1c398e]' : 'text-slate-700'
+                  className={`flex items-center justify-between px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/5 cursor-pointer ${
+                    option.value === value ? 'bg-slate-50 dark:bg-white/10 font-semibold text-[#1c398e] dark:text-primary' : 'text-slate-700 dark:text-slate-300'
                   }`}
                 >
                   <span className="truncate">{option.label}</span>
-                  {option.value === value && <CheckCircleIcon className="h-4 w-4 text-[#1c398e]" />}
+                  {option.value === value && <CheckCircleIcon className="h-4 w-4 text-[#1c398e] dark:text-primary" />}
                 </li>
               ))
             ) : (

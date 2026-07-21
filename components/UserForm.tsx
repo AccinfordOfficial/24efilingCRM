@@ -41,7 +41,7 @@ const initialFormState: Omit<User, 'id' | 'avatar_url' | 'created_at' | 'last_up
 
 const FormField: React.FC<{ label: string, id: string, children: React.ReactNode, required?: boolean }> = ({ label, id, children, required }) => (
     <div>
-        <label htmlFor={id} className="block text-sm font-medium text-slate-700 mb-1">
+        <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1">
             {label} {required && <span className="text-red-500">*</span>}
         </label>
         {children}
@@ -342,12 +342,12 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
 
                     <div className="space-y-4">
                         {!user && (
-                            <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-4">
+                            <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-4">
                                 <FormField label="Password" id="password" required>
-                                    <Input name="password" id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-white" />
+                                    <Input name="password" id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-slate-900 border-white/10 text-white placeholder-slate-600 rounded-lg" />
                                 </FormField>
                                 <FormField label="Confirm Password" id="confirmPassword" required>
-                                    <Input name="confirmPassword" id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="bg-white" />
+                                    <Input name="confirmPassword" id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="bg-slate-900 border-white/10 text-white placeholder-slate-600 rounded-lg" />
                                 </FormField>
                             </div>
                         )}

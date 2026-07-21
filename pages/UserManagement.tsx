@@ -40,8 +40,8 @@ const DateBadge: React.FC<{ date: string }> = ({ date }) => {
   if (d.toDateString() === yesterday.toDateString()) label = 'Yesterday';
 
   return (
-    <div className="sticky top-0 bg-white/95 backdrop-blur-sm z-10 py-2 border-b border-slate-100 mb-4">
-      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</span>
+    <div className="sticky top-0 bg-slate-950/90 backdrop-blur-sm z-10 py-2 border-b border-white/5 mb-4">
+      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">{label}</span>
     </div>
   );
 };
@@ -76,16 +76,16 @@ const UserActivityTimeline: React.FC<{ activities: UserActivity[] }> = ({ activi
         .map(([date, dailyActs]) => (
           <div key={date}>
             <DateBadge date={date} />
-            <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-0.5 before:bg-slate-200">
+            <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-0 before:w-0.5 before:bg-white/5">
               {dailyActs.map((act) => (
                 <div key={act.id} className="relative group">
-                  <div className="absolute left-[-21px] top-1.5 h-3 w-3 rounded-full border-2 border-white ring-2 ring-slate-200 bg-slate-400 group-hover:bg-[#1c398e] group-hover:ring-[#1c398e] transition-all"></div>
+                  <div className="absolute left-[-21px] top-1.5 h-3 w-3 rounded-full border-2 border-slate-950 ring-2 ring-white/10 bg-slate-600 group-hover:bg-primary group-hover:ring-primary transition-all"></div>
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2 justify-between">
-                      <span className="font-semibold text-slate-900 text-sm">{act.action}</span>
-                      <span className="text-xs text-slate-400 font-mono">{new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      <span className="font-semibold text-white text-sm">{act.action}</span>
+                      <span className="text-xs text-slate-500 font-mono">{new Date(act.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
-                    <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-md border border-slate-100">
+                    <p className="text-sm text-slate-300 leading-relaxed bg-white/5 p-3 rounded-md border border-white/5">
                       {act.details}
                     </p>
                   </div>
@@ -226,18 +226,21 @@ const UserManagement: React.FC<UserManagementProps> = ({
   }, [viewingUser, userActivities]);
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-8 text-white max-w-7xl mx-auto p-4 md:p-6">
       {/* Header Section */}
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-white/5 p-6 rounded-xl border border-white/5 backdrop-blur-md">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">User Management</h1>
-          <p className="text-slate-500 mt-1">Manage personnel, roles, and branch assignments.</p>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent flex items-center gap-2">
+            <Users className="h-8 w-8 text-primary" />
+            User Management
+          </h1>
+          <p className="text-slate-400 mt-1">Manage personnel, roles, and branch assignments.</p>
         </div>
         <div className="flex items-center gap-2">
           {currentUserRole === 'Super Admin' && (
             <Button
               onClick={handleAddNew}
-              className="gap-2 bg-[#1c398e] hover:bg-[#152c6f] text-white shadow-lg shadow-blue-900/20 px-6 py-2 rounded-xl"
+              className="gap-2 bg-primary hover:bg-primary/95 text-white neon-glow-primary border border-white/10 px-6 py-2 rounded-xl"
             >
               <PlusCircle className="h-5 w-5" />
               Add New User

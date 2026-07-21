@@ -580,17 +580,21 @@ export default function OffersManagement({ offers, services, onAddOffer, onUpdat
 
       {/* Create / Edit Campaign Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <Card className="w-full max-w-lg bg-white border border-slate-200 shadow-2xl animate-in zoom-in-95 duration-200 my-8">
-            <CardHeader className="border-b pb-4 bg-slate-50/55 rounded-t-xl">
-              <CardTitle className="text-xl font-bold flex items-center gap-2">
-                <GiftIcon className="w-5 h-5 text-blue-600" />
-                {editingOffer ? 'Edit Coupon Campaign' : 'Launch New Campaign'}
-              </CardTitle>
-              <CardDescription>Configure promotional rules, discount rates, and validity windows.</CardDescription>
-            </CardHeader>
-            <form onSubmit={handleSubmit}>
-              <CardContent className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
+          onClick={() => setIsModalOpen(false)}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="w-full max-w-lg my-8">
+            <Card className="w-full bg-slate-950 border border-white/10 shadow-2xl animate-in zoom-in-95 duration-200 text-white">
+              <CardHeader className="border-b border-white/5 pb-4 bg-white/5 rounded-t-xl">
+                <CardTitle className="text-xl font-bold flex items-center gap-2 text-white">
+                  <GiftIcon className="w-5 h-5 text-primary" />
+                  {editingOffer ? 'Edit Coupon Campaign' : 'Launch New Campaign'}
+                </CardTitle>
+                <CardDescription className="text-slate-400">Configure promotional rules, discount rates, and validity windows.</CardDescription>
+              </CardHeader>
+              <form onSubmit={handleSubmit}>
+                <CardContent className="p-6 space-y-4 max-h-[60vh] overflow-y-auto custom-scrollbar text-white">
                 {/* Campaign Name */}
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1">Campaign Name *</label>
@@ -709,16 +713,17 @@ export default function OffersManagement({ offers, services, onAddOffer, onUpdat
               </CardContent>
 
               {/* Form Footers */}
-              <div className="flex justify-end gap-2 border-t p-4 bg-slate-50/55 rounded-b-xl">
-                <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>
+              <div className="flex justify-end gap-2 border-t border-white/5 p-4 bg-white/5 rounded-b-xl">
+                <Button type="button" variant="outline" className="border-white/10 text-slate-300 hover:bg-white/5" onClick={() => setIsModalOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700 text-white font-bold">
+                <Button type="submit" disabled={isSubmitting} className="bg-primary hover:bg-primary/95 text-white font-bold">
                   {isSubmitting ? 'Saving...' : editingOffer ? 'Save Changes' : 'Launch Campaign'}
                 </Button>
               </div>
             </form>
           </Card>
+          </div>
         </div>
       )}
       {/* Delete Confirmation Dialog */}

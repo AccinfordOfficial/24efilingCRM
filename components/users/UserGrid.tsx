@@ -15,8 +15,8 @@ interface UserGridProps {
 export const UserGrid: React.FC<UserGridProps> = ({ users, onEdit, onToggleStatus, onViewActivity, onTransfer, currentUserRole, currentUser }) => {
   if (users.length === 0) {
     return (
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
-        <p className="text-slate-500 font-medium">No users found matching your filters.</p>
+      <div className="glass-card border border-white/5 p-12 text-center">
+        <p className="text-slate-400 font-medium">No users found matching your filters.</p>
       </div>
     );
   }

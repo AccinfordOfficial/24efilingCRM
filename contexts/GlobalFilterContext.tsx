@@ -66,17 +66,8 @@ export const GlobalFilterProvider: React.FC<GlobalFilterProviderProps> = ({
     const [adminId, setAdminId] = useState<string | 'All Managers'>('All Managers');
     const [employeeId, setEmployeeId] = useState<string | 'All Employees'>('All Employees');
     const [leadSourceId, setLeadSourceId] = useState<string | 'All Sources'>('All Sources');
-    const [dateRange, setDateRange] = useState<DateRange>(() => {
-        const today = new Date();
-        const y = today.getFullYear();
-        const m = String(today.getMonth() + 1).padStart(2, '0');
-        const d = String(today.getDate()).padStart(2, '0');
-        const dateStr = `${y}-${m}-${d}`;
-        // By default, parse it into local date objects correctly at 00:00:00 to avoid timezone shifts.
-        const todayLocal = new Date(`${dateStr}T00:00:00`);
-        return { from: todayLocal, to: todayLocal };
-    });
-    const [activePreset, setActivePreset] = useState<DatePreset>('today');
+    const [dateRange, setDateRange] = useState<DateRange>({ from: undefined, to: undefined });
+    const [activePreset, setActivePreset] = useState<DatePreset>('all');
 
     // 1. Calculate Available Cities
     const availableCities = useMemo(() => {

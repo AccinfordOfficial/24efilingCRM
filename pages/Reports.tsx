@@ -10,6 +10,7 @@ import { useGlobalFilter } from '../contexts/GlobalFilterContext';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { DashboardFilterBar } from '../components/dashboard/DashboardFilterBar';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
     PieChart, Pie, Cell, Legend, AreaChart, Area
@@ -1825,13 +1826,15 @@ const AdvancedAdminReports: React.FC<{ users: User[], allLeads: Lead[], customer
 
 const Reports: React.FC<{ userRole: User['role'], leads?: Lead[], users?: User[], allLeads?: Lead[], customers?: Customer[], dateRange: { from: string; to: string }, setDateRange: any, currentUser: User }> = (props) => {
     return (
-        <div className="w-full h-full flex flex-col gap-8 p-1">
-             <div className="flex flex-col xl:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-200">
+        <div className="w-full h-full flex flex-col gap-6 p-1">
+             <div className="flex flex-col xl:flex-row items-center justify-between gap-4 pb-6 border-b border-white/5">
                 <div>
-                    <h2 className="text-3xl font-bold tracking-tight text-slate-900">Reports & Analytics</h2>
-                    <p className="text-slate-550 mt-1 text-lg">Detailed insights into business performance and team productivity.</p>
+                    <h2 className="text-3xl font-bold tracking-tight text-white animate-all duration-300">Reports & Analytics</h2>
+                    <p className="text-slate-400 mt-1 text-sm">Detailed insights into business performance and team productivity.</p>
                 </div>
             </div>
+
+            <DashboardFilterBar currentUserRole={props.userRole} />
 
             <div className="flex-1 w-full">
                 {['Super Admin', 'Admin'].includes(props.userRole) ? (
