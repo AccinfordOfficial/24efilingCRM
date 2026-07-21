@@ -44,6 +44,10 @@ const BlogsManagement = lazy(() => import('./pages/BlogsManagement'));
 const TestimonialsManagement = lazy(() => import('./pages/TestimonialsManagement'));
 const BranchManagement = lazy(() => import('./pages/BranchManagement'));
 const CityManagement = lazy(() => import('./pages/CityManagement'));
+const RevenueDashboard = lazy(() => import('./pages/RevenueDashboard'));
+const EmployeePerformance = lazy(() => import('./pages/EmployeePerformance'));
+const InvoiceManagement = lazy(() => import('./pages/InvoiceManagement'));
+const PoliciesManagement = lazy(() => import('./pages/PoliciesManagement'));
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -75,6 +79,10 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Create New Lead': { title: 'Create New Lead', subtitle: 'Add a new potential customer to the system.' },
   'Services': { title: 'Manage Services', subtitle: 'Add and manage services and sub-services.' },
   'Offers & Coupons': { title: 'Offers & Coupons', subtitle: 'Manage discount campaigns, coupons, and referral offers.' },
+  'Revenue Dashboard': { title: 'Revenue Dashboard', subtitle: 'Detailed revenue tracking, branch breakdowns, and time filters.' },
+  'Employee Performance': { title: 'Employee Performance', subtitle: 'Track user conversions, rankings, and lead progression.' },
+  'Invoices & Policies': { title: 'Invoices & Policies', subtitle: 'Manage billing invoices and document company terms.' },
+  'Policies Management': { title: 'Policies Management', subtitle: 'Configure corporate guidelines and billing terms.' },
   '24efiling Web': { title: '24eFiling Web', subtitle: 'Manage your website, articles, leads, and customer reviews.' },
   'Web Leads': { title: 'Organic Website Leads', subtitle: 'Review organic contact form queries from the main website.' },
   'Blogs': { title: 'Blogs Content Manager', subtitle: 'Compose educational resources and company updates.' },
@@ -230,6 +238,15 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     updateCity,
     deleteCity,
     deleteBranch,
+    invoices,
+    addInvoice,
+    updateInvoice,
+    deleteInvoice,
+    addInvoicePayment,
+    companyPolicies,
+    addPolicy,
+    updatePolicy,
+    deletePolicy,
     transferUser,
     transferLogs,
     auditLogs
@@ -552,7 +569,11 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       'Notifications': '/notifications',
       'Settings': '/settings',
       'Offers': '/offers',
-      'Web Leads': '/web'
+      'Web Leads': '/web',
+      'Revenue Dashboard': '/revenue',
+      'Employee Performance': '/performance',
+      'Invoices & Policies': '/invoices',
+      'Policies Management': '/policies'
     };
     if (pageToPath[page]) {
       navigate(pageToPath[page]);
@@ -1097,6 +1118,46 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
               onTransferUser={transferUser}
             />
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/revenue" element={
+          <RevenueDashboard
+            leads={roleScopedLeads}
+            users={users}
+            customers={customers}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/performance" element={
+          <EmployeePerformance
+            leads={roleScopedLeads}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/invoices" element={
+          <InvoiceManagement
+            invoices={invoices}
+            onAddInvoice={addInvoice}
+            onUpdateInvoice={updateInvoice}
+            onDeleteInvoice={deleteInvoice}
+            onAddInvoicePayment={addInvoicePayment}
+            leads={roleScopedLeads}
+            customers={roleScopedCustomers}
+            users={users}
+            branches={branches}
+            currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/policies" element={
+          <PoliciesManagement
+            companyPolicies={companyPolicies}
+            onAddPolicy={addPolicy}
+            onUpdatePolicy={updatePolicy}
+            onDeletePolicy={deletePolicy}
+            currentUser={viewProfile!}
+          />
         } />
         <Route path="/cities" element={
           isSuperAdmin ? (

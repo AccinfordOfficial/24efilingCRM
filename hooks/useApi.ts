@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog } from '../types';
+import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy } from '../types';
 import { Database, Json } from '../lib/supabaseClient';
 import { calculateLeadScore } from '../lib/scoring';
 
@@ -228,6 +228,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const [businessCategories, setBusinessCategories] = useState<any[]>([]);
     const [industryTypes, setIndustryTypes] = useState<any[]>([]);
     const [leadSources, setLeadSources] = useState<any[]>([]);
+    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [companyPolicies, setCompanyPolicies] = useState<CompanyPolicy[]>([]);
 
 
     const hasLoaded = useRef(false);
@@ -252,6 +254,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     setWebLeads(d.webLeads || []);
                     setBlogs(d.blogs || []);
                     setTestimonials(d.testimonials || []);
+                    setInvoices(d.invoices || []);
+                    setCompanyPolicies(d.companyPolicies || []);
                     // If we have cache, show it immediately!
                     setLoading(false);
                 } catch (e) {
@@ -297,6 +301,24 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (usersError) throw new Error(`Users: ${usersError.message}`);
             if (notificationsError) throw new Error(`Notifications: ${notificationsError.message}`);
             if (userActivitiesError) throw new Error(`Activities: ${userActivitiesError.message}`);
+
+            let invoicesData: any[] | null = null;
+            let policiesData: any[] | null = null;
+            try {
+                const res = await (supabase.from('invoices' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                invoicesData = res.data;
+            } catch (e) {
+                console.warn("Invoices fetch failed (run SETUP_INVOICES_TABLE.sql if missing):", e);
+            }
+
+            try {
+                const res = await (supabase.from('company_policies' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                policiesData = res.data;
+            } catch (e) {
+                console.warn("Policies fetch failed (run SETUP_INVOICES_TABLE.sql if missing):", e);
+            }
 
             // PHASE 2: Fetch leads with FK joins — use explicit constraint names for reliability.
             // Falls back to a plain select if schema cache doesn't know the FK yet.
@@ -346,6 +368,8 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (categoriesData) setBusinessCategories(categoriesData);
             if (industriesData) setIndustryTypes(industriesData);
             if (leadSourcesData) setLeadSources(leadSourcesData);
+            if (invoicesData) setInvoices(invoicesData as any[]);
+            if (policiesData) setCompanyPolicies(policiesData as any[]);
 
             // Fetch Web Leads with LocalStorage fallback and seeds
             let webLeadsList: WebLead[] = [];
@@ -565,7 +589,9 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     offers: offersData || [],
                     webLeads: webLeadsList,
                     blogs: blogsList,
-                    testimonials: testimonialsList
+                    testimonials: testimonialsList,
+                    invoices: invoices || [],
+                    companyPolicies: companyPolicies || []
                 });
 
                 if (cacheData.length < 4500000) {
@@ -2206,5 +2232,92 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
         deleteCity,
         updateBranch,
         deleteBranch,
+
+        // Invoice CRUD
+        invoices,
+        addInvoice: useCallback(async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'invoice_number'>) => {
+            try {
+                const { data, error } = await (supabase.from('invoices' as any) as any).insert([invoiceData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Invoice Created', `Created invoice: ${data.invoice_number} for total ₹${data.total_amount}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for invoice", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updateInvoice: useCallback(async (id: string, invoiceData: Partial<Invoice>) => {
+            try {
+                const { error } = await (supabase.from('invoices' as any) as any).update(invoiceData).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Invoice Updated', `Updated invoice ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for invoice", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        deleteInvoice: useCallback(async (id: string) => {
+            try {
+                const { error } = await (supabase.from('invoices' as any) as any).delete().eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Invoice Deleted', `Deleted invoice ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB delete failed for invoice", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+
+        // Policy CRUD
+        companyPolicies,
+        addPolicy: useCallback(async (policyData: Omit<CompanyPolicy, 'id' | 'created_at' | 'updated_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('company_policies' as any) as any).insert([policyData]).select().single();
+                if (error) throw error;
+                await logUserActivity('Policy Created', `Created company policy: ${data.name}`);
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for policy", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        updatePolicy: useCallback(async (id: string, policyData: Partial<CompanyPolicy>) => {
+            try {
+                const { error } = await (supabase.from('company_policies' as any) as any).update(policyData).eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Policy Updated', `Updated policy ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB update failed for policy", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+        deletePolicy: useCallback(async (id: string) => {
+            try {
+                const { error } = await (supabase.from('company_policies' as any) as any).delete().eq('id', id);
+                if (error) throw error;
+                await logUserActivity('Policy Deleted', `Deleted policy ID: ${id}`);
+                await fetchData();
+            } catch (e) {
+                console.warn("DB delete failed for policy", e);
+                throw e;
+            }
+        }, [logUserActivity, fetchData]),
+
+        // Invoice payments
+        addInvoicePayment: useCallback(async (invoiceId: string, paymentId: string, amount: number) => {
+            try {
+                const { data, error } = await (supabase.from('invoice_payments' as any) as any).insert([{ invoice_id: invoiceId, payment_id: paymentId, amount }]).select().single();
+                if (error) throw error;
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("DB insert failed for invoice payment", e);
+                throw e;
+            }
+        }, [fetchData])
     };
 };

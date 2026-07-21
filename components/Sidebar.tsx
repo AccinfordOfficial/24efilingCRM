@@ -101,7 +101,15 @@ const superAdminNav: NavSection[] = [
   {
     title: 'Analytics',
     items: [
-      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+      { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
+      { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
+      { path: '/reports', label: 'Reports & Analytics', icon: FileText },
+    ]
+  },
+  {
+    title: 'Management',
+    items: [
+      { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
     ]
   },
   {
@@ -143,7 +151,9 @@ const adminNav: NavSection[] = [
   {
     title: 'Analytics',
     items: [
-      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+      { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
+      { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
+      { path: '/reports', label: 'Reports & Analytics', icon: FileText },
     ]
   },
   {
@@ -151,6 +161,12 @@ const adminNav: NavSection[] = [
     items: [
       { path: '/team', label: 'Team Management', icon: ShieldCheck },
       { path: '/verify-documents', label: 'Document Verification', icon: FileCheck },
+    ]
+  },
+  {
+    title: 'Management',
+    items: [
+      { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
     ]
   },
   {
@@ -187,12 +203,15 @@ const salesExecNav: NavSection[] = [
   {
     title: 'Analytics',
     items: [
-      { path: '/reports', label: 'Reports & Analytics', icon: BarChart3 },
+      { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
+      { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
+      { path: '/reports', label: 'Reports & Analytics', icon: FileText },
     ]
   },
   {
     title: 'Management',
     items: [
+      { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
       { path: '/follow-ups', label: 'Follow-ups', icon: Clock },
       { path: '/client-documents', label: 'Client Documents', icon: FileUp },
     ]

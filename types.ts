@@ -247,6 +247,7 @@ export type Lead = {
   created_by?: string; // ID of the creator
   assigned_at?: string; // Timestamp of assignment
   branch_id?: string;
+  branch_name?: string;
   created_at: string;
   last_contacted: string;
   next_follow_up?: string;
@@ -308,6 +309,7 @@ export type Customer = {
   business_zip_code?: string | null;
   assigned_to?: User;
   branch_id?: string;
+  branch_name?: string;
   service_sets?: ServiceSet[];
   uploaded_documents?: Document[];
   avatar_url?: string;
@@ -527,3 +529,51 @@ export type Testimonial = {
   status: 'Pending' | 'Approved' | 'Rejected';
   created_at: string;
 }
+
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+
+export type Invoice = {
+  id: string;
+  invoice_number?: string;
+  customer_id: string | null;
+  lead_id: string | null;
+  branch_id?: string | null;
+  items: InvoiceItem[];
+  subtotal: number;
+  tax_amount: number;
+  discount_amount: number;
+  total_amount: number;
+  status: InvoiceStatus;
+  due_date: string;
+  paid_date?: string | null;
+  pdf_url?: string | null;
+  notes?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+  
+  // Joined fields for display
+  customer_name?: string;
+  lead_name?: string;
+  creator_name?: string;
+};
+
+export type InvoicePayment = {
+  id: string;
+  invoice_id: string;
+  payment_id: string;
+  amount: number;
+  created_at: string;
+};
+
+export type CompanyPolicy = {
+  id: string;
+  name: string;
+  content: string;
+  version: number;
+  is_active: boolean;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+  creator_name?: string;
+};
