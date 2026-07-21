@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
-import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement, SupportTicket, TicketComment, KnowledgeBaseArticle, EmployeeFeedback, FeedbackTemplate, WorkOrder, WorkOrderNote } from '../types';
+import { User, Lead, Activity, Document, Customer, Notification, UserActivity, Task, OrganizationSettings, Service, SubService, Offer, WebLead, Blog, Testimonial, Payment, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement, SupportTicket, TicketComment, KnowledgeBaseArticle, EmployeeFeedback, FeedbackTemplate, WorkOrder, WorkOrderNote, WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate } from '../types';
 import { Database, Json } from '../lib/supabaseClient';
 import { calculateLeadScore } from '../lib/scoring';
 
@@ -236,6 +236,9 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
     const [kbArticles, setKbArticles] = useState<KnowledgeBaseArticle[]>([]);
     const [feedback, setFeedback] = useState<EmployeeFeedback[]>([]);
     const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
+    const [whatsappConversations, setWhatsappConversations] = useState<WhatsAppConversation[]>([]);
+    const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([]);
+    const [whatsappTemplates, setWhatsappTemplates] = useState<WhatsAppTemplate[]>([]);
 
 
     const hasLoaded = useRef(false);
@@ -268,6 +271,9 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     setKbArticles(d.kbArticles || []);
                     setFeedback(d.feedback || []);
                     setWorkOrders(d.workOrders || []);
+                    setWhatsappConversations(d.whatsappConversations || []);
+                    setWhatsappMessages(d.whatsappMessages || []);
+                    setWhatsappTemplates(d.whatsappTemplates || []);
                     // If we have cache, show it immediately!
                     setLoading(false);
                 } catch (e) {
@@ -399,6 +405,34 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 console.warn("Work orders fetch failed (run SETUP_WORK_ORDERS_TABLE.sql if missing):", e);
             }
 
+            let whatsappConversationsData: any[] | null = null;
+            let whatsappMessagesData: any[] | null = null;
+            let whatsappTemplatesData: any[] | null = null;
+
+            try {
+                const res = await (supabase.from('whatsapp_conversations' as any) as any).select('*').order('last_message_at', { ascending: false });
+                if (res.error) throw res.error;
+                whatsappConversationsData = res.data;
+            } catch (e) {
+                console.warn("whatsappConversations fetch failed (run SETUP_WHATSAPP_INTEGRATION.sql if missing):", e);
+            }
+
+            try {
+                const res = await (supabase.from('whatsapp_messages' as any) as any).select('*').order('created_at', { ascending: true });
+                if (res.error) throw res.error;
+                whatsappMessagesData = res.data;
+            } catch (e) {
+                console.warn("whatsappMessages fetch failed:", e);
+            }
+
+            try {
+                const res = await (supabase.from('whatsapp_templates' as any) as any).select('*').order('created_at', { ascending: false });
+                if (res.error) throw res.error;
+                whatsappTemplatesData = res.data;
+            } catch (e) {
+                console.warn("whatsappTemplates fetch failed:", e);
+            }
+
             // PHASE 2: Fetch leads with FK joins — use explicit constraint names for reliability.
             // Falls back to a plain select if schema cache doesn't know the FK yet.
             // FIX: Run FIX_SCHEMA_CACHE_RELOAD.sql in Supabase to permanently resolve this.
@@ -455,6 +489,9 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
             if (kbArticlesData) setKbArticles(kbArticlesData as any[]);
             if (feedbackData) setFeedback(feedbackData as any[]);
             if (workOrdersData) setWorkOrders(workOrdersData as any[]);
+            if (whatsappConversationsData) setWhatsappConversations(whatsappConversationsData as any[]);
+            if (whatsappMessagesData) setWhatsappMessages(whatsappMessagesData as any[]);
+            if (whatsappTemplatesData) setWhatsappTemplates(whatsappTemplatesData as any[]);
 
             // Fetch Web Leads with LocalStorage fallback and seeds
             let webLeadsList: WebLead[] = [];
@@ -682,7 +719,10 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                     tickets: tickets || [],
                     kbArticles: kbArticles || [],
                     feedback: feedback || [],
-                    workOrders: workOrders || []
+                    workOrders: workOrders || [],
+                    whatsappConversations: whatsappConversations || [],
+                    whatsappMessages: whatsappMessages || [],
+                    whatsappTemplates: whatsappTemplates || []
                 });
 
                 if (cacheData.length < 4500000) {
@@ -2613,6 +2653,50 @@ export const useApi = (options: { fetchOnMount?: boolean } = { fetchOnMount: tru
                 console.warn("DB insert failed for work order note", e);
                 throw e;
             }
+        }, [fetchData]),
+
+        // WhatsApp Integrations
+        whatsappConversations,
+        whatsappMessages,
+        whatsappTemplates,
+        sendWhatsAppMessage: useCallback(async (conversationId: string, content: string, templateName?: string) => {
+            try {
+                const { data, error } = await (supabase.from('whatsapp_messages' as any) as any).insert([{
+                    conversation_id: conversationId,
+                    direction: 'outbound',
+                    content,
+                    message_type: templateName ? 'template' : 'text',
+                    template_name: templateName || null,
+                    status: 'sent'
+                }]).select().single();
+                if (error) throw error;
+
+                // Sync last message timestamp on parent conversation
+                await (supabase.from('whatsapp_conversations' as any) as any).update({
+                    last_message_at: new Date().toISOString(),
+                    unread_count: 0
+                }).eq('id', conversationId);
+
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("WhatsApp message send failed", e);
+                throw e;
+            }
+        }, [fetchData]),
+        addWhatsAppTemplate: useCallback(async (templateData: Omit<WhatsAppTemplate, 'id' | 'created_at'>) => {
+            try {
+                const { data, error } = await (supabase.from('whatsapp_templates' as any) as any).insert([templateData]).select().single();
+                if (error) throw error;
+                await fetchData();
+                return data;
+            } catch (e) {
+                console.warn("WhatsApp template insertion failed", e);
+                throw e;
+            }
+        }, [fetchData]),
+        syncWhatsAppConversations: useCallback(async () => {
+            await fetchData();
         }, [fetchData])
     };
 };

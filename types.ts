@@ -758,3 +758,39 @@ export type WorkOrderNote = {
   created_at: string;
   user_name?: string;
 };
+
+export type WhatsAppConversation = {
+  id: string;
+  customer_phone: string;
+  customer_name?: string;
+  customer_id?: string | null;
+  last_message_at: string;
+  unread_count: number;
+  assigned_to?: string | null;
+  status: 'active' | 'resolved' | 'archived';
+  created_at: string;
+};
+
+export type WhatsAppMessage = {
+  id: string;
+  conversation_id: string;
+  direction: 'inbound' | 'outbound';
+  content: string;
+  message_type: 'text' | 'image' | 'document' | 'template';
+  whatsapp_message_id?: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed';
+  is_ai_generated: boolean;
+  template_name?: string;
+  created_at: string;
+};
+
+export type WhatsAppTemplate = {
+  id: string;
+  name: string;
+  content: string;
+  variables: string[];
+  category: 'marketing' | 'utility' | 'authentication';
+  status: 'approved' | 'pending' | 'rejected';
+  created_by?: string | null;
+  created_at: string;
+};

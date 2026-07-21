@@ -132,6 +132,12 @@ const superAdminNav: NavSection[] = [
     ]
   },
   {
+    title: 'Communication',
+    items: [
+      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
+    ]
+  },
+  {
     title: 'System',
     items: [
       { path: '/activity', label: 'Activity Feed', icon: Clock },
@@ -198,6 +204,12 @@ const adminNav: NavSection[] = [
     ]
   },
   {
+    title: 'Communication',
+    items: [
+      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
+    ]
+  },
+  {
     title: 'System',
     items: [
       { path: '/notifications', label: 'Notifications', icon: Bell },
@@ -247,6 +259,12 @@ const salesExecNav: NavSection[] = [
       { path: '/support', label: 'Support Center', icon: MessageSquare },
       { path: '/feedback', label: 'Employee Feedback', icon: ShieldCheck },
       { path: '/work-orders', label: 'Work Orders', icon: Package }
+    ]
+  },
+  {
+    title: 'Communication',
+    items: [
+      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
     ]
   },
   {

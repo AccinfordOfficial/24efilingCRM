@@ -54,6 +54,7 @@ const Announcements = lazy(() => import('./pages/Announcements'));
 const Support = lazy(() => import('./pages/Support'));
 const EmployeeFeedback = lazy(() => import('./pages/EmployeeFeedback'));
 const WorkOrders = lazy(() => import('./pages/WorkOrders'));
+const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'));
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -98,6 +99,7 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Reminders': { title: 'Reminders', subtitle: 'Manage personal schedule tasks and assigned team events.' },
   'Work Status': { title: 'Work Status Tracker', subtitle: 'Monitor task completion stages, workload distribution, and Kanban updates.' },
   'Announcements': { title: 'Company Announcements', subtitle: 'Corporate announcements feed, target distribution, and read receipts.' },
+  'WhatsApp': { title: 'WhatsApp AI Broadcast Hub', subtitle: 'AI assistant conversational suggestions, messaging templates, and automated work order dispatch.' }
 };
 
 
@@ -278,6 +280,12 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     addWorkOrder,
     updateWorkOrder,
     addWorkOrderNote,
+    whatsappConversations,
+    whatsappMessages,
+    whatsappTemplates,
+    sendWhatsAppMessage,
+    addWhatsAppTemplate,
+    syncWhatsAppConversations,
     transferUser,
     transferLogs,
     auditLogs
@@ -610,7 +618,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       'Announcements': '/announcements',
       'Support': '/support',
       'Employee Feedback': '/feedback',
-      'Work Orders': '/work-orders'
+      'Work Orders': '/work-orders',
+      'WhatsApp': '/whatsapp'
     };
     if (pageToPath[page]) {
       navigate(pageToPath[page]);
@@ -1266,6 +1275,21 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             users={users}
             branches={branches}
             currentUser={viewProfile!}
+          />
+        } />
+        <Route path="/whatsapp" element={
+          <WhatsAppDashboard
+            conversations={whatsappConversations}
+            messages={whatsappMessages}
+            templates={whatsappTemplates}
+            onSendMessage={sendWhatsAppMessage}
+            onAddTemplate={addWhatsAppTemplate}
+            onSync={syncWhatsAppConversations}
+            customers={customers}
+            users={users}
+            currentUser={viewProfile!}
+            onAddWorkOrder={addWorkOrder}
+            services={services}
           />
         } />
         <Route path="/cities" element={
