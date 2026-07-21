@@ -1,748 +1,1431 @@
-# 24eFiling CRM — Complete Upgrade Implementation Plan (v2)
+# 📐 24eFiling CRM — Implementation Plan
 
-## Background & Current State
-
-The 24eFiling CRM is an existing **React 19 + TypeScript + Vite + TailwindCSS + Supabase** application with:
-- **27 pages** including Dashboard, Leads, Customers, Reports, Services, Payments, Branch Management, etc.
-- **Supabase PostgreSQL** backend with RLS, Edge Functions, and Storage
-- **Role hierarchy**: Super Admin → Admin/Branch Manager → Sales Executive (+ Receptionist, Team Leader, Service Executive, Accounts Team)
-- **Existing features**: Lead management, customer management, payment tracking, document upload/download, notifications, services, offers, web management (blogs, testimonials)
-- **Deployment target**: Vercel (frontend) + Supabase (backend/DB/storage/edge functions)
-
-The client shared a **NEXORA CRM** reference design — a premium dark-theme UI with glassmorphic cards, AI copilot panel, rich analytics, and modern animations.
+> **Created:** July 21, 2026  
+> **Based on:** [CRM_UPGRADE_MASTERPLAN.md](./CRM_UPGRADE_MASTERPLAN.md)  
+> **Approach:** Bottom-up — fix foundations first, then build features  
+> **Estimated Total Duration:** ~20 weeks (5 phases)
 
 ---
 
-## Resolved Questions
-
-| # | Question | Answer | Impact |
-|---|----------|--------|--------|
-| Q1 | Deployment target | **Vercel** | Supabase Edge Functions for webhooks; Vercel for frontend hosting |
-| Q2 | WhatsApp Business API | **Don't have yet** — de-prioritized to Phase 6 (last) | WhatsApp + bot features moved to final phase |
-| Q3 | Work Orders 24/7 | **Customers submit via WhatsApp bot** → employees manage via CRM | CRM-side work order management in Phase 4; WhatsApp bot intake in Phase 6 |
-| Q4 | Phase priority | **WhatsApp de-prioritized**, everything else stays | Phase order adjusted |
-| Q5 | City Management | **No existing UI page** — needs new page | New `CityManagement.tsx` page in Phase 1 |
+## Phase 1 — Foundation & Technical Debt Cleanup
+**Duration:** Weeks 1–3  
+**Goal:** Make the codebase maintainable, secure, and ready for rapid feature development.
 
 ---
 
-## User Review Required
+### 1.1 Environment & Credentials Hardening
+**Time:** 2 hours
 
-> [!IMPORTANT]
-> **This is a massive project spanning 18 feature areas.** Delivered in 6 phases, each building on the previous. WhatsApp integration is now the final phase — you can get the full CRM running before needing a WhatsApp Business API account.
+#### Tasks:
+- [ ] Create `.env` file at project root:
+  ```env
+  VITE_SUPABASE_URL=https://your-project.supabase.co
+  VITE_SUPABASE_ANON_KEY=your-anon-key
+  VITE_GOOGLE_GENAI_API_KEY=your-key
+  VITE_WHATSAPP_TOKEN=your-token
+  VITE_WHATSAPP_PHONE_NUMBER_ID=your-id
+  ```
+- [ ] Update `.gitignore` to include `.env`, `.env.local`, `.env.production`
+- [ ] Refactor `env.tsx` → `lib/env.ts`:
+  ```typescript
+  export const ENV = {
+    SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+    SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+    GOOGLE_GENAI_API_KEY: import.meta.env.VITE_GOOGLE_GENAI_API_KEY,
+    WHATSAPP_TOKEN: import.meta.env.VITE_WHATSAPP_TOKEN,
+    WHATSAPP_PHONE_NUMBER_ID: import.meta.env.VITE_WHATSAPP_PHONE_NUMBER_ID,
+  } as const;
+  ```
+- [ ] Update all imports across codebase (`lib/supabaseClient.ts`, `lib/whatsappClient.ts`, `components/AICopilot.tsx`, etc.)
+- [ ] Delete old `env.tsx`
 
-> [!WARNING]
-> **Work Order Flow**: Customers will eventually submit work orders via a WhatsApp bot (Phase 6). Until then, Phase 4 builds the CRM-side work order module so employees can manually create/manage work orders. When WhatsApp goes live in Phase 6, bot-submitted orders will auto-flow into the same system.
-
----
-
-## Requirements Mapping
-
-| # | Requirement | Current Status | Phase |
-|---|------------|---------------|-------|
-| 1 | Total cities & create city | ❌ No UI page exists | **Phase 1** |
-| 2 | Total branch & create branch | ✅ BranchManagement.tsx exists | **Phase 1** (enhance) |
-| 3 | Total employee & create employee | ✅ UserManagement.tsx exists | **Phase 1** (enhance) |
-| 4 | Revenue — branch wise, filters (day/week/month/custom) | ⚠️ Reports.tsx partial | **Phase 2** |
-| 5 | Employee sales conversions & performance | ⚠️ SalesExecutivePerformanceModal exists | **Phase 2** |
-| 6 | Customer data & documentation | ✅ Customers.tsx, CustomerDetail.tsx | **Phase 1** (enhance) |
-| 7 | Document upload & download | ✅ Document management exists | **Phase 1** (enhance) |
-| 8 | Reminders — personal + task-assigned, admin task assignment | ❌ Needs new page + DB tables | **Phase 3** |
-| 9 | Work status — employee wise & branch wise | ❌ Needs new feature | **Phase 3** |
-| 10 | Extensive analytics, user-friendly | ⚠️ Reports page exists (115KB) | **Phase 2** |
-| 11 | Support for employees, sales, operations, clients | ⚠️ Basic roles exist | **Phase 4** |
-| 12 | Employee feedback | ❌ Needs new feature | **Phase 4** |
-| 13 | Work orders 24/7 | ❌ Needs new module | **Phase 4** (CRM side) + **Phase 6** (WhatsApp bot intake) |
-| 14 | WhatsApp AI chatbot | ⚠️ Chatbot.tsx is basic AI chat | **Phase 6** (de-prioritized) |
-| 15 | Work & sales reports | ⚠️ Reports exists, needs enhancement | **Phase 2** |
-| 16 | Super admin updates/announcements | ❌ Needs new feature | **Phase 3** |
-| 17 | Services — create, customize, pricing | ✅ ServiceManagement.tsx exists | **Phase 1** (enhance) |
-| 18 | Revenue generation, invoice storing, policies | ⚠️ InvoicePDF exists, no storage | **Phase 2** |
-
----
-
-## Proposed Changes
-
-### Phase 1: NEXORA-Style UI Overhaul + Foundation Enhancements
-**Goal**: Transform the visual identity to match the NEXORA reference while enhancing existing modules and adding city management.
+#### Files Modified:
+| Action | File |
+|--------|------|
+| CREATE | `.env` |
+| CREATE | `lib/env.ts` |
+| MODIFY | `.gitignore` |
+| MODIFY | `lib/supabaseClient.ts` |
+| MODIFY | `lib/whatsappClient.ts` |
+| MODIFY | `components/AICopilot.tsx` |
+| MODIFY | `pages/WhatsAppDashboard.tsx` |
+| DELETE | `env.tsx` |
 
 ---
 
-#### Design System Refresh
+### 1.2 Dead File Cleanup
+**Time:** 30 minutes
 
-##### [MODIFY] [index.css](file:///d:/24efilings%20CRM/index.css)
-- Complete dark-theme overhaul with NEXORA-inspired color palette
-- Glassmorphism utility classes (`glass-card`, `glass-panel`, `glass-sidebar`)
-- New CSS variables for gradient backgrounds, glow effects, card borders
-- Premium scrollbar styling for dark mode
-- Micro-animation keyframes (fade-up, slide-in, pulse-glow, shimmer)
+#### Tasks:
+- [ ] Delete empty/dead files:
+  - `components/Dashboard.tsx` (0 bytes)
+  - `components/DashboardMetrics.tsx` (0 bytes)
+  - `App.tsx.backup` (stale backup)
+  - `backend/server.js` (blank placeholder)
+  - `backend/package.json` (unused)
+- [ ] Delete one-off utility scripts (after confirming no longer needed):
+  - `clean.cjs`, `clean2.py`, `clean3.py`
+  - `fix.py`, `migrate_app.py`
+  - `debug_data.js`, `update_users.js`, `update_supabase_types.cjs`
+- [ ] Verify no imports reference deleted files
+- [ ] Remove `backend/` directory entirely
 
-##### [MODIFY] [tailwind.config.js](file:///d:/24efilings%20CRM/tailwind.config.js)
-- Extended color palette with curated dark-mode colors (slate-900/950 base, blue/violet accents)
-- Custom backdrop-blur and glass transparency scales
-- Animation timing functions and duration presets
-- Typography: Inter (body) + Outfit (headings) from Google Fonts
-
-##### [NEW] `components/ui/GlassCard.tsx`
-- Reusable glassmorphic card component with gradient borders
-- Hover glow effects and subtle animations
-- Variants: `default`, `stat`, `chart`, `activity`
-
-##### [NEW] `components/ui/StatCard.tsx`
-- NEXORA-style metric cards (Total Revenue, Open Leads, Win Rate, etc.)
-- Sparkline mini-charts using Recharts
-- Trend indicators (↑ +14.6%, ↓ -3.2%) with color-coded badges
-- Animated number counters
-
-##### [NEW] `components/ui/AnimatedCounter.tsx`
-- Smooth number animation component for dashboard metrics
-- Supports currency formatting (₹), percentages, and plain numbers
-
----
-
-#### Sidebar & Navigation Overhaul
-
-##### [MODIFY] [Sidebar.tsx](file:///d:/24efilings%20CRM/components/Sidebar.tsx)
-- NEXORA-style dark glassmorphic sidebar with blur backdrop
-- Collapsible sidebar with smooth animations (expanded/icon-only modes)
-- Grouped navigation sections with section headers (e.g., "Core", "Analytics", "Management", "Communication")
-- Active state with gradient highlight and left border indicator
-- User profile card at bottom with online status indicator
-- Quick search bar at top (⌘K shortcut)
-- Badge counts with animated pulse for new items
-- Add nav items for all new pages: Cities, Reminders, Work Status, Feedback, Work Orders, Support, Announcements, Revenue, Performance, Invoices
-
-##### [MODIFY] [Header.tsx](file:///d:/24efilings%20CRM/components/Header.tsx)
-- Slim top bar with breadcrumb navigation
-- Global search with command palette (⌘K)
-- Notification bell with unread count badge
-- Quick-action buttons (+ New Lead, + New Task)
-- User avatar dropdown with settings/logout
-
-##### [MODIFY] [Layout.tsx](file:///d:/24efilings%20CRM/components/Layout.tsx)
-- Responsive layout with collapsible sidebar
-- Smooth page transitions using Framer Motion
-- Dark gradient background (deep navy → slate-950)
+#### Files Deleted:
+| File | Reason |
+|------|--------|
+| `components/Dashboard.tsx` | 0 bytes — never implemented |
+| `components/DashboardMetrics.tsx` | 0 bytes — never implemented |
+| `App.tsx.backup` | Stale backup, use git instead |
+| `backend/server.js` | Blank file, no backend server used |
+| `backend/package.json` | Orphaned package.json |
+| `clean.cjs` | One-off migration script |
+| `clean2.py` | One-off migration script |
+| `clean3.py` | One-off migration script |
+| `fix.py` | One-off fix script |
+| `migrate_app.py` | One-off migration script |
+| `debug_data.js` | Debug utility |
+| `update_users.js` | One-off script |
+| `update_supabase_types.cjs` | One-off script |
 
 ---
 
-#### Dashboard Overhaul
+### 1.3 Database Migration System Setup
+**Time:** 4 hours
 
-##### [MODIFY] [DashboardOverview.tsx](file:///d:/24efilings%20CRM/pages/DashboardOverview.tsx)
-- **Greeting Header**: "Good morning, [Name] 👋" with date, + Add Widget button, time-period selector
-- **Top Row**: 4 NEXORA-style stat cards with sparklines and trend badges:
-  - Total Revenue (₹) with % change
-  - Total Leads with conversion indicator
-  - Conversion Rate (%) with trend
-  - Avg. Deal Size (₹) with trend
-- **Row 2**: 
-  - Pipeline Overview (horizontal stacked bar — Qualification, Discovery, Proposal, Negotiation, Closed Won)
-  - Revenue Forecast (area chart with gradient fill, actual vs projected)
-  - Recent Activities (avatar-based timeline feed)
-- **Row 3**: Branch-wise revenue comparison, Top performers leaderboard, Upcoming reminders
-- All cards use glassmorphic styling with hover effects
+#### Tasks:
+- [ ] Initialize Supabase CLI in the project:
+  ```bash
+  npx supabase init
+  ```
+- [ ] Create a consolidated baseline migration from all 74 SQL files:
+  ```
+  supabase/migrations/
+  ├── 00001_baseline_profiles.sql
+  ├── 00002_baseline_leads.sql
+  ├── 00003_baseline_customers.sql
+  ├── 00004_baseline_activities_tasks.sql
+  ├── 00005_baseline_documents_notifications.sql
+  ├── 00006_baseline_services_offers.sql
+  ├── 00007_baseline_branches_cities.sql
+  ├── 00008_baseline_invoices.sql
+  ├── 00009_baseline_announcements.sql
+  ├── 00010_baseline_support_tickets.sql
+  ├── 00011_baseline_work_orders.sql
+  ├── 00012_baseline_feedback.sql
+  ├── 00013_baseline_whatsapp.sql
+  ├── 00014_baseline_web_modules.sql
+  ├── 00015_baseline_assets.sql
+  ├── 00016_baseline_rls_policies.sql
+  ├── 00017_baseline_triggers_functions.sql
+  ├── 00018_baseline_storage_buckets.sql
+  ├── 00019_baseline_settings.sql
+  ├── 00020_baseline_payment_sequences.sql
+  ```
+- [ ] Move all 74 root-level SQL files into `sql_archive/` (don't delete — keep for reference)
+- [ ] Add `sql_archive/` to `.gitignore`
+- [ ] Document migration process in `supabase/README.md`
+- [ ] Generate proper Supabase TypeScript types:
+  ```bash
+  npx supabase gen types typescript --project-id YOUR_PROJECT_ID > types/database.types.ts
+  ```
 
----
-
-#### City Management Page (Requirement #1)
-
-##### [NEW] `pages/CityManagement.tsx`
-- **Stat cards at top**: Total Cities, Active Cities, States Covered
-- Create/Edit city modal (city name, city code, state, status toggle)
-- Searchable, sortable data table with columns: City Name, Code, State, Branches Count, Status, Actions
-- Bulk actions (activate/deactivate)
-- City detail: expand to see branches in that city
-
-##### [NEW] SQL: `SETUP_CITIES_UI.sql`
-- Ensure `cities` table exists with proper schema (if not already created by `SETUP_CITIES_MODULE.sql`)
-- RLS policies: Super Admin full access, Admin read-only
-- Indexes on `city_name`, `state`
-
-##### [MODIFY] [App.tsx](file:///d:/24efilings%20CRM/App.tsx)
-- Add route: `/cities` → `CityManagement`
-- Add lazy import for `CityManagement`
-- Add page config entry
-
----
-
-#### Enhanced Branch Management (Requirement #2)
-
-##### [MODIFY] [BranchManagement.tsx](file:///d:/24efilings%20CRM/pages/BranchManagement.tsx)
-- NEXORA-style stat cards at top: Total Branches, Active Branches, Total Employees across branches, Total Revenue across branches
-- Branch cards with glassmorphic styling: logo, manager info, employee count, revenue at-a-glance
-- Create branch modal with **city selection dropdown** (linked to cities table)
-- Branch detail expansion: employee list, revenue chart, recent activity
-
----
-
-#### Enhanced Employee/User Management (Requirement #3)
-
-##### [MODIFY] [UserManagement.tsx](file:///d:/24efilings%20CRM/pages/UserManagement.tsx)
-- Stat cards: Total Employees, Active, By Department breakdown
-- Enhanced user cards with role badges, branch info, online status
-- Department-wise filtering tabs (Sales, Operations, HR, CA, Others)
-- Quick-view drawer for employee profile with activity history
+#### Files Modified:
+| Action | File |
+|--------|------|
+| CREATE | `supabase/migrations/00001_baseline_profiles.sql` ... `00020_baseline_payment_sequences.sql` |
+| CREATE | `supabase/README.md` |
+| CREATE | `types/database.types.ts` |
+| MOVE | 74 root `.sql` files → `sql_archive/` |
+| MODIFY | `.gitignore` |
 
 ---
 
-#### Enhanced Services (Requirement #17)
+### 1.4 Split `useApi.ts` (135KB → 15 domain hooks)
+**Time:** 8 hours  
+**Risk:** HIGH — this is the backbone. Must be done carefully with testing after each extraction.
 
-##### [MODIFY] [ServiceManagement.tsx](file:///d:/24efilings%20CRM/pages/ServiceManagement.tsx)
-- Glassmorphic redesign
-- Service catalog with pricing display
-- Bulk price update capability
-- Service usage count (how many leads/customers use each service)
-
----
-
-#### Enhanced Customers & Documents (Requirements #6, #7)
-
-##### [MODIFY] [Customers.tsx](file:///d:/24efilings%20CRM/pages/Customers.tsx) & [CustomerDetail.tsx](file:///d:/24efilings%20CRM/pages/CustomerDetail.tsx)
-- Glassmorphic redesign matching NEXORA contact detail view
-- Customer profile card with AI summary section
-- Document tab with drag-and-drop upload, download buttons, verification status badges
-- Timeline view of all customer interactions
-
----
-
-### Phase 2: Revenue Analytics, Reports & Invoice System
-**Goal**: Comprehensive revenue tracking with branch-wise filters, enhanced reports, and invoice storage.
-
----
-
-#### Revenue Dashboard (Requirement #4)
-
-##### [NEW] `pages/RevenueDashboard.tsx`
-- **Branch-wise revenue table** with expandable rows showing employee-level breakdown
-- **Time filter bar**: Today | This Week | This Month | This Quarter | This Year | Custom Date Range picker
-- **Revenue charts**:
-  - Area chart: Revenue trend over time (daily/weekly/monthly granularity)
-  - Bar chart: Branch-wise comparison (side-by-side)
-  - Pie/Donut chart: Service-wise revenue distribution
-  - Stacked bar: Revenue breakdown by payment method
-- **KPI stat cards**: Total Revenue, Revenue per Branch (avg), Growth Rate vs previous period, Outstanding Dues
-- **Export**: Download as Excel (.xlsx) or PDF
-- **Drill-down**: Click any branch → see employee-level revenue → click employee → see lead-level revenue
-
-##### [NEW] `components/charts/RevenueChart.tsx`
-- Reusable chart component with gradient fills, animated transitions, interactive tooltips
-- Supports area, bar, pie, and stacked chart modes
-
----
-
-#### Employee Performance & Sales Conversions (Requirement #5)
-
-##### [NEW] `pages/EmployeePerformance.tsx`
-- **Leaderboard view**: Ranked employees by conversion rate, revenue generated, tasks completed
-- **Individual performance card** (click any employee):
-  - Leads assigned vs converted (funnel chart)
-  - Revenue generated (bar chart over time)
-  - Average deal size, average response time
-  - Activity score (calls + emails + notes + document uploads)
-  - Task completion rate
-- **Comparison mode**: Select 2-3 employees for side-by-side comparison
-- **Time-period filters**: Same as revenue dashboard (day/week/month/quarter/year/custom)
-- **Branch filter**: View performance for a specific branch
-
-##### [MODIFY] [SalesExecutivePerformanceModal.tsx](file:///d:/24efilings%20CRM/components/SalesExecutivePerformanceModal.tsx)
-- Glassmorphic redesign
-- Add historical performance trend chart
-- Link to full EmployeePerformance page
-
----
-
-#### Enhanced Reports (Requirements #10, #15)
-
-##### [MODIFY] [Reports.tsx](file:///d:/24efilings%20CRM/pages/Reports.tsx)
-- **Restructure into tabbed sections**:
-  1. **Sales Reports**: Lead conversion funnel, win/loss analysis, source attribution, pipeline velocity
-  2. **Revenue Reports**: Branch-wise, service-wise, employee-wise revenue with all time filters
-  3. **Work Reports**: Task completion rates, average turnaround time, SLA compliance
-  4. **Employee Reports**: Performance trends, activity patterns, feedback scores (Phase 4 data)
-  5. **Customer Reports**: Retention analysis, lifetime value, service popularity
-- **Export all reports**: Excel + PDF
-- **Glassmorphic charts** with NEXORA styling
-
----
-
-#### Invoice Storage System (Requirement #18)
-
-##### [NEW] `pages/InvoiceManagement.tsx`
-- Invoice list with search, filter by status (Paid, Pending, Overdue, Cancelled)
-- Invoice detail view with embedded PDF preview
-- **Create invoice** from customer/lead data (auto-populate items from service sets)
-- **Auto-save** generated PDF to Supabase Storage, store metadata in DB
-- Invoice numbering: auto-increment (e.g., `INV-2026-0001`)
-- Payment reconciliation: link payments to invoices
-- Overdue invoice alerts
-
-##### [NEW] SQL: `SETUP_INVOICES_TABLE.sql`
+#### New File Structure:
 ```
-Tables:
-- invoices: id, invoice_number, customer_id, lead_id, branch_id, 
-  items (jsonb), subtotal, tax_amount, discount_amount, total_amount,
-  status (draft/sent/paid/overdue/cancelled), due_date, paid_date,
-  pdf_url (Supabase Storage link), notes, created_by, created_at, updated_at
-
-- invoice_payments: id, invoice_id, payment_id, amount, created_at
+hooks/
+├── api/
+│   ├── useApiCore.ts              # Supabase client, cache manager, realtime subscription, shared types
+│   ├── useLeadsApi.ts             # addLead, updateLead, updateMultipleLeads, deleteMultipleLeads, fetchLeadDetails
+│   ├── useCustomersApi.ts         # addCustomer, updateCustomer, deleteCustomer, deleteCustomers, importCustomers
+│   ├── useUsersApi.ts             # updateUser, transferUser, deleteMultipleUsers
+│   ├── useTasksApi.ts             # addTaskToLead, updateTaskOnLead, deleteTaskFromLead
+│   ├── useActivitiesApi.ts        # addActivityToLead, fetchActivities
+│   ├── useDocumentsApi.ts         # uploadDocument, deleteDocument, updateDocumentStatus
+│   ├── useServicesApi.ts          # addService, updateService, deleteService, addSubService, updateSubService, deleteSubService
+│   ├── useInvoicesApi.ts          # addInvoice, updateInvoice, deleteInvoice, addInvoicePayment
+│   ├── useOffersApi.ts            # addOffer, updateOffer, deleteOffer, incrementOfferUsage
+│   ├── useWebApi.ts               # addWebLead, updateWebLead, convertWebLeadToCrmLead, blogs CRUD, testimonials CRUD
+│   ├── useWorkOrdersApi.ts        # addWorkOrder, updateWorkOrder, deleteWorkOrder, work order notes
+│   ├── useSupportApi.ts           # tickets CRUD, comments, KB articles, employee feedback
+│   ├── useWhatsAppApi.ts          # conversations, messages, templates CRUD
+│   ├── useBranchesApi.ts          # branches CRUD, cities CRUD
+│   ├── useNotificationsApi.ts     # addNotification, markAsRead, announcements CRUD
+│   ├── useSettingsApi.ts          # org settings, policies, reminders
+│   └── index.ts                   # Re-export combined useApi hook for backward compatibility
+├── useDashboardMetrics.ts         # (keep as-is, already separate)
+├── useMockData.ts                 # (keep as-is)
+└── usePagination.ts               # (keep as-is)
 ```
 
-##### [MODIFY] [InvoicePDF.tsx](file:///d:/24efilings%20CRM/components/InvoicePDF.tsx)
-- After PDF generation, auto-upload to Supabase Storage bucket
-- Save URL reference to `invoices.pdf_url`
-- Download button that fetches from storage
+#### Extraction Strategy:
+1. Create `hooks/api/useApiCore.ts` — extract Supabase client init, localStorage cache logic, realtime channel setup, and shared state types
+2. Extract one domain at a time, starting with the most independent:
+   - `useSettingsApi.ts` (fewest dependencies)
+   - `useBranchesApi.ts`
+   - `useServicesApi.ts`
+   - `useOffersApi.ts`
+   - `useNotificationsApi.ts`
+   - `useWebApi.ts`
+   - `useWhatsAppApi.ts`
+   - `useSupportApi.ts`
+   - `useWorkOrdersApi.ts`
+   - `useInvoicesApi.ts`
+   - `useDocumentsApi.ts`
+   - `useActivitiesApi.ts`
+   - `useTasksApi.ts`
+   - `useUsersApi.ts`
+   - `useCustomersApi.ts`
+   - `useLeadsApi.ts` (most dependencies — do last)
+3. Create `hooks/api/index.ts` that combines all hooks into a single `useApi()` for backward compatibility
+4. Test after each extraction — verify the page that uses those functions still works
 
-##### [NEW] `pages/PoliciesManagement.tsx`
-- Company policies CRUD (payment terms, refund policy, service agreements)
-- Policy templates that auto-attach to invoices
-- Version history for policy changes
-
----
-
-### Phase 3: Reminders, Task Management & Super Admin Updates
-**Goal**: Comprehensive reminder system, work status tracking, and admin communications.
-
----
-
-#### Reminders System (Requirement #8)
-
-##### [NEW] `pages/Reminders.tsx`
-- **Two-tab layout**:
-  1. **Personal Reminders**: User creates for themselves
-     - Title, description, due date/time
-     - Priority (High/Medium/Low) with color coding
-     - Recurring option (daily, weekly, monthly)
-     - Status: Pending → Snoozed → Completed / Overdue
-  2. **Task-Assigned Reminders**: 
-     - Admins/Super Admins assign tasks to employees
-     - Assignee gets a reminder notification
-     - Assigner can track completion status
-     - Category: Follow-up, Document Collection, Payment Reminder, Client Meeting, Internal Task
-- **Views**:
-  - List view (default): sorted by due date
-  - Calendar view: day/week/month calendar with reminder dots
-  - Kanban view: columns by status (Pending | Today | Overdue | Completed)
-- **Auto birthday greetings**: System creates auto-reminders for customer/employee DOBs (leverages existing `birthdayScheduler.ts`)
-- **Notification integration**: Bell icon alerts + browser notifications for due/overdue reminders
-- **Filters**: By type, priority, status, assignee, date range
-
-##### [NEW] SQL: `SETUP_REMINDERS_TABLE.sql`
-```
-Tables:
-- reminders: id, user_id (owner), title, description, 
-  type ('personal' | 'task_assigned'), due_date, due_time,
-  priority ('high' | 'medium' | 'low'), 
-  status ('pending' | 'snoozed' | 'completed' | 'overdue'),
-  is_recurring, recurrence_pattern (daily/weekly/monthly),
-  assigned_by (FK profiles), assigned_to (FK profiles),
-  related_lead_id, related_customer_id, branch_id,
-  completed_at, snoozed_until, created_at, updated_at
-
-RLS: Users see own reminders + reminders assigned to them.
-     Admins see all reminders in their branch.
-     Super Admin sees all.
-```
-
-##### [MODIFY] [birthdayScheduler.ts](file:///d:/24efilings%20CRM/lib/birthdayScheduler.ts)
-- Create reminder records (not just notifications) for upcoming birthdays
-- Configurable greeting message templates
-- Support both customer DOB and employee DOB
-
----
-
-#### Work Status Tracking (Requirement #9)
-
-##### [NEW] `pages/WorkStatus.tsx`
-- **Kanban board**: Drag-and-drop tasks across columns: To Do → In Progress → Review → Done
-- **Employee-wise view**: Select an employee → see all their tasks with status, workload bar
-- **Branch-wise view**: Aggregate task metrics per branch in a summary table
-  - Columns: Branch Name, Total Tasks, Completed, In Progress, Overdue, Completion Rate
-- **Metrics panel** at top:
-  - Total tasks (all statuses)
-  - Completion rate (%)
-  - Average turnaround time
-  - Overdue count (with red badge)
-- **Filters**: By employee, branch, priority, date range, category
-- **Gantt chart** (optional toggle): Timeline view with task bars and dependencies
-
-##### Enhanced Tasks Schema
-- Extend existing `tasks` table with: `assigned_to`, `status` (todo/in_progress/review/done), `branch_id`, `category` (work_order/internal/client_task), `estimated_hours`, `actual_hours`
-- New SQL migration: `ENHANCE_TASKS_TABLE.sql`
-
----
-
-#### Super Admin Updates & Announcements (Requirement #16)
-
-##### [NEW] `pages/Announcements.tsx`
-- **Create announcement** (Super Admin only):
-  - Title, rich-text content (markdown editor)
-  - Target audience: All Users, specific roles, specific branches
-  - Type: General, Policy Update, Feature Release, Urgent
-  - Pin option (stays at top)
-  - Expiry date (optional)
-- **Announcement feed**: Chronological list with type badges and read/unread indicators
-- **Read receipts**: Track which users have seen each announcement
-- **Employees view**: Read-only feed with mark-as-read
-
-##### [NEW] SQL: `SETUP_ANNOUNCEMENTS_TABLE.sql`
-```
-Tables:
-- announcements: id, title, content, type, target_roles (text[]),
-  target_branches (uuid[]), is_pinned, expires_at, 
-  created_by (FK profiles), created_at, updated_at
-
-- announcement_reads: id, announcement_id (FK), user_id (FK), read_at
-
-RLS: All authenticated users can read announcements targeting their role/branch.
-     Only Super Admin can create/edit/delete.
-```
-
-##### [MODIFY] [DashboardOverview.tsx](file:///d:/24efilings%20CRM/pages/DashboardOverview.tsx)
-- Add pinned announcements banner/carousel at top of dashboard
-- "New announcements" indicator if unread announcements exist
-
----
-
-### Phase 4: Support, Feedback & Work Orders (CRM Side)
-**Goal**: Internal support system, employee feedback, and CRM-side work order management.
-
-> [!NOTE]
-> Work orders are managed by employees in this phase. Customer-facing submission via WhatsApp bot comes in Phase 6.
-
----
-
-#### Support System (Requirement #11)
-
-##### [NEW] `pages/Support.tsx`
-- **Ticket-based support** for employees, sales, operations, clients
-- **Create ticket**: Category (Technical, Account, Service, General), priority, description, attachments
-- **Ticket lifecycle**: Open → Assigned → In Progress → Resolved → Closed
-- **Ticket list**: Filterable by status, priority, category, assignee
-- **Ticket detail view**: Conversation thread (comments), status history, SLA timer
-- **Knowledge base tab**: FAQ articles for common questions (Super Admin creates)
-- **SLA tracking**: Auto-escalate if response time > threshold
-
-##### [NEW] SQL: `SETUP_SUPPORT_TICKETS_TABLE.sql`
-```
-Tables:
-- support_tickets: id, title, description, category, priority, status,
-  created_by (FK), assigned_to (FK), branch_id,
-  attachments (text[]),
-  sla_response_deadline, sla_resolution_deadline,
-  first_response_at, resolved_at, closed_at,
-  created_at, updated_at
-
-- ticket_comments: id, ticket_id (FK), user_id (FK), content, 
-  attachments (text[]), created_at
-
-- knowledge_base: id, title, content, category, 
-  created_by (FK), is_published, created_at, updated_at
+#### Backward Compatibility Pattern (`hooks/api/index.ts`):
+```typescript
+export function useApi() {
+  const core = useApiCore();
+  const leads = useLeadsApi(core);
+  const customers = useCustomersApi(core);
+  const users = useUsersApi(core);
+  // ... all other hooks
+  
+  return {
+    ...core,
+    ...leads,
+    ...customers,
+    ...users,
+    // ... spread all
+  };
+}
 ```
 
 ---
 
-#### Employee Feedback (Requirement #12)
+### 1.5 Split `CreateLead.tsx` (1,541 lines → 5 components)
+**Time:** 4 hours
 
-##### [NEW] `pages/EmployeeFeedback.tsx`
-- **Feedback dashboard** (Admin/Super Admin view):
-  - All employees with average scores, recent feedback status
-  - Filter by branch, department, period
-- **Give feedback** (Manager → Employee):
-  - Rating categories: Communication, Technical Skills, Teamwork, Punctuality, Customer Handling, Initiative
-  - Each category: 1-5 star rating + text comment
-  - Overall rating auto-calculated
-  - Period selection (Q1/Q2/Q3/Q4 + Year)
-- **Receive feedback** (Employee view):
-  - View feedback received with scores
-  - Trend chart of scores over quarters
-  - Acknowledge feedback
-- **Self-assessment**: Employee fills out same form for themselves
-- **Anonymous peer feedback** (optional): Employees can give anonymous feedback to peers
-
-##### [NEW] SQL: `SETUP_FEEDBACK_TABLE.sql`
+#### New File Structure:
 ```
-Tables:
-- employee_feedback: id, employee_id (FK), reviewer_id (FK),
-  feedback_type ('self' | 'manager' | 'peer'),
-  period (e.g., 'Q1-2026'), 
-  ratings (jsonb: {communication: 4, technical: 5, ...}),
-  overall_score (computed), comments (text),
-  is_anonymous (bool), status ('draft' | 'submitted' | 'acknowledged'),
-  created_at, updated_at
-
-- feedback_templates: id, name, categories (jsonb), 
-  created_by (FK), is_active, created_at
+pages/
+├── CreateLead.tsx                      # Orchestrator (imports below, manages state)
+├── create-lead/
+│   ├── ClientInfoSection.tsx           # Personal/business details form fields
+│   ├── ServiceSetBuilder.tsx           # Service selection, sub-services, quantity
+│   ├── PricingCalculator.tsx           # Discount, tax, totals computation
+│   ├── LiveProformaPreview.tsx         # Real-time invoice preview panel
+│   ├── ReferralSection.tsx             # Referral source (customer/employee)
+│   └── useCreateLeadForm.ts           # Form state management hook
 ```
+
+#### Extraction Details:
+| New File | Lines (approx) | Extracts From |
+|----------|:-:|---|
+| `ClientInfoSection.tsx` | ~250 | Name, email, phone, PAN, address fields, country select |
+| `ServiceSetBuilder.tsx` | ~350 | Service dropdown, sub-service multi-select, quantity inputs, add/remove service sets |
+| `PricingCalculator.tsx` | ~200 | Discount logic, GST calculation, total computation, offer code application |
+| `LiveProformaPreview.tsx` | ~200 | Live invoice preview panel that reacts to form state |
+| `ReferralSection.tsx` | ~100 | Referral by customer/employee selection |
+| `useCreateLeadForm.ts` | ~300 | All useState declarations, validation logic, submit handler, reference number generation |
 
 ---
 
-#### Work Orders — CRM Side (Requirement #13)
+### 1.6 Split `LeadDetail.tsx` (1,141 lines → tab components)
+**Time:** 3 hours
 
-##### [NEW] `pages/WorkOrders.tsx`
-- **Work order list**: All orders with status filters
-- **Create work order** (employee creates on behalf of customer, or auto-created from WhatsApp in Phase 6):
-  - Customer selection (from existing customers or new)
-  - Service(s) selection with pricing
-  - Description, priority, estimated completion date
-  - Branch assignment
-- **Work order lifecycle**: Submitted → Accepted (auto) → Assigned → In Progress → Completed → Invoiced
-- **Auto-accept**: All work orders are immediately accepted (24/7 availability)
-- **Assignment**: Auto-assign to available employee in the branch, or manual assignment
-- **SLA timer**: Track turnaround time per service type
-- **Link to invoices**: Generate invoice from completed work order (Phase 2 invoice system)
-
-##### [NEW] SQL: `SETUP_WORK_ORDERS_TABLE.sql`
+#### New File Structure:
 ```
-Tables:
-- work_orders: id, reference_number (auto: WO-2026-0001), 
-  customer_id (FK), customer_name, customer_phone,
-  service_id (FK), sub_service_id (FK),
-  description, priority ('urgent' | 'normal' | 'low'),
-  status ('submitted' | 'accepted' | 'assigned' | 'in_progress' | 'completed' | 'invoiced'),
-  assigned_to (FK profiles), branch_id (FK),
-  estimated_completion, actual_completion,
-  total_amount, invoice_id (FK invoices, nullable),
-  source ('crm' | 'whatsapp' | 'web'),
-  created_by (FK, nullable for bot-created),
-  created_at, updated_at
-
-- work_order_notes: id, work_order_id (FK), user_id (FK), 
-  content, created_at
+pages/
+├── LeadDetail.tsx                      # Tab shell, lead header, status stepper
+├── lead-detail/
+│   ├── LeadOverviewTab.tsx             # Contact info, business details, score card
+│   ├── LeadActivitiesTab.tsx           # Activity timeline with add note
+│   ├── LeadDocumentsTab.tsx            # Document upload, status, verification
+│   ├── LeadTasksTab.tsx               # Task list, create/edit/complete
+│   ├── LeadPaymentsTab.tsx            # Payment history, add payment, receipts
+│   ├── LeadScoreBreakdown.tsx         # Visual score breakdown card
+│   └── LeadStatusStepper.tsx          # Pipeline stage stepper bar
 ```
 
 ---
 
-### Phase 5: Polish, AI Copilot & Optimization
-**Goal**: AI-powered insights, performance optimization, and final UI polish.
+### 1.7 Form Validation System
+**Time:** 4 hours
 
----
+#### Tasks:
+- [ ] Install dependencies:
+  ```bash
+  npm install react-hook-form zod @hookform/resolvers
+  ```
+- [ ] Create validation schemas:
+  ```
+  lib/
+  ├── validations/
+  │   ├── leadSchema.ts          # Lead form validation (phone regex, PAN regex, email)
+  │   ├── customerSchema.ts      # Customer form validation
+  │   ├── userSchema.ts          # User creation/edit validation
+  │   ├── invoiceSchema.ts       # Invoice validation
+  │   ├── serviceSchema.ts       # Service/sub-service validation
+  │   └── commonSchemas.ts       # Shared schemas (email, phone, PAN, GSTIN, Aadhar)
+  ```
+- [ ] Create reusable form field components:
+  ```
+  components/ui/
+  ├── FormField.tsx              # Label + Input + Error message wrapper
+  ├── FormSelect.tsx             # Label + Select + Error wrapper
+  ├── FormTextarea.tsx           # Label + Textarea + Error wrapper
+  ├── FormDatePicker.tsx         # Label + Calendar + Error wrapper
+  ```
+- [ ] Migrate forms one at a time:
+  1. `components/UserForm.tsx` (simplest)
+  2. `components/CustomerForm.tsx`
+  3. `pages/create-lead/` components
+  4. All modal forms across pages
 
-#### AI Copilot Panel (inspired by NEXORA reference)
+#### Common Validation Schemas (`lib/validations/commonSchemas.ts`):
+```typescript
+import { z } from 'zod';
 
-##### [NEW] `components/AICopilot.tsx`
-- Slide-out panel on right side of dashboard (toggle with button)
-- Powered by Google Gemini AI (`@google/genai` already in dependencies)
-- **Sections**:
-  - **Deal Insights**: "Lead X is 85% likely to convert based on activity and engagement"
-  - **Action Items**: "You have 5 tasks due today" with quick links
-  - **Smart Summary**: "Your team closed 12 deals this month, 20% more than last month"
-  - **Ask anything**: Natural language query box — "Show me revenue for LB Nagar branch this week"
-- Context-aware: Uses current page data to generate relevant insights
+export const phoneSchema = z.string()
+  .regex(/^[6-9]\d{9}$/, 'Enter valid 10-digit Indian mobile number');
 
-##### [MODIFY] [DashboardOverview.tsx](file:///d:/24efilings%20CRM/pages/DashboardOverview.tsx)
-- Add AI Copilot toggle button in header area
-- Integrate copilot panel alongside dashboard
+export const panSchema = z.string()
+  .regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Enter valid PAN (e.g., ABCDE1234F)');
 
----
+export const gstinSchema = z.string()
+  .regex(/^\d{2}[A-Z]{5}\d{4}[A-Z]{1}\d[Z]{1}[A-Z\d]{1}$/, 'Enter valid GSTIN');
 
-#### Dashboard Widget Customization
+export const aadharSchema = z.string()
+  .regex(/^\d{12}$/, 'Enter valid 12-digit Aadhar number');
 
-##### [NEW] `components/dashboards/WidgetGrid.tsx`
-- Drag-and-drop dashboard widget layout
-- Widget types: KPI stat card, chart, activity feed, calendar, reminders, announcements
-- Users can show/hide widgets and rearrange layout
-- Save layout preference per user in Supabase (profiles table or separate `user_preferences` table)
-
----
-
-#### Performance Optimization
-
-##### Across all pages:
-- **React Query caching**: Review and optimize stale times, garbage collection
-- **Virtual scrolling**: Add TanStack Virtual for large data tables (leads, customers, invoices)
-- **Image optimization**: Lazy loading for avatars and branch logos
-- **Bundle optimization**: Review code splitting, ensure all pages are lazy-loaded
-- **Supabase optimization**: 
-  - Add database indexes on frequently queried columns
-  - Materialized views for expensive report queries
-  - Connection pooling configuration
-- **Lighthouse audit**: Target 90+ performance score
-
----
-
-### Phase 6: WhatsApp AI Chatbot & Bot-Driven Work Orders (De-prioritized)
-**Goal**: WhatsApp Business API integration with AI-powered auto-responses and automated work order intake.
-
-> [!NOTE]
-> This phase requires a **WhatsApp Business API account** (via Meta Cloud API, or a provider like Twilio/360dialog). Set up the account before starting this phase.
-
----
-
-#### WhatsApp Integration (Requirement #14)
-
-##### [NEW] `supabase/functions/whatsapp-webhook/index.ts`
-- Supabase Edge Function as webhook endpoint for Meta Cloud API
-- **Inbound message handling**:
-  - Parse incoming WhatsApp messages
-  - Route to AI engine (Google Gemini) for auto-response
-  - Create work orders from customer messages (Requirement #13 bot intake)
-  - Send auto-replies with service information, pricing, status updates
-- **Outbound message handling**:
-  - Send template messages (birthday greetings, payment reminders, status updates)
-  - Broadcast messages (with opt-in tracking)
-
-##### [NEW] `pages/WhatsAppDashboard.tsx`
-- **Conversation list**: All WhatsApp conversations with customer name, last message, timestamp
-- **Chat view**: Full message history with sent/delivered/read status
-- **AI response suggestions**: Gemini generates suggested replies, employee can approve/edit/send
-- **Template library**: Pre-approved WhatsApp message templates
-- **Broadcast**: Send bulk messages to customer segments
-- **Analytics**: Response rate, average response time, conversations resolved by bot vs human
-
-##### [MODIFY] [Chatbot.tsx](file:///d:/24efilings%20CRM/components/Chatbot.tsx)
-- Evolve into a unified communication panel
-- Tab 1: Internal AI Assistant (existing)
-- Tab 2: WhatsApp conversations (new)
-- Customer context sidebar: Show lead/customer info alongside chat
-
-##### [NEW] `lib/whatsappClient.ts`
-- WhatsApp Business API client wrapper
-- Functions: sendTextMessage, sendTemplate, sendMedia, markAsRead
-- Rate limiting and retry logic
-- Error handling for API failures
-
-##### [NEW] SQL: `SETUP_WHATSAPP_INTEGRATION.sql`
-```
-Tables:
-- whatsapp_conversations: id, customer_phone, customer_name, customer_id (FK nullable),
-  last_message_at, unread_count, assigned_to (FK profiles),
-  status ('active' | 'resolved' | 'archived'), created_at
-
-- whatsapp_messages: id, conversation_id (FK), direction ('inbound' | 'outbound'),
-  content, message_type ('text' | 'image' | 'document' | 'template'),
-  whatsapp_message_id (Meta's ID), status ('sent' | 'delivered' | 'read' | 'failed'),
-  is_ai_generated (bool), template_name, created_at
-
-- whatsapp_templates: id, name, content, variables (text[]),
-  category ('marketing' | 'utility' | 'authentication'),
-  status ('approved' | 'pending' | 'rejected'),
-  created_by (FK), created_at
-```
-
-#### Work Order Bot Intake (Requirement #13 — WhatsApp side)
-
-##### [MODIFY] `supabase/functions/whatsapp-webhook/index.ts`
-- When AI detects a customer wants a service:
-  1. Extract: customer name, phone, service requested, description
-  2. Auto-create a `work_order` record with `source = 'whatsapp'` and `status = 'accepted'`
-  3. Auto-assign to available employee in the relevant branch
-  4. Send confirmation message to customer via WhatsApp
-  5. Notify assigned employee via CRM notification
-- Conversational flow: Bot asks clarifying questions if service type is ambiguous
-
----
-
-## Database Changes Summary
-
-| Table | Phase | Purpose |
-|-------|-------|---------|
-| `cities` (new page, table may exist) | 1 | City management UI |
-| `invoices` | 2 | Invoice storage & tracking |
-| `invoice_payments` | 2 | Payment-invoice linkage |
-| `company_policies` | 2 | Policy management |
-| `reminders` | 3 | Personal + task-assigned reminders |
-| `announcements` | 3 | Super admin updates |
-| `announcement_reads` | 3 | Read tracking |
-| `tasks` (enhanced) | 3 | Extended status, assignment fields |
-| `support_tickets` | 4 | Support system |
-| `ticket_comments` | 4 | Support conversation threads |
-| `knowledge_base` | 4 | FAQ/help articles |
-| `employee_feedback` | 4 | Feedback records |
-| `feedback_templates` | 4 | Feedback form templates |
-| `work_orders` | 4 | Work order management |
-| `work_order_notes` | 4 | Work order conversation |
-| `whatsapp_conversations` | 6 | WhatsApp chat threads |
-| `whatsapp_messages` | 6 | Individual messages |
-| `whatsapp_templates` | 6 | Approved message templates |
-
-All tables follow existing patterns: UUID primary keys, RLS policies per role hierarchy, `created_at`/`updated_at` timestamps, proper foreign keys with cascade rules.
-
----
-
-## Updated Navigation Structure
-
-```
-── CORE ──────────────────────────────
-📊  Dashboard
-🏙️  City Management              [NEW - Phase 1]
-🏢  Branch Management             [ENHANCED - Phase 1]
-👥  User Management               [ENHANCED - Phase 1]
-
-── SALES ─────────────────────────────
-📋  All Leads
-➕  Create New Lead
-🎯  My Leads
-🔄  Lead Workflow
-👤  Customers                     [ENHANCED - Phase 1]
-
-── ANALYTICS ─────────────────────────
-💰  Revenue Dashboard             [NEW - Phase 2]
-📈  Employee Performance          [NEW - Phase 2]
-📊  Reports & Analytics           [ENHANCED - Phase 2]
-
-── MANAGEMENT ────────────────────────
-🧾  Invoices & Policies           [NEW - Phase 2]
-⏰  Reminders                     [NEW - Phase 3]
-📌  Work Status                   [NEW - Phase 3]
-📋  Work Orders                   [NEW - Phase 4]
-📢  Announcements                 [NEW - Phase 3]
-
-── PEOPLE ────────────────────────────
-🎫  Support                       [NEW - Phase 4]
-📝  Employee Feedback             [NEW - Phase 4]
-
-── COMMUNICATION ─────────────────────
-💬  WhatsApp                      [NEW - Phase 6]
-🔔  Notifications
-
-── BUSINESS ──────────────────────────
-💳  Payments
-🏷️  Offers & Coupons
-🌐  24eFiling Web (dropdown)
-🛠️  Services                     [ENHANCED - Phase 1]
-⚙️  Settings
+export const emailSchema = z.string().email('Enter valid email address');
 ```
 
 ---
 
-## Verification Plan
+### 1.8 UI Component Gaps
+**Time:** 3 hours
 
-### Per-Phase Build Checks
-- TypeScript compilation: `npx tsc --noEmit`
-- Production build: `npm run build`
-- Vercel deployment preview for each phase
+#### Tasks:
+- [ ] Install Sonner for toast notifications:
+  ```bash
+  npm install sonner
+  ```
+- [ ] Create `components/ui/Toaster.tsx` — global toast provider
+- [ ] Replace all imperative `showToast` prop passing with `toast()` calls from Sonner
+- [ ] Install and create Radix Tooltip:
+  ```bash
+  npm install @radix-ui/react-tooltip
+  ```
+- [ ] Create `components/ui/Tooltip.tsx` — reusable tooltip wrapper
+- [ ] Add tooltips to all icon-only buttons across the app
+- [ ] Replace ALL `window.confirm()` usages with `ConfirmationDialog`:
+  - `pages/PoliciesManagement.tsx`
+  - `pages/TestimonialsManagement.tsx`
+  - `pages/CustomerDetail.tsx` (uses `alert()`)
+  - Any other occurrences
+- [ ] Standardize all charts to Recharts (replace custom SVG charts):
+  - `components/charts/BarChart.tsx` → Recharts `<BarChart>`
+  - `components/charts/DonutChart.tsx` → Recharts `<PieChart>`
+  - `components/charts/FunnelChart.tsx` → Recharts custom funnel
+  - `components/charts/LineChart.tsx` → Recharts `<LineChart>`
 
-### Per-Phase Functional Checks
-
-| Phase | Key Verification |
-|-------|-----------------|
-| **Phase 1** | UI matches NEXORA reference, all existing features still work, city CRUD functional, navigation restructured |
-| **Phase 2** | Revenue dashboard shows accurate branch-wise data with all time filters, invoices created/stored/downloadable, reports restructured |
-| **Phase 3** | Personal + task reminders work with notifications, kanban work status is draggable, announcements display on dashboard |
-| **Phase 4** | Support tickets CRUD with conversation threads, feedback forms submit/aggregate/display, work orders auto-accept and flow through lifecycle |
-| **Phase 5** | AI Copilot generates useful insights from real data, dashboard widgets are customizable, performance score ≥ 90 |
-| **Phase 6** | WhatsApp webhook receives/sends messages, AI generates contextual responses, work orders auto-created from bot conversations |
-
-### Role-Based Testing
-- Log in as **Super Admin**: Verify full access to all modules
-- Log in as **Admin/Branch Manager**: Verify branch-scoped data
-- Log in as **Sales Executive**: Verify assigned-data-only access
-- Verify RLS policies block unauthorized data access
+#### Files Modified:
+| Action | File |
+|--------|------|
+| CREATE | `components/ui/Toaster.tsx` |
+| CREATE | `components/ui/Tooltip.tsx` |
+| MODIFY | `components/charts/BarChart.tsx` (rewrite with Recharts) |
+| MODIFY | `components/charts/DonutChart.tsx` (rewrite with Recharts) |
+| MODIFY | `components/charts/FunnelChart.tsx` (rewrite with Recharts) |
+| MODIFY | `components/charts/LineChart.tsx` (rewrite with Recharts) |
+| MODIFY | ~15 pages (replace window.confirm/alert with components) |
 
 ---
 
-## Estimated Scope
+### 1.9 Storage Bucket Security
+**Time:** 1 hour
 
-| Phase | Description | New/Modified Files | New DB Tables |
-|-------|------------|-------------------|---------------|
-| **Phase 1** | UI Overhaul + Foundation | ~15-20 | 1 (cities UI) |
-| **Phase 2** | Revenue, Reports, Invoices | ~10-12 | 3 |
-| **Phase 3** | Reminders, Work Status, Announcements | ~8-10 | 4 |
-| **Phase 4** | Support, Feedback, Work Orders | ~10-12 | 6 |
-| **Phase 5** | AI Copilot, Polish, Optimization | ~5-8 | 0-1 |
-| **Phase 6** | WhatsApp AI Chatbot | ~6-8 | 3 |
-| **Total** | | **~55-70 files** | **~17 tables** |
+#### Tasks:
+- [ ] Change `documents` bucket from public to private
+- [ ] Change `invoices` bucket from public to private
+- [ ] Keep `avatars` bucket public (profile images need direct URLs)
+- [ ] Update document/invoice access to use Supabase signed URLs:
+  ```typescript
+  const { data } = await supabase.storage
+    .from('documents')
+    .createSignedUrl(filePath, 3600); // 1 hour expiry
+  ```
+- [ ] Update all components that display documents/invoices to request signed URLs
+
+#### SQL Migration:
+```sql
+-- 00021_fix_storage_security.sql
+UPDATE storage.buckets SET public = false WHERE id = 'documents';
+UPDATE storage.buckets SET public = false WHERE id = 'invoices';
+```
 
 ---
 
-> [!TIP]
-> **Ready to start Phase 1** — the NEXORA-style UI transformation + city management + navigation overhaul. This phase delivers the biggest visual impact and sets up the design system for everything that follows.
+### 1.10 Performance Foundation
+**Time:** 3 hours
+
+#### Tasks:
+- [ ] Add database indexes:
+  ```sql
+  -- 00022_add_performance_indexes.sql
+  CREATE INDEX IF NOT EXISTS idx_leads_assigned_to ON leads(assigned_to);
+  CREATE INDEX IF NOT EXISTS idx_leads_branch_id ON leads(branch_id);
+  CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+  CREATE INDEX IF NOT EXISTS idx_leads_created_at ON leads(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_leads_created_by ON leads(created_by);
+  CREATE INDEX IF NOT EXISTS idx_customers_lead_id ON customers(lead_id);
+  CREATE INDEX IF NOT EXISTS idx_customers_created_at ON customers(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_activities_lead_id ON activities(lead_id);
+  CREATE INDEX IF NOT EXISTS idx_activities_created_at ON activities(created_at DESC);
+  CREATE INDEX IF NOT EXISTS idx_tasks_lead_id ON tasks(lead_id);
+  CREATE INDEX IF NOT EXISTS idx_tasks_assigned_to ON tasks(assigned_to);
+  CREATE INDEX IF NOT EXISTS idx_tasks_due_date ON tasks(due_date);
+  CREATE INDEX IF NOT EXISTS idx_documents_lead_id ON documents(lead_id);
+  CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
+  CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON notifications(is_read);
+  CREATE INDEX IF NOT EXISTS idx_profiles_branch_id ON profiles(branch_id);
+  CREATE INDEX IF NOT EXISTS idx_profiles_role ON profiles(role);
+  ```
+- [ ] Add `useMemo` wrapping for expensive computations in:
+  - `App.tsx` — `roleScopedLeads`, `roleScopedCustomers`, `globallyFilteredLeads`
+  - `pages/Reports.tsx` — chart data computations
+  - `pages/RevenueDashboard.tsx` — revenue aggregations
+  - `pages/Customers.tsx` — filtered/sorted customer lists
+  - `hooks/useDashboardMetrics.ts` — metric calculations
+- [ ] Implement server-side pagination for leads table:
+  ```typescript
+  // In useLeadsApi.ts
+  async function fetchLeadsPaginated(page: number, pageSize: number, filters: LeadFilters) {
+    const from = page * pageSize;
+    const to = from + pageSize - 1;
+    
+    let query = supabase.from('leads').select('*', { count: 'exact' });
+    
+    if (filters.status) query = query.eq('status', filters.status);
+    if (filters.assignedTo) query = query.eq('assigned_to', filters.assignedTo);
+    if (filters.branchId) query = query.eq('branch_id', filters.branchId);
+    
+    const { data, count, error } = await query
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    
+    return { data, totalCount: count, page, pageSize };
+  }
+  ```
+
+---
+
+### Phase 1 Verification Checklist:
+- [ ] `npm run build` succeeds with zero TypeScript errors
+- [ ] All pages load without console errors
+- [ ] Lead creation flow works end-to-end
+- [ ] Lead-to-customer conversion works
+- [ ] Invoice generation works
+- [ ] Document upload/download works (with signed URLs)
+- [ ] Login/logout works for all 3 roles
+- [ ] Real-time updates still function
+
+---
+
+## Phase 2 — Core Feature Gaps
+**Duration:** Weeks 4–8  
+**Goal:** Build the daily-driver features that eliminate the need for external tools.
+
+---
+
+### 2.1 Global Search (Cmd+K)
+**Time:** 6 hours
+
+#### New Files:
+```
+components/
+├── GlobalSearch.tsx              # Cmd+K spotlight modal
+├── GlobalSearchResults.tsx       # Categorized results (leads, customers, invoices, users)
+```
+
+#### Implementation:
+- [ ] Create `GlobalSearch.tsx` — Radix Dialog with search input, keyboard shortcut listener
+- [ ] Search across: leads (name, business, phone, email, PAN, reference#), customers (same), users (name, email), invoices (number)
+- [ ] Categorized results with icons and quick navigation
+- [ ] Recent searches stored in `localStorage`
+- [ ] Quick actions: "Create Lead", "Create Invoice", "Add User"
+- [ ] Register `Ctrl+K` / `Cmd+K` keyboard shortcut in `App.tsx`
+- [ ] Add search icon to `Header.tsx`
+
+#### Database:
+- [ ] Consider adding a Supabase full-text search index on leads/customers if dataset grows large:
+  ```sql
+  -- 00023_add_search_indexes.sql
+  ALTER TABLE leads ADD COLUMN IF NOT EXISTS search_vector tsvector
+    GENERATED ALWAYS AS (
+      to_tsvector('english', coalesce(first_name, '') || ' ' || coalesce(last_name, '') || ' ' || coalesce(business_name, '') || ' ' || coalesce(email, '') || ' ' || coalesce(phone_number, ''))
+    ) STORED;
+  CREATE INDEX idx_leads_search ON leads USING gin(search_vector);
+  ```
+
+---
+
+### 2.2 Quick-Add Lead Modal
+**Time:** 3 hours
+
+#### New Files:
+```
+components/
+├── QuickAddLead.tsx              # Minimal lead creation modal
+```
+
+#### Implementation:
+- [ ] Floating "+" button on bottom-right of all pages (Sales Executive)
+- [ ] Modal with only: First Name, Phone, Service (dropdown), Priority — 4 fields
+- [ ] Creates lead with `status: 'New Lead'`, auto-assigns to current user
+- [ ] "Add More Details" button navigates to full CreateLead page
+- [ ] Keyboard shortcut: `N` key opens quick-add
+
+---
+
+### 2.3 Automated Lead Assignment Rules
+**Time:** 8 hours
+
+#### New Files:
+```
+pages/
+├── AutoAssignmentSettings.tsx       # Rules configuration UI
+
+lib/
+├── leadAssignment.ts                # Assignment engine
+
+supabase/migrations/
+├── 00024_lead_assignment_rules.sql  # Rules table
+```
+
+#### Database Schema:
+```sql
+-- 00024_lead_assignment_rules.sql
+CREATE TABLE lead_assignment_rules (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  priority INTEGER DEFAULT 0,           -- Higher = checked first
+  is_active BOOLEAN DEFAULT true,
+  rule_type TEXT NOT NULL,              -- 'round_robin', 'skill_based', 'load_balanced', 'source_based', 'geography_based'
+  conditions JSONB DEFAULT '{}',        -- { "lead_source": "Website", "city": "Hyderabad", "service": "GST" }
+  target_branch_id TEXT,                -- Assign to specific branch
+  target_user_ids UUID[],              -- Specific users for round-robin
+  last_assigned_index INTEGER DEFAULT 0, -- Track round-robin position
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Assignment Engine (`lib/leadAssignment.ts`):
+```typescript
+export async function autoAssignLead(lead: Partial<Lead>): Promise<string | null> {
+  // 1. Fetch active rules ordered by priority DESC
+  // 2. For each rule, check if lead matches conditions
+  // 3. If match found:
+  //    - round_robin: pick next user from target_user_ids, increment index
+  //    - skill_based: find user with matching skills and fewest active leads
+  //    - load_balanced: find user in branch with fewest active leads
+  //    - source_based: map lead source to user/branch
+  //    - geography_based: map lead city to branch
+  // 4. Return assigned user ID or null if no rule matches
+}
+```
+
+#### Integration Points:
+- [ ] Call `autoAssignLead()` in `addLead()` when `assigned_to` is not manually set
+- [ ] Call `autoAssignLead()` for web lead conversion in `convertWebLeadToCrmLead()`
+- [ ] Add "Auto-Assignment Rules" to Settings sidebar (Super Admin only)
+
+---
+
+### 2.4 Sales Targets & Tracking
+**Time:** 10 hours
+
+#### New Files:
+```
+pages/
+├── TargetsDashboard.tsx             # Targets vs achievement view
+
+components/
+├── TargetGauge.tsx                  # Visual gauge component
+├── TargetSettingsModal.tsx          # Set targets modal
+
+supabase/migrations/
+├── 00025_sales_targets.sql
+```
+
+#### Database Schema:
+```sql
+-- 00025_sales_targets.sql
+CREATE TABLE sales_targets (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  branch_id TEXT,
+  period_type TEXT NOT NULL,          -- 'monthly', 'quarterly', 'yearly'
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  target_revenue NUMERIC DEFAULT 0,
+  target_leads INTEGER DEFAULT 0,
+  target_conversions INTEGER DEFAULT 0,
+  target_calls INTEGER DEFAULT 0,
+  commission_rate NUMERIC DEFAULT 0,  -- Percentage
+  commission_threshold NUMERIC DEFAULT 0, -- Min revenue before commission kicks in
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE commission_payouts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  target_id UUID REFERENCES sales_targets(id),
+  period_start DATE NOT NULL,
+  period_end DATE NOT NULL,
+  achieved_revenue NUMERIC DEFAULT 0,
+  commission_amount NUMERIC DEFAULT 0,
+  status TEXT DEFAULT 'pending',      -- 'pending', 'approved', 'paid'
+  approved_by UUID REFERENCES profiles(id),
+  paid_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Features:
+- [ ] Super Admin / Branch Manager can set targets per user per month/quarter
+- [ ] Branch-level aggregate targets
+- [ ] Real-time gauge: "₹3.2L / ₹5L" with daily run-rate projection
+- [ ] Commission calculator: auto-compute based on rules
+- [ ] Leaderboard integration with target achievement percentage
+- [ ] Add "Targets" to sidebar navigation for all roles
+- [ ] Notification when target achieved (celebration modal)
+
+---
+
+### 2.5 Service Delivery Pipeline
+**Time:** 12 hours
+
+#### New Files:
+```
+pages/
+├── ServiceDelivery.tsx              # Service delivery tracking dashboard
+
+components/
+├── ServiceDeliveryBoard.tsx         # Kanban-style delivery tracker
+├── DeliveryChecklist.tsx            # Service-specific checklist component
+
+supabase/migrations/
+├── 00026_service_delivery.sql
+```
+
+#### Database Schema:
+```sql
+-- 00026_service_delivery.sql
+CREATE TABLE service_delivery_templates (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  service_name TEXT NOT NULL,
+  sub_service_name TEXT,
+  steps JSONB NOT NULL,               -- [{ "order": 1, "name": "Collect Documents", "sla_hours": 24 }, ...]
+  total_sla_days INTEGER DEFAULT 7,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE service_deliveries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+  work_order_id UUID REFERENCES work_orders(id),
+  service_name TEXT NOT NULL,
+  sub_service_name TEXT,
+  template_id UUID REFERENCES service_delivery_templates(id),
+  assigned_to UUID REFERENCES profiles(id),
+  branch_id TEXT,
+  status TEXT DEFAULT 'not_started',  -- 'not_started', 'in_progress', 'on_hold', 'completed', 'cancelled'
+  current_step INTEGER DEFAULT 0,
+  steps_progress JSONB DEFAULT '[]',  -- [{ "step": 1, "status": "completed", "completed_at": "...", "notes": "..." }]
+  started_at TIMESTAMPTZ,
+  completed_at TIMESTAMPTZ,
+  due_date TIMESTAMPTZ,
+  sla_breached BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Pre-Built Templates for 24eFiling:
+```json
+[
+  {
+    "service": "GST Registration",
+    "steps": [
+      { "order": 1, "name": "Collect PAN, Aadhar, Photos", "sla_hours": 24 },
+      { "order": 2, "name": "Prepare Application", "sla_hours": 12 },
+      { "order": 3, "name": "Submit on GST Portal", "sla_hours": 4 },
+      { "order": 4, "name": "ARN Generated", "sla_hours": 1 },
+      { "order": 5, "name": "Respond to Queries (if any)", "sla_hours": 48 },
+      { "order": 6, "name": "GSTIN Received", "sla_hours": 72 }
+    ]
+  },
+  {
+    "service": "Company Registration",
+    "steps": [
+      { "order": 1, "name": "Name Approval (RUN)", "sla_hours": 48 },
+      { "order": 2, "name": "DSC Generation", "sla_hours": 24 },
+      { "order": 3, "name": "Drafting MOA/AOA", "sla_hours": 24 },
+      { "order": 4, "name": "SPICe+ Filing", "sla_hours": 12 },
+      { "order": 5, "name": "CIN Received", "sla_hours": 72 },
+      { "order": 6, "name": "PAN/TAN Allotment", "sla_hours": 24 }
+    ]
+  }
+]
+```
+
+#### Integration:
+- [ ] Auto-create service delivery when work order is created
+- [ ] Auto-create service delivery when lead converts to customer
+- [ ] SLA timer with color coding (green = on track, yellow = warning, red = breached)
+- [ ] Customer notification at each step completion (WhatsApp template)
+- [ ] Dashboard widget showing delivery bottlenecks
+- [ ] Link from customer detail page to delivery status
+
+---
+
+### 2.6 Recurring Services & Renewals
+**Time:** 8 hours
+
+#### New Files:
+```
+pages/
+├── RenewalsPipeline.tsx             # Renewals management view
+
+supabase/migrations/
+├── 00027_recurring_services.sql
+```
+
+#### Database Schema:
+```sql
+-- 00027_recurring_services.sql
+CREATE TABLE recurring_services (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+  service_name TEXT NOT NULL,
+  sub_service_name TEXT,
+  frequency TEXT NOT NULL,            -- 'monthly', 'quarterly', 'half_yearly', 'yearly', 'custom'
+  frequency_months INTEGER,           -- Custom frequency in months
+  last_completed_date DATE,
+  next_due_date DATE NOT NULL,
+  amount NUMERIC DEFAULT 0,
+  auto_create_lead BOOLEAN DEFAULT true,
+  reminder_days_before INTEGER[] DEFAULT '{30, 15, 7}',
+  assigned_to UUID REFERENCES profiles(id),
+  branch_id TEXT,
+  status TEXT DEFAULT 'active',       -- 'active', 'paused', 'cancelled'
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE renewal_history (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  recurring_service_id UUID REFERENCES recurring_services(id) ON DELETE CASCADE,
+  lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+  period_start DATE,
+  period_end DATE,
+  amount NUMERIC,
+  status TEXT DEFAULT 'pending',      -- 'pending', 'completed', 'skipped', 'overdue'
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Features:
+- [ ] Flag services as recurring during lead creation / customer edit
+- [ ] Auto-generate renewal reminders (30/15/7 days before)
+- [ ] Auto-create follow-up lead when renewal is due (optional)
+- [ ] Renewal calendar view (monthly grid showing upcoming renewals)
+- [ ] Revenue forecasting based on active recurring services
+- [ ] Customer LTV calculation: sum of all historical + projected recurring revenue
+- [ ] Renewal pipeline with status columns: Upcoming → Contacted → Renewed → Skipped
+
+---
+
+### 2.7 Email Integration
+**Time:** 10 hours
+
+#### New Files:
+```
+components/
+├── EmailComposer.tsx                # Rich email compose modal
+├── EmailThread.tsx                  # Email conversation thread view
+├── EmailTemplateSelector.tsx        # Template picker
+
+lib/
+├── emailClient.ts                   # Email sending via Resend/SendGrid API
+
+supabase/
+├── functions/send-email/index.ts    # Edge Function for email dispatch
+
+supabase/migrations/
+├── 00028_email_integration.sql
+```
+
+#### Database Schema:
+```sql
+-- 00028_email_integration.sql
+CREATE TABLE email_templates (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  body_html TEXT NOT NULL,
+  category TEXT,                      -- 'welcome', 'payment_reminder', 'document_request', 'service_update', 'general'
+  variables TEXT[],                   -- ['{{client_name}}', '{{service_name}}', '{{due_date}}']
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE email_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  lead_id UUID REFERENCES leads(id) ON DELETE SET NULL,
+  customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+  sent_by UUID REFERENCES profiles(id),
+  to_email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  body_preview TEXT,
+  template_id UUID REFERENCES email_templates(id),
+  status TEXT DEFAULT 'sent',         -- 'sent', 'delivered', 'opened', 'clicked', 'bounced', 'failed'
+  opened_at TIMESTAMPTZ,
+  clicked_at TIMESTAMPTZ,
+  message_id TEXT,                    -- External provider message ID
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Implementation:
+- [ ] Use Resend (recommended for simplicity) or SendGrid as email provider
+- [ ] Supabase Edge Function handles actual sending (keeps API key server-side)
+- [ ] Email composer with template variable auto-fill from lead/customer data
+- [ ] Email logs attached to lead/customer activity timeline
+- [ ] Bulk email capability from Customers/Leads overview pages
+- [ ] Pre-built templates: Welcome, Payment Reminder, Document Request, Service Update, Completion Notification
+
+---
+
+### 2.8 Notification System Enhancement
+**Time:** 6 hours
+
+#### New Files:
+```
+supabase/migrations/
+├── 00029_notification_rules.sql
+
+components/
+├── NotificationRulesEditor.tsx      # Rules configuration UI
+```
+
+#### Database Schema:
+```sql
+-- 00029_notification_rules.sql
+CREATE TABLE notification_rules (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  trigger_type TEXT NOT NULL,         -- 'lead_stale', 'payment_overdue', 'sla_breach', 'document_pending', 'target_achieved'
+  conditions JSONB DEFAULT '{}',      -- { "days_stale": 2, "amount_threshold": 10000 }
+  channels TEXT[] DEFAULT '{"in_app"}', -- 'in_app', 'email', 'whatsapp', 'sms'
+  escalation_chain UUID[],           -- [exec_id, manager_id, admin_id] — escalate after each interval
+  escalation_interval_hours INTEGER DEFAULT 24,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Built-in Rules to Create:
+1. Lead untouched 48 hours → notify branch manager
+2. Payment overdue 30 days → notify super admin
+3. Document pending verification 48 hours → notify admin
+4. SLA breach on service delivery → notify branch manager + super admin
+5. Target achieved → celebration notification to user + admin
+6. New web lead → notify assigned branch
+7. Support ticket unresolved 72 hours → escalate
+
+---
+
+### 2.9 "My Day" View for Sales Executives
+**Time:** 6 hours
+
+#### New Files:
+```
+pages/
+├── MyDay.tsx                        # Personal daily command center
+```
+
+#### Features:
+- [ ] Morning checklist layout:
+  - Today's follow-ups (sorted by time)
+  - Overdue follow-ups (highlighted red)
+  - Tasks due today
+  - Meetings/appointments
+  - Birthdays to wish
+  - New leads assigned (since yesterday)
+- [ ] Target progress gauge at the top
+- [ ] Quick actions: Log Call, Send WhatsApp, Add Note, Mark Done
+- [ ] "Plan My Day" AI suggestion (using Gemini): prioritize which leads to contact first based on score + staleness
+- [ ] End-of-day summary: auto-generated report of today's activities
+
+#### Sidebar Addition:
+- Add "My Day" as the first item in Sales Executive navigation
+- Make it the default landing page for Sales Executives (instead of Dashboard)
+
+---
+
+### Phase 2 Verification Checklist:
+- [ ] Cmd+K global search finds leads, customers, users across all pages
+- [ ] Quick-add lead creates a lead in under 5 seconds
+- [ ] Auto-assignment rules correctly route new leads
+- [ ] Sales targets display and track correctly for each executive
+- [ ] Service delivery pipeline shows step-by-step progress
+- [ ] Renewals generate reminders at configured intervals
+- [ ] Emails send successfully with template variable substitution
+- [ ] Notification rules trigger correctly for stale leads and overdue payments
+- [ ] "My Day" view shows all relevant daily items for sales executive
+
+---
+
+## Phase 3 — Growth Features
+**Duration:** Weeks 9–14  
+**Goal:** Add automation, client-facing tools, and operational features.
+
+---
+
+### 3.1 Client Self-Service Portal
+**Time:** 20 hours (separate mini-app)
+
+#### Architecture:
+```
+client-portal/                       # Separate Vite app (subdomain: portal.24efiling.com)
+├── src/
+│   ├── pages/
+│   │   ├── Login.tsx               # OTP-based phone login
+│   │   ├── Dashboard.tsx           # Service status overview
+│   │   ├── ServiceStatus.tsx       # Step-by-step delivery tracker
+│   │   ├── Documents.tsx           # Upload/download documents
+│   │   ├── Invoices.tsx            # View & download invoices/receipts
+│   │   ├── Payments.tsx            # Payment history & pay online
+│   │   ├── Support.tsx             # Raise/track support tickets
+│   │   └── Profile.tsx             # Edit contact details
+│   ├── lib/
+│   │   └── supabaseClient.ts       # Same Supabase project, different RLS
+│   └── App.tsx
+```
+
+#### Database Changes:
+```sql
+-- 00030_client_portal.sql
+CREATE TABLE client_accounts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  customer_id UUID REFERENCES customers(id) ON DELETE CASCADE,
+  phone_number TEXT UNIQUE NOT NULL,
+  otp_hash TEXT,
+  otp_expires_at TIMESTAMPTZ,
+  last_login TIMESTAMPTZ,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS: Clients can only see their own data
+-- New RLS policies on customers, service_deliveries, documents, invoices
+-- scoped to client_accounts.customer_id
+```
+
+---
+
+### 3.2 Attendance & Leave Management
+**Time:** 10 hours
+
+#### New Files:
+```
+pages/
+├── Attendance.tsx                   # Attendance dashboard
+├── LeaveManagement.tsx              # Leave request/approval
+
+supabase/migrations/
+├── 00031_attendance.sql
+```
+
+#### Database Schema:
+```sql
+-- 00031_attendance.sql
+CREATE TABLE attendance (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  date DATE NOT NULL,
+  check_in TIMESTAMPTZ,
+  check_out TIMESTAMPTZ,
+  status TEXT DEFAULT 'present',      -- 'present', 'absent', 'half_day', 'wfh', 'on_leave', 'late'
+  location_lat NUMERIC,
+  location_lng NUMERIC,
+  branch_id TEXT,
+  notes TEXT,
+  UNIQUE(user_id, date)
+);
+
+CREATE TABLE leave_requests (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  leave_type TEXT NOT NULL,           -- 'casual', 'sick', 'earned', 'comp_off', 'unpaid'
+  start_date DATE NOT NULL,
+  end_date DATE NOT NULL,
+  days NUMERIC NOT NULL,
+  reason TEXT,
+  status TEXT DEFAULT 'pending',      -- 'pending', 'approved', 'rejected', 'cancelled'
+  approved_by UUID REFERENCES profiles(id),
+  approved_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE leave_balances (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE,
+  year INTEGER NOT NULL,
+  casual_total INTEGER DEFAULT 12,
+  casual_used INTEGER DEFAULT 0,
+  sick_total INTEGER DEFAULT 6,
+  sick_used INTEGER DEFAULT 0,
+  earned_total INTEGER DEFAULT 15,
+  earned_used INTEGER DEFAULT 0,
+  UNIQUE(user_id, year)
+);
+```
+
+---
+
+### 3.3 Expense Tracking
+**Time:** 8 hours
+
+#### New Files:
+```
+pages/
+├── ExpenseManager.tsx               # Expense logging & approval
+├── ProfitLoss.tsx                   # P&L dashboard
+
+supabase/migrations/
+├── 00032_expenses.sql
+```
+
+#### Database Schema:
+```sql
+-- 00032_expenses.sql
+CREATE TABLE expenses (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  category TEXT NOT NULL,             -- 'salary', 'rent', 'software', 'travel', 'govt_fees', 'utilities', 'marketing', 'misc'
+  description TEXT NOT NULL,
+  amount NUMERIC NOT NULL,
+  date DATE NOT NULL,
+  branch_id TEXT,
+  customer_id UUID REFERENCES customers(id),  -- If expense is on behalf of client
+  receipt_url TEXT,
+  submitted_by UUID REFERENCES profiles(id),
+  approved_by UUID REFERENCES profiles(id),
+  status TEXT DEFAULT 'pending',      -- 'pending', 'approved', 'rejected', 'reimbursed'
+  is_reimbursable BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+---
+
+### 3.4 Workflow Automation Engine
+**Time:** 12 hours
+
+#### New Files:
+```
+pages/
+├── AutomationRules.tsx              # Visual rule builder
+
+components/
+├── AutomationRuleEditor.tsx         # Rule creation form
+
+supabase/migrations/
+├── 00033_automation_engine.sql
+
+supabase/functions/
+├── run-automations/index.ts         # Edge Function — cron triggered
+```
+
+#### Database Schema:
+```sql
+-- 00033_automation_engine.sql
+CREATE TABLE automation_rules (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  trigger_event TEXT NOT NULL,        -- 'lead_created', 'lead_status_changed', 'payment_received', 'service_completed', 'time_based'
+  trigger_conditions JSONB,           -- { "status": "Success", "amount_gt": 5000 }
+  actions JSONB NOT NULL,             -- [{ "type": "send_whatsapp", "template": "welcome" }, { "type": "create_task", "content": "..." }]
+  delay_minutes INTEGER DEFAULT 0,   -- Wait before executing
+  is_active BOOLEAN DEFAULT true,
+  run_count INTEGER DEFAULT 0,
+  last_run_at TIMESTAMPTZ,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+CREATE TABLE automation_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  rule_id UUID REFERENCES automation_rules(id),
+  trigger_entity_type TEXT,           -- 'lead', 'customer', 'payment'
+  trigger_entity_id UUID,
+  actions_executed JSONB,
+  status TEXT DEFAULT 'success',      -- 'success', 'partial_failure', 'failed'
+  error_message TEXT,
+  executed_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+#### Pre-Built Automations:
+| # | Name | Trigger | Action |
+|---|------|---------|--------|
+| 1 | Welcome Message | Lead created | Send WhatsApp welcome template |
+| 2 | Stale Lead Alert | Lead untouched 48h | Notify branch manager |
+| 3 | Payment Confirmation | Payment recorded | Send WhatsApp receipt + Email |
+| 4 | Document Request | Status → "Documents & Payments" | Send document checklist WhatsApp |
+| 5 | Service Complete | Work order completed | Create invoice + notify client |
+| 6 | Review Request | Service completed + 7 days | Send testimonial request |
+| 7 | SLA Breach | Delivery past deadline | Escalate to super admin |
+| 8 | Birthday Wishes | Customer birthday | WhatsApp wish + create task |
+| 9 | Renewal Reminder | 30 days before renewal | Create follow-up lead + notify exec |
+| 10 | Daily Digest | Every day 9 AM | Email summary to each executive |
+
+---
+
+### 3.5 Document Template System
+**Time:** 6 hours
+
+#### New Files:
+```
+pages/
+├── DocumentTemplates.tsx            # Template management
+
+components/
+├── TemplateEditor.tsx               # Template editor with variable picker
+├── TemplatePreview.tsx              # Live preview with sample data
+
+supabase/migrations/
+├── 00034_document_templates.sql
+```
+
+#### Database Schema:
+```sql
+-- 00034_document_templates.sql
+CREATE TABLE document_templates (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  category TEXT NOT NULL,             -- 'engagement_letter', 'agreement', 'noc', 'authorization', 'receipt'
+  body_html TEXT NOT NULL,
+  variables TEXT[],                   -- ['{{client_name}}', '{{service_name}}', '{{date}}', '{{company_gst}}']
+  version INTEGER DEFAULT 1,
+  is_active BOOLEAN DEFAULT true,
+  created_by UUID REFERENCES profiles(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+---
+
+### Phase 3 Verification Checklist:
+- [ ] Client portal login via OTP works
+- [ ] Clients can view their service delivery status
+- [ ] Attendance check-in/out records correctly
+- [ ] Leave requests flow through approval workflow
+- [ ] Expenses can be submitted, approved, and reflected in P&L
+- [ ] Automation rules trigger correctly on events
+- [ ] Document templates generate correctly with client data
+
+---
+
+## Phase 4 — Integrations & Polish
+**Duration:** Weeks 15–20  
+**Goal:** Connect external services, optimize mobile, add testing.
+
+---
+
+### 4.1 Payment Gateway (Razorpay)
+**Time:** 8 hours
+
+- [ ] Razorpay integration for online payment collection
+- [ ] Payment links generated from CRM, sent via WhatsApp/Email
+- [ ] Auto-reconciliation: webhook captures payment → updates lead/customer → sends receipt
+- [ ] Partial payment support
+
+### 4.2 Cloud Telephony (Exotel)
+**Time:** 8 hours
+
+- [ ] Click-to-call from lead/customer pages
+- [ ] Auto-log call duration and outcome
+- [ ] Call recording storage (link to activity)
+- [ ] Missed call alerts as notifications
+
+### 4.3 SMS Gateway (MSG91)
+**Time:** 4 hours
+
+- [ ] SMS notification support for critical alerts
+- [ ] OTP generation for client portal
+- [ ] SMS templates aligned with DLT registration
+
+### 4.4 PWA Setup
+**Time:** 4 hours
+
+- [ ] Add `manifest.json` with app name, icons, theme color
+- [ ] Register service worker for offline caching
+- [ ] Add install prompt for mobile users
+- [ ] Cache critical assets and API responses for offline access
+- [ ] Push notification support via service worker
+
+### 4.5 CI/CD & Testing
+**Time:** 8 hours
+
+- [ ] GitHub Actions workflow:
+  ```yaml
+  # .github/workflows/ci.yml
+  name: CI
+  on: [push, pull_request]
+  jobs:
+    lint-and-build:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-node@v4
+        - run: npm ci
+        - run: npx tsc --noEmit        # Type check
+        - run: npm run build            # Build check
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: actions/setup-node@v4
+        - run: npm ci
+        - run: npm test
+  ```
+- [ ] Install Vitest:
+  ```bash
+  npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom
+  ```
+- [ ] Write unit tests for critical business logic:
+  - `lib/scoring.ts` — lead scoring calculations
+  - `lib/paymentUtils.ts` — reference number generation
+  - `lib/validations/*.ts` — all zod schemas
+  - Pricing calculator — discount + GST computations
+- [ ] Write integration tests for critical flows:
+  - Login → Dashboard load
+  - Create Lead → Verify in database
+  - Convert Lead → Customer created correctly
+  - Payment recording → Totals update correctly
+- [ ] Error tracking:
+  ```bash
+  npm install @sentry/react
+  ```
+  - Configure Sentry in `index.tsx`
+  - Wrap App in `Sentry.ErrorBoundary`
+
+### 4.6 Mobile-Optimized Experience
+**Time:** 6 hours
+
+- [ ] Bottom navigation bar component for mobile
+- [ ] Card-based layout for data tables on mobile (responsive breakpoint)
+- [ ] Swipeable lead cards with quick actions
+- [ ] Pull-to-refresh on list pages
+- [ ] Touch-friendly spacing on all interactive elements
+
+---
+
+## Phase 5 — Intelligence & Future
+**Duration:** Weeks 21+  
+**Goal:** Make the CRM predictive and intelligent.
+
+---
+
+### 5.1 ML-Based Lead Scoring
+- [ ] Train model on historical lead data (features: source, service, response time, activity count, document count → outcome: converted/lost)
+- [ ] Deploy as Supabase Edge Function or external API
+- [ ] Replace rule-based scoring with ML predictions
+- [ ] Show confidence score and top contributing factors
+
+### 5.2 Revenue Forecasting
+- [ ] Time-series forecasting based on historical monthly revenue
+- [ ] Pipeline-weighted forecast (lead value × probability per stage)
+- [ ] Renewal-based recurring revenue projection
+- [ ] Visual forecast chart on Revenue Dashboard
+
+### 5.3 Churn Prediction
+- [ ] Identify customers likely to not renew
+- [ ] Factors: engagement frequency, payment delays, support tickets, service completion time
+- [ ] Early warning dashboard for at-risk customers
+- [ ] Auto-trigger retention workflow (special offers, check-in calls)
+
+### 5.4 GST Compliance Calendar
+- [ ] Per-client GST filing deadline tracker
+- [ ] GSTR-1, GSTR-3B, GSTR-9 due dates auto-calculated
+- [ ] Filing status per client per period
+- [ ] Bulk reminder generation before deadlines
+- [ ] Late fee calculator for missed filings
+
+### 5.5 Internal Team Chat
+- [ ] Real-time messaging using Supabase Realtime
+- [ ] 1:1 and group channels
+- [ ] File sharing
+- [ ] @mention notifications
+- [ ] Link messages to leads/customers
+
+### 5.6 Multi-Company Support
+- [ ] Tenant isolation at database level
+- [ ] Company switcher in header
+- [ ] Per-company settings, branding, and service catalog
+- [ ] Cross-company reporting for the owner
+
+---
+
+## Sidebar Navigation After All Phases
+
+### Super Admin (Final State):
+```
+📊 Dashboard
+📅 My Day
+🎯 Targets
+
+── SALES ──
+📋 All Leads
+➕ Create Lead
+👤 My Leads
+📊 Lead Workflow
+👥 Customers
+🔄 Renewals
+
+── SERVICE DELIVERY ──
+🔧 Service Tracker
+📝 Work Orders
+📄 Work Status
+
+── ANALYTICS ──
+💰 Revenue Dashboard
+📈 Employee Performance
+📊 Reports & Analytics
+💵 P&L Dashboard
+
+── MANAGEMENT ──
+🏢 Branches
+🏙️ Cities
+👥 Users
+👥 Teams
+📝 Document Verification
+📋 Attendance
+
+── OPERATIONS ──
+🧾 Invoices
+💳 Payments
+💸 Expenses
+⏰ Reminders
+📢 Announcements
+🎫 Support Center
+📝 Employee Feedback
+
+── MARKETING ──
+🎁 Offers
+🌐 Website Hub
+  ├── Overview
+  ├── Web Leads
+  ├── Blogs
+  ├── Testimonials
+  └── Services
+
+── COMMUNICATION ──
+💬 WhatsApp
+📧 Email Center
+
+── AUTOMATION ──
+⚡ Automation Rules
+🔀 Auto-Assignment
+📄 Document Templates
+
+── SYSTEM ──
+🔔 Notifications
+📜 Activity Feed
+⚙️ Settings
+```
+
+### Sales Executive (Final State):
+```
+📅 My Day              ← NEW (default landing page)
+📊 Dashboard
+🎯 My Targets          ← NEW
+
+── SALES ──
+📋 All Leads
+➕ Create Lead (+ Quick Add)
+👤 My Leads
+📊 Lead Workflow
+👥 Customers
+🔄 My Renewals          ← NEW
+
+── OPERATIONS ──
+🧾 Invoices
+📞 Follow-ups
+📂 Client Documents
+⏰ Reminders
+📝 Work Status
+📢 Announcements
+🎫 Support
+📝 Feedback
+📝 Work Orders
+
+── ANALYTICS ──
+💰 Revenue
+📈 Performance
+📊 Reports
+
+── COMMUNICATION ──
+💬 WhatsApp
+📧 Email               ← NEW
+
+── SYSTEM ──
+🔔 Notifications
+📋 Attendance           ← NEW
+```
+
+---
+
+## Summary — Total New Files to Create
+
+| Phase | New Files | New DB Tables | Est. Hours |
+|-------|:-:|:-:|:-:|
+| Phase 1 — Foundation | ~35 files | 0 new tables, indexes + migrations | ~32 hrs |
+| Phase 2 — Core Gaps | ~20 files | 8 new tables | ~65 hrs |
+| Phase 3 — Growth | ~15 files | 8 new tables | ~56 hrs |
+| Phase 4 — Integrations | ~10 files | 2 new tables | ~38 hrs |
+| Phase 5 — Intelligence | ~15 files | 4 new tables | ~40 hrs |
+| **TOTAL** | **~95 files** | **~22 new tables** | **~231 hrs** |
+
+---
+
+> **Note:** This plan is designed to be executed sequentially — each phase builds on the previous one. However, within each phase, tasks can be parallelized by different developers. Phase 1 MUST be completed before starting Phase 2, as it establishes the code architecture that all subsequent features depend on.
+
+---
+
+*Last updated: July 21, 2026*

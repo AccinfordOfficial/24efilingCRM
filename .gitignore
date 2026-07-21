@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment and custom files
+.env
+.env.*
+! .env.example
+sql_archive/
+

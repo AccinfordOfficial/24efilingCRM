@@ -8,6 +8,7 @@ import { Dialog } from '../components/ui/Dialog';
 import { useToast } from '../components/Toast';
 import { Testimonial } from '../types';
 import { Star, PlusCircle, Trash2, CheckCircle, XCircle, Clock, AlertTriangle, User, Quote } from 'lucide-react';
+import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface TestimonialsManagementProps {
   testimonials: Testimonial[];
@@ -27,6 +28,8 @@ export default function TestimonialsManagement({
   
   // Testimonial Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     client_name: '',
     company: '',
@@ -78,21 +81,29 @@ export default function TestimonialsManagement({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to permanently delete this testimonial?")) return;
-    try {
-      await onDeleteTestimonial(id);
-      toast.add({
-        title: 'Testimonial Deleted',
-        message: 'The review was removed from the list.',
-        type: 'success'
-      });
-    } catch (e: any) {
-      toast.add({
-        title: 'Delete Failed',
-        message: e.message || 'Error deleting review.',
-        type: 'error'
-      });
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteId) {
+      try {
+        await onDeleteTestimonial(deleteId);
+        toast.add({
+          title: 'Testimonial Deleted',
+          message: 'The review was removed from the list.',
+          type: 'success'
+        });
+      } catch (e: any) {
+        toast.add({
+          title: 'Delete Failed',
+          message: e.message || 'Error deleting review.',
+          type: 'error'
+        });
+      } finally {
+        setDeleteId(null);
+      }
     }
   };
 
@@ -360,6 +371,14 @@ export default function TestimonialsManagement({
           </div>
         </form>
       </Dialog>
+
+      <ConfirmationDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Testimonial"
+        description="Are you sure you want to permanently delete this testimonial? This action cannot be undone."
+      />
     </div>
   );
 }

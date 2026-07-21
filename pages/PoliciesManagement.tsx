@@ -7,6 +7,8 @@ import { Textarea } from '../components/ui/Textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/Dialog';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 
 interface PoliciesManagementProps {
   companyPolicies: CompanyPolicy[];
@@ -28,6 +30,8 @@ export default function PoliciesManagement({
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<CompanyPolicy | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
@@ -88,12 +92,21 @@ export default function PoliciesManagement({
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this policy?')) return;
-    try {
-      await onDeletePolicy(id);
-    } catch (e: any) {
-      alert(e.message || 'Failed to delete policy.');
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+    setIsDeleteOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteId) {
+      try {
+        await onDeletePolicy(deleteId);
+        toast.success('Policy deleted successfully');
+      } catch (e: any) {
+        toast.error(e.message || 'Failed to delete policy.');
+      } finally {
+        setDeleteId(null);
+      }
     }
   };
 
@@ -279,6 +292,14 @@ export default function PoliciesManagement({
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog
+        isOpen={isDeleteOpen}
+        onClose={() => setIsDeleteOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Policy"
+        description="Are you sure you want to delete this policy? This action cannot be undone."
+      />
     </div>
   );
 }

@@ -14,6 +14,8 @@ import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import { ConfirmationDialog } from './components/ui/ConfirmationDialog';
 import { SuccessConversionModal } from './components/ui/SuccessConversionModal';
+import { Toaster } from './components/ui/Toaster';
+import { TooltipProvider } from './components/ui/Tooltip';
 
 import { checkAndTriggerBirthdays } from './lib/birthdayScheduler';
 import { checkAndTriggerOfferStatus } from './lib/offerScheduler';
@@ -1034,7 +1036,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<PageLoader />}>
+      <TooltipProvider>
+        <Suspense fallback={<PageLoader />}>
         <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={
@@ -1448,7 +1451,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           onUploadDocument={editingLead ? (file) => handleUploadDocument(editingLead.id, file, 'Other Documents') : undefined}
           onDeleteDocument={editingLead ? (docId) => handleDeleteDocument(editingLead.id, docId) : undefined}
         />
+        <Toaster />
       </Suspense>
+      </TooltipProvider>
     </ErrorBoundary>
   );
 }

@@ -1,3 +1,5 @@
+import { ENV } from './env';
+
 /**
  * Meta WhatsApp Business API Client Wrapper
  * Handles sending text messages, template broadcasts, and status marking.
@@ -8,8 +10,8 @@ export class WhatsAppClient {
   private apiVersion: string;
 
   constructor(
-    accessToken = (process.env as any).WHATSAPP_ACCESS_TOKEN || '',
-    phoneNumberId = (process.env as any).WHATSAPP_PHONE_NUMBER_ID || '',
+    accessToken = ENV.WHATSAPP_TOKEN || '',
+    phoneNumberId = ENV.WHATSAPP_PHONE_NUMBER_ID || '',
     apiVersion = 'v18.0'
   ) {
     this.accessToken = accessToken;

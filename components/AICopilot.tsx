@@ -5,6 +5,7 @@ import { Card, CardContent } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
 import { Sparkles, MessageSquare, ListTodo, BrainCircuit, X, Send, RefreshCw, AlertCircle } from 'lucide-react';
+import { ENV } from '../lib/env';
 
 interface AICopilotProps {
   isOpen: boolean;
@@ -51,7 +52,7 @@ export default function AICopilot({
   const [summarizing, setSummarizing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const apiKey = process.env.API_KEY || (process.env as any).GEMINI_API_KEY;
+  const apiKey = ENV.GOOGLE_GENAI_API_KEY;
 
   // Initialize Chat Session
   useEffect(() => {

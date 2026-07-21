@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate, Customer, User, Service, UserRole } from '../types';
 import { GoogleGenAI } from "@google/genai";
 import { MessageSquare, Search, Send, RefreshCw, AlertCircle, FileText, CheckCircle2, User as UserIcon, Calendar, ArrowRight, ShieldCheck, Tag, Plus, MessageCircle, MoreVertical } from 'lucide-react';
+import { ENV } from '../lib/env';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Textarea } from '../components/ui/Textarea';
@@ -111,7 +112,7 @@ export default function WhatsAppDashboard({
   const [woAmount, setWoAmount] = useState('');
 
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const apiKey = process.env.API_KEY || (process.env as any).GEMINI_API_KEY;
+  const apiKey = ENV.GOOGLE_GENAI_API_KEY;
 
   // Active chat stream
   const activeChatMessages = useMemo(() => {

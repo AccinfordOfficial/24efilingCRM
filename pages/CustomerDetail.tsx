@@ -9,6 +9,7 @@ import { MultiPaymentReceipt } from '../components/MultiPaymentReceipt';
 import { ServiceInvoice } from '../components/ServiceInvoice';
 import { SearchableSelect } from '../components/ui/SearchableSelect';
 import { useApi } from '../hooks/useApi';
+import { toast } from 'sonner';
 
 import { BUSINESS_CATEGORIES, INDUSTRY_TYPES } from '../constants';
 
@@ -85,7 +86,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onBack, leads
 
         // Validate Business Details in Edit Customer Form
         if (!editBusinessName?.trim() || !editBusinessCategory?.trim() || !editIndustryType?.trim()) {
-            alert('Business Name, Business Category, and Industry Type are mandatory.');
+            toast.error('Business Name, Business Category, and Industry Type are mandatory.');
             return;
         }
 
@@ -111,7 +112,7 @@ const CustomerDetail: React.FC<CustomerDetailProps> = ({ customer, onBack, leads
             setIsEditOpen(false);
             if (refreshData) await refreshData();
         } catch (err: any) {
-            alert(`Failed to update customer: ${err.message}`);
+            toast.error(`Failed to update customer: ${err.message}`);
         }
     };
 

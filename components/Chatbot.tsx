@@ -8,6 +8,7 @@ import { VoiceChatIcon, XIcon } from './icons';
 import { useAuth } from '../context/AuthContext';
 
 import { useNavigate } from 'react-router-dom';
+import { ENV } from '../lib/env';
 
 interface Message {
     role: 'user' | 'model';
@@ -41,9 +42,9 @@ export const Chatbot: React.FC = () => {
     useEffect(() => {
         if (!profile) return;
 
-        if (process.env.API_KEY) {
+        if (ENV.GOOGLE_GENAI_API_KEY) {
             try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+                const ai = new GoogleGenAI({ apiKey: ENV.GOOGLE_GENAI_API_KEY });
                 const chatSession = ai.chats.create({
                   model: 'gemini-2.5-flash',
                   config: {

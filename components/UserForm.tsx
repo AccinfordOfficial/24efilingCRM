@@ -1,13 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { User, Branch, City } from '../types';
 import { Dialog } from './ui/Dialog';
 import { Button } from './ui/Button';
-import { Input } from './ui/Input';
 import { Select } from './ui/Select';
-import { USER_SKILLS, USER_ROLES_WITH_DESCRIPTIONS, ROLE_PERMISSIONS, getRoleDotColor } from '../constants';
+import { FormField } from './ui/FormField';
+import { FormSelect } from './ui/FormSelect';
+import { FormTextarea } from './ui/FormTextarea';
 import { Switch } from './ui/Switch';
 import { Badge } from './ui/Badge';
 import { UserIcon, ChevronDown } from './icons';
+import { USER_SKILLS, USER_ROLES_WITH_DESCRIPTIONS, ROLE_PERMISSIONS, getRoleDotColor } from '../constants';
+import { userSchema, UserFormValues } from '../lib/validations/userSchema';
+import { z } from 'zod';
 
 interface UserFormProps {
     isOpen: boolean;
@@ -20,86 +26,107 @@ interface UserFormProps {
     allUsers?: User[];
 }
 
-const initialFormState: Omit<User, 'id' | 'avatar_url' | 'created_at' | 'last_updated'> = {
-    name: '',
-    email: '',
-    phone_number: '',
-    role: 'Sales Executive',
-    department: 'Sales',
-    skills: [],
-    branch_name: '',
-    branch_id: '',
-    city_id: '',
-    city_name: '',
-    address: '',
-    date_of_birth: '',
-    gender: '' as any,
-    is_active: true,
-    reporting_to: '',
-    employee_code: '',
-};
-
-const FormField: React.FC<{ label: string, id: string, children: React.ReactNode, required?: boolean }> = ({ label, id, children, required }) => (
-    <div>
-        <label htmlFor={id} className="block text-sm font-medium text-slate-300 mb-1">
-            {label} {required && <span className="text-red-500">*</span>}
-        </label>
-        {children}
-    </div>
-);
-
 export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, user, branches, cities = [], initialBranchName, allUsers = [] }) => {
-    const [formData, setFormData] = useState<Omit<User, 'id' | 'avatar_url' | 'created_at' | 'last_updated'>>(initialFormState);
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const [profilePicPreview, setProfilePicPreview] = useState<string | null>(null);
     const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
     const [isRoleDropdownOpen, setIsRoleDropdownOpen] = useState(false);
+    const [formError, setFormError] = useState<string | null>(null);
     const roleDropdownRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
+    // Dynamic schema validation extending base userSchema to handle password on creation
+    const dynamicUserSchema = useMemo(() => {
         if (user) {
-            setFormData({
-                name: user.name,
-                email: user.email,
-                phone_number: user.phone_number || '',
-                role: user.role,
-                department: user.department || 'Sales',
-                skills: user.skills || [],
-                branch_name: user.branch_name || '',
-                branch_id: user.branch_id || '',
-                city_id: user.city_id || '',
-                city_name: user.city_name || '',
-                address: user.address || '',
-                date_of_birth: user.date_of_birth || '',
-                gender: user.gender || '' as any,
-                is_active: user.is_active,
-                reporting_to: user.reporting_to || '',
-                employee_code: user.employee_code || '',
-            });
-            setProfilePicPreview(user.avatar_url);
-            setSelectedSkills(user.skills || []);
-            setPassword('');
-            setConfirmPassword('');
-            setError(null);
-        } else {
-            let initialState = { ...initialFormState };
-            if (initialBranchName && initialBranchName !== 'All Branches') {
-                const matchedBranch = branches.find(b => b.name === initialBranchName);
-                if (matchedBranch) {
-                    initialState.branch_name = matchedBranch.name;
-                    initialState.branch_id = matchedBranch.id;
-                }
-            }
-            setFormData(initialState);
-            setProfilePicPreview(null);
-            setSelectedSkills([]);
-            setPassword('');
-            setConfirmPassword('');
-            setError(null);
+            return userSchema;
         }
-    }, [user, isOpen, initialBranchName, branches]);
+        return userSchema.extend({
+            password: z.string().min(6, 'Password must be at least 6 characters'),
+            confirmPassword: z.string().min(6, 'Password must be at least 6 characters')
+        }).refine(data => data.password === data.confirmPassword, {
+            message: "Passwords do not match",
+            path: ["confirmPassword"]
+        });
+    }, [user]);
+
+    const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<any>({
+        resolver: zodResolver(dynamicUserSchema),
+        defaultValues: {
+            name: '',
+            email: '',
+            phone: '',
+            role: 'Sales Executive',
+            department: 'Sales',
+            branch_id: '',
+            city_id: '',
+            address: '',
+            date_of_birth: '',
+            gender: '',
+            is_active: true,
+            reporting_to: '',
+            employee_code: '',
+            password: '',
+            confirmPassword: ''
+        }
+    });
+
+    const watchedRole = watch('role');
+    const watchedCityId = watch('city_id');
+    const watchedBranchId = watch('branch_id');
+    const watchedIsActive = watch('is_active');
+    const watchedName = watch('name');
+    const watchedEmail = watch('email');
+    const watchedPassword = watch('password');
+
+    useEffect(() => {
+        if (isOpen) {
+            if (user) {
+                reset({
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone_number || '',
+                    role: user.role,
+                    department: user.department || 'Sales',
+                    branch_id: user.branch_id || '',
+                    city_id: user.city_id || '',
+                    address: user.address || '',
+                    date_of_birth: user.date_of_birth || '',
+                    gender: user.gender || '',
+                    is_active: user.is_active,
+                    reporting_to: user.reporting_to || '',
+                    employee_code: user.employee_code || '',
+                });
+                setProfilePicPreview(user.avatar_url);
+                setSelectedSkills(user.skills || []);
+            } else {
+                let defaultBranchId = '';
+                if (initialBranchName && initialBranchName !== 'All Branches') {
+                    const matchedBranch = branches.find(b => b.name === initialBranchName);
+                    if (matchedBranch) {
+                        defaultBranchId = matchedBranch.id;
+                    }
+                }
+                reset({
+                    name: '',
+                    email: '',
+                    phone: '',
+                    role: 'Sales Executive',
+                    department: 'Sales',
+                    branch_id: defaultBranchId,
+                    city_id: '',
+                    address: '',
+                    date_of_birth: '',
+                    gender: '',
+                    is_active: true,
+                    reporting_to: '',
+                    employee_code: '',
+                    password: '',
+                    confirmPassword: ''
+                });
+                setProfilePicPreview(null);
+                setSelectedSkills([]);
+            }
+            setFormError(null);
+        }
+    }, [user, isOpen, initialBranchName, branches, reset]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -111,46 +138,28 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => {
-            const next = { ...prev, [name]: value };
-            if (name === 'city_id') {
-                const selectedCity = cities.find(c => c.id === value);
-                if (selectedCity) {
-                    next.city_name = selectedCity.city_name;
-                    // Auto-select branch if only one or clear branch if not matching
-                    const cityBranches = branches.filter(b => b.city_id === value);
-                    if (cityBranches.length === 1) {
-                        next.branch_id = cityBranches[0].id;
-                        next.branch_name = cityBranches[0].name;
-                    } else {
-                        next.branch_id = '';
-                        next.branch_name = '';
-                    }
-                } else {
-                    next.city_name = '';
-                }
-            } else if (name === 'branch_id') {
-                const selectedBranch = branches.find(b => b.id === value);
-                if (selectedBranch) {
-                    next.branch_name = selectedBranch.name;
-                    // Auto-select city if not selected
-                    if (!next.city_id && selectedBranch.city_id) {
-                        next.city_id = selectedBranch.city_id;
-                        const city = cities.find(c => c.id === selectedBranch.city_id);
-                        if (city) next.city_name = city.city_name;
-                    }
-                } else {
-                    next.branch_name = '';
-                }
-            }
-            return next;
-        });
+    // Sync city selection changes
+    const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const cityId = e.target.value;
+        setValue('city_id', cityId);
+        
+        const cityBranches = branches.filter(b => b.city_id === cityId);
+        if (cityBranches.length === 1) {
+            setValue('branch_id', cityBranches[0].id);
+        } else {
+            setValue('branch_id', '');
+        }
     };
 
-    const handleActiveChange = (checked: boolean) => {
-        setFormData((prev) => ({ ...prev, is_active: checked }));
+    // Sync branch selection changes
+    const handleBranchChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const branchId = e.target.value;
+        setValue('branch_id', branchId);
+        
+        const selectedBranch = branches.find(b => b.id === branchId);
+        if (selectedBranch && !watchedCityId && selectedBranch.city_id) {
+            setValue('city_id', selectedBranch.city_id);
+        }
     };
 
     const handleProfilePicChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,7 +168,6 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
             const reader = new FileReader();
             reader.onloadend = () => {
                 setProfilePicPreview(reader.result as string);
-                setFormData(prev => ({ ...prev, avatar_url: reader.result as string }));
             };
             reader.readAsDataURL(file);
         }
@@ -177,56 +185,38 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
         setSelectedSkills(selectedSkills.filter(skill => skill !== skillToRemove));
     };
 
-    const availableSkills = USER_SKILLS.filter(skill => !selectedSkills.includes(skill));
+    const onSubmit = (data: any) => {
+        setFormError(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        setError(null);
+        const selectedBranch = branches.find(b => b.id === data.branch_id);
+        const selectedCity = cities.find(c => c.id === data.city_id);
 
-        // Sanitize form data
         const currentData = {
-            ...formData,
-            email: formData.email?.replace(/[^a-zA-Z0-9@._\-+]/g, '').toLowerCase() || '',
-            name: formData.name?.trim() || '',
-        };
-
-        if (!user) { // New user validation
-            if (!password || password.length < 6) {
-                setError("Password must be at least 6 characters.");
-                return;
-            }
-            if (password !== confirmPassword) {
-                setError("Passwords do not match.");
-                return;
-            }
-        }
-        
-        if (!currentData.date_of_birth) {
-            setError("Date of birth is required.");
-            return;
-        }
-        if (!currentData.gender) {
-            setError("Gender is required.");
-            return;
-        }
-
-        const finalUserData: any = {
-            ...currentData,
+            ...data,
+            phone_number: data.phone,
+            branch_name: selectedBranch ? selectedBranch.name : '',
+            city_name: selectedCity ? selectedCity.city_name : '',
+            email: data.email?.trim().toLowerCase() || '',
+            name: data.name?.trim() || '',
             skills: selectedSkills,
+            avatar_url: profilePicPreview
         };
 
+        delete currentData.phone;
+        delete currentData.confirmPassword;
+
+        const finalUserData: any = { ...currentData };
         if (user) {
             finalUserData.id = user.id;
-        } else {
-            finalUserData.password = password;
         }
 
         onSave(finalUserData);
     };
 
-    const selectedRoleInfo = USER_ROLES_WITH_DESCRIPTIONS.find(r => r.role === formData.role);
-    const permissionsForRole = formData.role ? ROLE_PERMISSIONS[formData.role] || [] : [];
-    const showBranchField = formData.role && formData.role !== 'Super Admin';
+    const availableSkills = USER_SKILLS.filter(skill => !selectedSkills.includes(skill));
+    const selectedRoleInfo = USER_ROLES_WITH_DESCRIPTIONS.find(r => r.role === watchedRole);
+    const permissionsForRole = watchedRole ? ROLE_PERMISSIONS[watchedRole] || [] : [];
+    const showBranchField = watchedRole && watchedRole !== 'Super Admin';
 
     return (
         <Dialog
@@ -234,9 +224,9 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
             onClose={onClose}
             title={user ? 'Edit User' : 'Create New User'}
             description="Add a new user to the CRM system with appropriate role and permissions."
-            maxWidth="max-w-3xl" // Increased max width for 2-column layout
+            maxWidth="max-w-3xl"
         >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
                 {/* Profile Header Section */}
                 <div className="flex items-center gap-6 p-4 bg-muted/30 rounded-lg border border-border/50">
@@ -265,95 +255,146 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
-                        <FormField label="Full Name" id="name" required>
-                            <Input name="name" id="name" placeholder="John Doe" value={formData.name || ''} onChange={handleChange} required className="bg-background" />
-                        </FormField>
+                        <FormField 
+                            label="Full Name" 
+                            id="name" 
+                            required 
+                            placeholder="John Doe" 
+                            registration={register('name')}
+                            error={errors.name?.message as string}
+                        />
                         
-                        <FormField label="Employee Code" id="employee_code">
-                            <Input name="employee_code" id="employee_code" placeholder="e.g. EMP-001" value={formData.employee_code || ''} onChange={handleChange} className="bg-background" />
-                        </FormField>
+                        <FormField 
+                            label="Employee Code" 
+                            id="employee_code" 
+                            placeholder="e.g. EMP-001" 
+                            registration={register('employee_code')}
+                            error={errors.employee_code?.message as string}
+                        />
 
-                        <FormField label="Email Address" id="email" required>
-                            <Input name="email" id="email" type="email" placeholder="john@example.com" value={formData.email || ''} onChange={handleChange} required className="bg-background" />
-                        </FormField>
+                        <FormField 
+                            label="Email Address" 
+                            id="email" 
+                            type="email" 
+                            required 
+                            placeholder="john@example.com" 
+                            registration={register('email')}
+                            error={errors.email?.message as string}
+                        />
 
-                        <FormField label="Phone Number" id="phone">
-                            <Input name="phone_number" id="phone" type="tel" placeholder="+91 9876543210" value={formData.phone_number || ''} onChange={handleChange} className="bg-background" />
-                        </FormField>
+                        <FormField 
+                            label="Phone Number" 
+                            id="phone" 
+                            type="tel" 
+                            placeholder="9876543210" 
+                            registration={register('phone')}
+                            error={errors.phone?.message as string}
+                        />
 
-                        <FormField label="Date of Birth" id="date_of_birth" required>
-                            <Input name="date_of_birth" id="date_of_birth" type="date" value={formData.date_of_birth || ''} onChange={handleChange} required className="bg-background" />
-                        </FormField>
+                        <FormField 
+                            label="Date of Birth" 
+                            id="date_of_birth" 
+                            type="date" 
+                            required 
+                            registration={register('date_of_birth')}
+                            error={errors.date_of_birth?.message as string}
+                        />
 
-                        <FormField label="Gender" id="gender" required>
-                            <Select name="gender" id="gender" value={formData.gender || ''} onChange={handleChange} required className="bg-background">
-                                <option value="" disabled>-- Select Gender --</option>
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                                <option value="Other">Other</option>
-                            </Select>
-                        </FormField>
+                        <FormSelect 
+                            label="Gender" 
+                            id="gender" 
+                            required 
+                            registration={register('gender')}
+                            error={errors.gender?.message as string}
+                        >
+                            <option value="" disabled>-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </FormSelect>
 
                         {showBranchField && (
                             <>
-                                <FormField label="Assigned City" id="city_id">
-                                    <Select name="city_id" id="city_id" value={formData.city_id || ''} onChange={handleChange} className="bg-background">
-                                        <option value="">-- All Cities --</option>
-                                        {cities.map(c => (
-                                            <option key={c.id} value={c.id}>{c.city_name}</option>
-                                        ))}
-                                    </Select>
-                                </FormField>
+                                <FormSelect 
+                                    label="Assigned City" 
+                                    id="city_id" 
+                                    registration={register('city_id', { onChange: handleCityChange })}
+                                    error={errors.city_id?.message as string}
+                                >
+                                    <option value="">-- All Cities --</option>
+                                    {cities.map(c => (
+                                        <option key={c.id} value={c.id}>{c.city_name}</option>
+                                    ))}
+                                </FormSelect>
 
-                                <FormField label="Assigned Branch" id="branch_id" required>
-                                    <Select name="branch_id" id="branch_id" value={formData.branch_id || ''} onChange={handleChange} required className="bg-background">
-                                        <option value="" disabled>-- Select a Branch --</option>
-                                        {branches
-                                            .filter(b => !formData.city_id || b.city_id === formData.city_id)
-                                            .map(b => (
-                                            <option key={b.id} value={b.id}>{b.name} {b.code ? `(${b.code})` : ''}</option>
-                                        ))}
-                                    </Select>
-                                </FormField>
+                                <FormSelect 
+                                    label="Assigned Branch" 
+                                    id="branch_id" 
+                                    required 
+                                    registration={register('branch_id', { onChange: handleBranchChange })}
+                                    error={errors.branch_id?.message as string}
+                                >
+                                    <option value="" disabled>-- Select a Branch --</option>
+                                    {branches
+                                        .filter(b => !watchedCityId || b.city_id === watchedCityId)
+                                        .map(b => (
+                                        <option key={b.id} value={b.id}>{b.name} {b.code ? `(${b.code})` : ''}</option>
+                                    ))}
+                                </FormSelect>
                             </>
                         )}
                         
-                        <FormField label="Address" id="address">
-                            <textarea
-                                name="address"
-                                id="address"
-                                rows={2}
-                                placeholder="Full address"
-                                value={formData.address || ''}
-                                onChange={handleChange}
-                                className="w-full text-sm rounded-md border border-input bg-background px-3 py-2 placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                            />
-                        </FormField>
+                        <FormTextarea 
+                            label="Address" 
+                            id="address" 
+                            rows={2} 
+                            placeholder="Full address" 
+                            registration={register('address')}
+                            error={errors.address?.message as string}
+                        />
                         
-                        <FormField label="Reporting To" id="reporting_to">
-                            <Select name="reporting_to" id="reporting_to" value={formData.reporting_to || ''} onChange={handleChange} className="bg-background">
-                                <option value="">-- Independent (Or Top Level) --</option>
-                                {allUsers.filter(u => u.id !== user?.id).map(u => (
-                                    <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
-                                ))}
-                            </Select>
-                        </FormField>
+                        <FormSelect 
+                            label="Reporting To" 
+                            id="reporting_to" 
+                            registration={register('reporting_to')}
+                            error={errors.reporting_to?.message as string}
+                        >
+                            <option value="">-- Independent (Or Top Level) --</option>
+                            {allUsers.filter(u => u.id !== user?.id).map(u => (
+                                <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                            ))}
+                        </FormSelect>
                     </div>
 
                     <div className="space-y-4">
                         {!user && (
                             <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-4">
-                                <FormField label="Password" id="password" required>
-                                    <Input name="password" id="password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required className="bg-slate-900 border-white/10 text-white placeholder-slate-600 rounded-lg" />
-                                </FormField>
-                                <FormField label="Confirm Password" id="confirmPassword" required>
-                                    <Input name="confirmPassword" id="confirmPassword" type="password" placeholder="••••••••" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="bg-slate-900 border-white/10 text-white placeholder-slate-600 rounded-lg" />
-                                </FormField>
+                                <FormField 
+                                    label="Password" 
+                                    id="password" 
+                                    type="password" 
+                                    required 
+                                    placeholder="••••••••" 
+                                    registration={register('password')}
+                                    error={errors.password?.message as string}
+                                />
+                                <FormField 
+                                    label="Confirm Password" 
+                                    id="confirmPassword" 
+                                    type="password" 
+                                    required 
+                                    placeholder="••••••••" 
+                                    registration={register('confirmPassword')}
+                                    error={errors.confirmPassword?.message as string}
+                                />
                             </div>
                         )}
 
                         <div className="p-4 rounded-lg border border-border/50 space-y-4 bg-muted/10">
-                            <FormField label="System Role" id="role" required>
+                            <div className="space-y-1 w-full">
+                                <label className="block text-sm font-medium text-slate-700">
+                                    System Role <span className="text-red-500">*</span>
+                                </label>
                                 <div className="relative" ref={roleDropdownRef}>
                                     <button
                                         id="role"
@@ -364,19 +405,17 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                         aria-expanded={isRoleDropdownOpen}
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className={`h-2 w-2 rounded-full ${getRoleDotColor(formData.role as User['role'])}`}></div>
+                                            <div className={`h-2 w-2 rounded-full ${getRoleDotColor(watchedRole as User['role'])}`}></div>
                                             <span className="font-medium">{selectedRoleInfo?.role}</span>
                                         </div>
                                         <ChevronDown className="w-4 h-4 text-muted-foreground opacity-50" />
                                     </button>
                                     {isRoleDropdownOpen && (
-                                        <ul
-                                            className="absolute z-50 w-full mt-1 overflow-auto bg-popover text-popover-foreground border rounded-md shadow-md max-h-60"
-                                        >
+                                        <ul className="absolute z-50 w-full mt-1 overflow-auto bg-popover text-popover-foreground border rounded-md shadow-md max-h-60">
                                             {USER_ROLES_WITH_DESCRIPTIONS.map(roleInfo => (
                                                 <li key={roleInfo.role}
                                                     onClick={() => {
-                                                        handleChange({ target: { name: 'role', value: roleInfo.role } } as any);
+                                                        setValue('role', roleInfo.role);
                                                         setIsRoleDropdownOpen(false);
                                                     }}
                                                     className="flex flex-col gap-1 px-3 py-2.5 text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground border-b border-border/50 last:border-0"
@@ -391,7 +430,7 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                         </ul>
                                     )}
                                 </div>
-                            </FormField>
+                            </div>
 
                             {permissionsForRole.length > 0 && (
                                 <div className="space-y-1.5">
@@ -411,7 +450,8 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                 </div>
 
                 <div className="border-t border-border pt-6">
-                    <FormField label="Skills & Expertise" id="skills">
+                    <div className="space-y-1 w-full">
+                        <label className="block text-sm font-medium text-slate-700">Skills & Expertise</label>
                         <div className="space-y-3">
                             <Select id="skills" onChange={handleAddSkill} value="" className="bg-background">
                                 <option value="" disabled>Select a skill to add...</option>
@@ -429,12 +469,16 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                 {selectedSkills.length === 0 && <span className="text-sm text-muted-foreground italic px-2">No skills added yet.</span>}
                             </div>
                         </div>
-                    </FormField>
+                    </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-4 border-t border-border">
                     <div className="flex items-center gap-3">
-                        <Switch checked={formData.is_active || false} onChange={handleActiveChange} id="active-user" />
+                        <Switch 
+                            checked={watchedIsActive || false} 
+                            onChange={(checked) => setValue('is_active', checked)} 
+                            id="active-user" 
+                        />
                         <label htmlFor="active-user" className="text-sm font-medium cursor-pointer select-none">
                             Active Account
                         </label>
@@ -442,19 +486,22 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
 
                     <div className="flex justify-end gap-3">
                         <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                        <Button type="submit" disabled={!formData.name || !formData.email || (!user && !password)}>
+                        <Button 
+                            type="submit" 
+                            disabled={!watchedName || !watchedEmail || (!user && !watchedPassword)}
+                        >
                             {user ? 'Save Changes' : 'Create User'}
                         </Button>
                     </div>
                 </div>
 
-                {error && (
+                {formError && (
                     <div className="rounded-md bg-destructive/15 p-3">
                         <div className="flex">
                             <div className="ml-3">
                                 <h3 className="text-sm font-medium text-destructive">Error</h3>
                                 <div className="text-sm text-destructive/90 mt-1">
-                                    {error}
+                                    {formError}
                                 </div>
                             </div>
                         </div>

@@ -3,6 +3,7 @@ import { Card, CardHeader, CardContent } from '../components/ui/Card';
 import { User, TransferLog } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 // New Components
 import { ProfileSettings } from '../components/settings/ProfileSettings';
@@ -21,12 +22,12 @@ interface SettingsProps {
 }
 
 const Settings: React.FC<SettingsProps> = ({ currentUser, transferLogs, auditLogs }) => {
-    // Toast State
-    const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error', message: string } | null>(null);
-
     const showToast = (type: 'success' | 'error', message: string) => {
-        setToastMessage({ type, message });
-        setTimeout(() => setToastMessage(null), 3000);
+        if (type === 'success') {
+            toast.success(message);
+        } else {
+            toast.error(message);
+        }
     };
 
     // Navigation
@@ -76,13 +77,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUser, transferLogs, auditLog
                 <p className="text-slate-500">Manage your account and system preferences.</p>
             </header>
 
-            {/* Custom Toast Notification Area */}
-            {toastMessage && (
-                <div className={`fixed top-4 right-4 z-[100] px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 transition-opacity animate-in fade-in slide-in-from-top-5 ${toastMessage.type === 'success' ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'} border`}>
-                    {toastMessage.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
-                    <p className="font-medium text-sm">{toastMessage.message}</p>
-                </div>
-            )}
+
 
             <Card>
                 <CardHeader>
