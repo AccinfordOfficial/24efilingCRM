@@ -94,10 +94,8 @@
 | WhatsApp dashboard (Req #14) | `pages/WhatsAppDashboard.tsx` | ✅ EXISTS |
 | Chatbot tab switcher | `components/Chatbot.tsx` | ✅ EXISTS (updated) |
 | WhatsApp SQL migration | `SETUP_WHATSAPP_INTEGRATION.sql` | ✅ EXISTS |
-| WhatsApp API client | `lib/whatsappClient.ts` | ⚠️ DEFERRED (see note below) |
-| Edge Function webhook | `supabase/functions/whatsapp-webhook/index.ts` | ⚠️ DEFERRED (see note below) |
-
-> **Note on deferred items**: The `whatsappClient.ts` (Meta Cloud API wrapper) and `whatsapp-webhook` (Supabase Edge Function) require an active WhatsApp Business API account (via Meta Cloud API, Twilio, or 360dialog). Since the user does not yet have one, these were intentionally deferred. All CRM-side WhatsApp UI, database schemas, CRUD operations, AI reply suggestions, template broadcasting, and bot work order intake are fully implemented and functional with seeded mock data.
+| WhatsApp API client | `lib/whatsappClient.ts` | ✅ EXISTS |
+| Edge Function webhook | `supabase/functions/whatsapp-webhook/index.ts` | ✅ EXISTS |
 
 ---
 
@@ -173,7 +171,7 @@ All phases passed both verification checks:
 | 11 | Support for employees, sales, operations | 4 | ✅ |
 | 12 | Employee feedback | 4 | ✅ |
 | 13 | Work orders 24/7 | 4 + 6 | ✅ |
-| 14 | WhatsApp AI chatbot | 6 | ✅ (CRM-side complete; Meta API deferred) |
+| 14 | WhatsApp AI chatbot | 6 | ✅ |
 | 15 | Work & sales reports | 2 | ✅ |
 | 16 | Super admin updates/announcements | 3 | ✅ |
 | 17 | Services — create, customize, pricing | 1 | ✅ |
@@ -183,4 +181,4 @@ All phases passed both verification checks:
 
 ## Final Verdict
 
-**✅ Implementation plan is fully executed.** All 6 phases, 18 requirements, ~40 page/component files, 8 SQL migrations, and 17 database tables have been delivered. The only deferred items (`whatsappClient.ts` and the Edge Function webhook) are explicitly blocked on the user obtaining a WhatsApp Business API account and do not affect CRM functionality.
+**✅ Implementation plan is fully executed.** All 6 phases, 18 requirements, ~40 page/component files, 8 SQL migrations, and 17 database tables have been delivered. All WhatsApp integration features (API client, Edge webhook, suggested replies, template broadcasting, and bot-driven work order intake) are successfully created and ready to be configured later.
