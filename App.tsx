@@ -57,6 +57,11 @@ const Support = lazy(() => import('./pages/Support'));
 const EmployeeFeedback = lazy(() => import('./pages/EmployeeFeedback'));
 const WorkOrders = lazy(() => import('./pages/WorkOrders'));
 const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'));
+import { AutoAssignmentSettings } from './pages/AutoAssignmentSettings';
+import { TargetsDashboard } from './pages/TargetsDashboard';
+import { ServiceDelivery } from './pages/ServiceDelivery';
+import { RenewalsPipeline } from './pages/RenewalsPipeline';
+import { MyDay } from './pages/MyDay';
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -1427,6 +1432,11 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onConvertWebLeadToCrmLead={convertWebLeadToCrmLead}
           />
         } />
+        <Route path="/auto-assignment" element={<AutoAssignmentSettings />} />
+        <Route path="/targets" element={<TargetsDashboard />} />
+        <Route path="/service-delivery" element={<ServiceDelivery />} />
+        <Route path="/renewals" element={<RenewalsPipeline />} />
+        <Route path="/my-day" element={<MyDay />} />
       </Route>
         </Routes>
         <UserForm

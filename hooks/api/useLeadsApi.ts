@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Lead, User } from '../../types';
+import { autoAssignLead } from '../../lib/leadAssignment';
 
 export function useLeadsApi(core: {
     profile: any;
@@ -105,11 +106,23 @@ export function useLeadsApi(core: {
         const industryTypeId = indObj ? indObj.id : '22222222-2222-2222-2222-222222222222';
         const leadSourceId = srcObj ? srcObj.id : '33333333-3333-3333-3333-333333333333';
 
+        let finalAssignedTo = assigned_to?.id;
+        if (!finalAssignedTo) {
+            const autoAssignedId = await autoAssignLead({
+                source: leadData.source,
+                service_requested: leadData.service_requested,
+                branch_id: profile.branch_id
+            });
+            if (autoAssignedId) {
+                finalAssignedTo = autoAssignedId;
+            }
+        }
+
         const dbLeadData: any = {
             ...rest,
             reference_number: referenceNumber,
-            assigned_to: assigned_to?.id,
-            assigned_by: assigned_to ? profile.id : null,
+            assigned_to: finalAssignedTo,
+            assigned_by: finalAssignedTo ? profile.id : null,
             created_by: profile.id,
             branch_id: profile.branch_id,
             payments: payments as any,

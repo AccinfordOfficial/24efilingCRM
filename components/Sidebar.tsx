@@ -91,11 +91,14 @@ const superAdminNav: NavSection[] = [
   {
     title: 'Sales',
     items: [
+      { path: '/my-day', label: 'My Day', icon: Calendar },
       { path: '/leads', label: 'All Leads', icon: Briefcase },
       { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
       { path: '/my-leads', label: 'My Leads', icon: Target },
       { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
       { path: '/customers', label: 'Customers', icon: Users },
+      { path: '/targets', label: 'Sales Targets', icon: Target },
+      { path: '/auto-assignment', label: 'Auto Assignment Rules', icon: Layers },
     ]
   },
   {
@@ -115,6 +118,9 @@ const superAdminNav: NavSection[] = [
   {
     title: 'Operations',
     items: [
+      { path: '/my-day', label: 'My Day', icon: Calendar },
+      { path: '/service-delivery', label: 'Service Delivery', icon: Package },
+      { path: '/renewals', label: 'Renewals & Recurring', icon: Clock },
       { path: '/reminders', label: 'Reminders', icon: Calendar },
       { path: '/work-status', label: 'Work Status', icon: Briefcase },
       { path: '/announcements', label: 'Announcements', icon: Megaphone },
