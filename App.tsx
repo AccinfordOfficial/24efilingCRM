@@ -66,6 +66,8 @@ import { ClientPortalView } from './pages/ClientPortalView';
 import { Attendance } from './pages/Attendance';
 import { ExpenseManager } from './pages/ExpenseManager';
 import { AutomationRules } from './pages/AutomationRules';
+import { DocumentTemplates } from './pages/DocumentTemplates';
+import { IntegrationsCenter } from './pages/IntegrationsCenter';
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
 
@@ -1444,6 +1446,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/expenses" element={<ExpenseManager />} />
         <Route path="/automation" element={<AutomationRules />} />
+        <Route path="/templates" element={<DocumentTemplates />} />
+        <Route path="/integrations" element={<IntegrationsCenter />} />
       </Route>
         </Routes>
         <UserForm

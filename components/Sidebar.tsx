@@ -113,6 +113,7 @@ const superAdminNav: NavSection[] = [
     title: 'Management',
     items: [
       { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
+      { path: '/templates', label: 'Document Templates', icon: FileText },
       { path: '/expenses', label: 'Expense Manager', icon: DollarSign },
       { path: '/client-portal', label: 'Client Portal Simulator', icon: Users },
     ]
@@ -150,6 +151,7 @@ const superAdminNav: NavSection[] = [
   {
     title: 'System',
     items: [
+      { path: '/integrations', label: 'Integrations & APIs', icon: Settings },
       { path: '/activity', label: 'Activity Feed', icon: Clock },
       { path: '/notifications', label: 'Notifications', icon: Bell },
       { path: '/settings', label: 'System Settings', icon: Settings },

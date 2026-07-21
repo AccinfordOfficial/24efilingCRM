@@ -1,0 +1,20 @@
+{
+  "short_name": "24eFiling CRM",
+  "name": "24eFiling Corporate CRM",
+  "icons": [
+    {
+      "src": "/full-logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/full-logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#090d16",
+  "theme_color": "#1c398e",
+  "display": "standalone"
+}
