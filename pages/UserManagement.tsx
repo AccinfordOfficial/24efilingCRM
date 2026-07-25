@@ -18,6 +18,7 @@ interface UserManagementProps {
   users: User[];
   cities?: City[];
   branches?: Branch[];
+  leads?: any[];
   onOpenUserForm: (user: User | null) => void;
   onUpdateUser: (user: User) => void;
   onDeleteUsers: (userIds: string[]) => void;
@@ -103,6 +104,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
   users, 
   cities = [], 
   branches = [], 
+  leads = [],
   onOpenUserForm, 
   onUpdateUser, 
   onDeleteUsers, 
@@ -330,6 +332,7 @@ const UserManagement: React.FC<UserManagementProps> = ({
         user={viewingUser}
         onClose={() => setViewingUser(null)}
         userActivities={userActivities}
+        leads={leads}
         onEdit={handleEdit}
         onTransfer={handleTransferClick}
         canManage={currentUserRole === 'Super Admin' || currentUserRole === 'Admin'}

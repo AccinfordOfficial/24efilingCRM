@@ -44,12 +44,35 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
   }, [cities]);
 
   const branchOptions = useMemo(() => {
+    if (!branches || branches.length === 0) return ['All Branches'];
+
     if (selectedCity === 'All Cities') {
-      return ['All Branches', ...branches.map(b => b.name)];
+      const allNames = branches.map(b => b.name).filter(Boolean);
+      return ['All Branches', ...Array.from(new Set(allNames))];
     }
-    const cityId = cities.find(c => c.city_name === selectedCity)?.id;
-    const filteredBranches = branches.filter(b => b.city_id === cityId).map(b => b.name);
-    return ['All Branches', ...filteredBranches];
+
+    const targetCity = (cities || []).find(c => c.city_name === selectedCity || c.id === selectedCity);
+    const targetCityId = targetCity?.id;
+
+    const filteredBranches = branches.filter(b => {
+      const bCityId = b.city_id || (b as any).cityId;
+      const bCityName = b.city_name || (b as any).city || (b as any).cityName;
+
+      const matchId = targetCityId && bCityId === targetCityId;
+      const matchName = bCityName && bCityName.toLowerCase() === selectedCity.toLowerCase();
+      
+      return matchId || matchName;
+    });
+
+    const branchNames = filteredBranches.map(b => b.name).filter(Boolean);
+
+    if (branchNames.length > 0) {
+      return ['All Branches', ...Array.from(new Set(branchNames))];
+    }
+
+    // Fail-safe fallback: return all branches if no specific city match found
+    const allNames = branches.map(b => b.name).filter(Boolean);
+    return ['All Branches', ...Array.from(new Set(allNames))];
   }, [selectedCity, branches, cities]);
 
   // When city changes, reset branch if it's no longer valid in the new city

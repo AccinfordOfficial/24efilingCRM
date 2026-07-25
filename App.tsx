@@ -1211,6 +1211,10 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
               currentUserRole={viewProfile?.role}
               branches={branches}
               cities={cities}
+              leads={leads}
+              userActivities={userActivities}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
               onOpenUserForm={handleOpenUserForm}
               onUpdateUser={updateUser}
               onDeleteUsers={deleteMultipleUsers}

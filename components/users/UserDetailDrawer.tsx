@@ -34,12 +34,15 @@ export const UserDetailDrawer: React.FC<UserDetailDrawerProps> = ({
     const roleColor = getRoleColor(user.role);
 
     // Calculate lead performance metrics for this user
-    const userLeads = leads.filter(l => l.assigned_to?.id === user.id || l.created_by === user.id);
+    const safeLeads = Array.isArray(leads) ? leads : [];
+    const safeActivities = Array.isArray(userActivities) ? userActivities : [];
+
+    const userLeads = safeLeads.filter(l => l && (l.assigned_to?.id === user.id || l.created_by === user.id));
     const convertedLeads = userLeads.filter(l => l.status === 'Success');
     const activeLeads = userLeads.filter(l => !['Success', 'Lost'].includes(l.status));
     const conversionRate = userLeads.length > 0 ? Math.round((convertedLeads.length / userLeads.length) * 100) : 0;
 
-    const userSpecificActivities = userActivities.filter(a => a.user_id === user.id);
+    const userSpecificActivities = safeActivities.filter(a => a && a.user_id === user.id);
 
     return (
         <div className="fixed inset-0 z-50 overflow-hidden bg-slate-950/60 backdrop-blur-sm transition-opacity animate-in fade-in duration-200 flex justify-end">
