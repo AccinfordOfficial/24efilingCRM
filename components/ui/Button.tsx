@@ -10,7 +10,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        primary: "bg-gradient-to-br from-blue-700 to-blue-600 text-white shadow-md hover:shadow-lg hover:from-blue-800 hover:to-blue-700", // Backward compatibility & Premium look
+        primary: "bg-gradient-to-br from-blue-700 to-blue-600 dark:from-violet-600 dark:to-purple-600 text-white shadow-md hover:shadow-lg hover:from-blue-800 hover:to-blue-700 dark:hover:from-violet-700 dark:hover:to-purple-700", // Backward compatibility & Premium look
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:

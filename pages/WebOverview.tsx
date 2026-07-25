@@ -257,15 +257,15 @@ export default function WebOverview({
   const getStatusBadgeClass = (status: WebLead['status']) => {
     switch (status) {
       case 'Pending':
-        return 'bg-slate-100 text-slate-700 border border-slate-200';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700';
       case 'Contacted':
-        return 'bg-amber-50 text-amber-700 border border-amber-200';
+        return 'bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800';
       case 'Converted':
-        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+        return 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800';
       case 'Spam':
-        return 'bg-rose-50 text-rose-700 border border-rose-200';
+        return 'bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800';
       default:
-        return 'bg-slate-100 text-slate-700';
+        return 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
     }
   };
 
@@ -305,93 +305,95 @@ export default function WebOverview({
       {/* Grid of Web Statistics */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Web Traffic Views (Genuine Reset to 0) */}
-        <Card className="border-0 shadow-md bg-white overflow-hidden relative group hover:shadow-lg transition-shadow">
+        <Card className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden relative group hover:border-white/20 transition-all">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-500" />
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Web Traffic Views</p>
-              <h3 className="text-2xl font-extrabold text-slate-900">0</h3>
-              <p className="text-[11px] text-slate-450 font-bold flex items-center gap-0.5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Web Traffic Views</p>
+              <h3 className="text-2xl font-extrabold text-white">0</h3>
+              <p className="text-[11px] text-slate-400 font-bold flex items-center gap-0.5">
                 <span className="text-slate-400 font-semibold">0% from last month</span>
               </p>
             </div>
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl group-hover:scale-105 transition-transform">
+            <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl group-hover:scale-105 transition-transform border border-blue-500/20">
               <Eye className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Organic Web Leads (Genuine from DB) */}
-        <Card className="border-0 shadow-md bg-white overflow-hidden relative group hover:shadow-lg transition-shadow">
+        <Card className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden relative group hover:border-white/20 transition-all">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Organic Web Leads</p>
-              <h3 className="text-2xl font-extrabold text-slate-900">{webLeads.length}</h3>
-              <p className="text-[11px] text-emerald-600 font-bold flex items-center gap-0.5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Organic Web Leads</p>
+              <h3 className="text-2xl font-extrabold text-white">{webLeads.length}</h3>
+              <p className="text-[11px] text-emerald-400 font-bold flex items-center gap-0.5">
                 <span>{pendingLeadsCount} new</span> <span className="text-slate-400 font-normal">pending review</span>
               </p>
             </div>
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl group-hover:scale-105 transition-transform">
+            <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl group-hover:scale-105 transition-transform border border-emerald-500/20">
               <Users className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Blogs Published (Genuine from DB) */}
-        <Card className="border-0 shadow-md bg-white overflow-hidden relative group hover:shadow-lg transition-shadow">
+        <Card className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden relative group hover:border-white/20 transition-all">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Blogs Published</p>
-              <h3 className="text-2xl font-extrabold text-slate-900">{publishedBlogsCount}</h3>
-              <p className="text-[11px] text-slate-500 font-bold flex items-center gap-0.5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Blogs Published</p>
+              <h3 className="text-2xl font-extrabold text-white">{publishedBlogsCount}</h3>
+              <p className="text-[11px] text-slate-400 font-bold flex items-center gap-0.5">
                 <span>{draftBlogsCount} drafts</span> <span className="text-slate-400 font-normal">queued</span>
               </p>
             </div>
-            <div className="p-3 bg-violet-50 text-violet-600 rounded-xl group-hover:scale-105 transition-transform">
+            <div className="p-3 bg-violet-500/10 text-violet-400 rounded-xl group-hover:scale-105 transition-transform border border-violet-500/20">
               <FileText className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
 
         {/* Approved Reviews (Genuine from DB) */}
-        <Card className="border-0 shadow-md bg-white overflow-hidden relative group hover:shadow-lg transition-shadow">
+        <Card className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden relative group hover:border-white/20 transition-all">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
           <CardContent className="p-5 flex items-center justify-between">
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Approved Reviews</p>
-              <h3 className="text-2xl font-extrabold text-slate-900">{approvedReviewsCount}</h3>
-              <p className="text-[11px] text-amber-600 font-bold flex items-center gap-0.5">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Approved Reviews</p>
+              <h3 className="text-2xl font-extrabold text-slate-900 dark:text-white">{approvedReviewsCount}</h3>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 font-bold flex items-center gap-0.5">
                 <span>{dynamicAverageRating}★ rating</span> <span className="text-slate-400 font-normal">site average</span>
               </p>
             </div>
-            <div className="p-3 bg-amber-50 text-amber-600 rounded-xl group-hover:scale-105 transition-transform">
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl group-hover:scale-105 transition-transform">
               <CheckCircle className="h-6 w-6" />
             </div>
           </CardContent>
         </Card>
-      </div>      {/* RECENT WEBSITE INQUIRIES LEADS TABLE - Form Input Columns */}
-      <Card className="border border-slate-100 shadow-lg bg-white overflow-hidden rounded-2xl">
-        <div className="bg-slate-50 border-b border-slate-100 px-6 py-4.5 flex justify-between items-center flex-wrap gap-4">
+      </div>
+
+      {/* RECENT WEBSITE INQUIRIES LEADS TABLE - Form Input Columns */}
+      <Card className="border border-slate-100 dark:border-white/10 shadow-lg bg-white dark:bg-slate-900/60 overflow-hidden rounded-2xl">
+        <div className="bg-slate-50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-white/5 px-6 py-4.5 flex justify-between items-center flex-wrap gap-4">
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-              <Sparkles className="h-4.5 w-4.5 text-indigo-600" />
+            <h2 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-1.5">
+              <Sparkles className="h-4.5 w-4.5 text-primary" />
               Recent Website Inquiries
             </h2>
-            <p className="text-[11px] text-slate-550 mt-0.5 font-medium">Captured form fields parsed directly from your customer application at www.24efiling.com.</p>
+            <p className="text-[11px] text-slate-550 dark:text-slate-400 mt-0.5 font-medium">Captured form fields parsed directly from your customer application at www.24efiling.com.</p>
           </div>
           <div className="flex items-center gap-2">
             {selectedLeadIds.length > 0 && (
               <div className="flex items-center gap-1.5 mr-2 animate-in fade-in slide-in-from-right-2 duration-300">
-                <span className="text-xs font-semibold text-slate-600 bg-slate-200 px-2.5 py-1 rounded-full">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 bg-slate-200 dark:bg-slate-800 px-2.5 py-1 rounded-full">
                   {selectedLeadIds.length} Selected
                 </span>
                 {selectedLeadIds.length === 1 && (
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 text-xs font-semibold text-indigo-700 bg-white border-slate-200 flex items-center gap-1"
+                    className="h-8 text-xs font-semibold text-primary bg-background border-slate-200 dark:border-white/10 flex items-center gap-1"
                     onClick={handleEditSelected}
                   >
                     <Edit className="h-3 w-3" /> Edit
@@ -407,30 +409,30 @@ export default function WebOverview({
                 </Button>
               </div>
             )}
-            <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-600 border border-indigo-100 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+            <span className="text-[10px] font-extrabold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 px-2.5 py-0.5 rounded-full flex items-center gap-1">
               <ShieldCheck className="h-3 w-3" /> Live Synchronization Active
             </span>
           </div>
         </div>
 
         {/* Advanced Filters Block */}
-        <div className="p-4 border-b border-slate-100 bg-slate-50/30 grid gap-3 sm:grid-cols-2 md:grid-cols-5 items-end">
+        <div className="p-4 border-b border-slate-100 dark:border-white/5 bg-slate-50/30 dark:bg-slate-950/20 grid gap-3 sm:grid-cols-2 md:grid-cols-5 items-end">
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Search Query</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Search Query</label>
             <Input
               type="text"
               placeholder="Search inquiries..."
               value={filterSearch}
               onChange={(e) => setFilterSearch(e.target.value)}
-              className="h-9 text-xs bg-white"
+              className="h-9 text-xs bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Status</label>
             <Select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="h-9 text-xs bg-white"
+              className="h-9 text-xs bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
             >
               <option value="All">All Statuses</option>
               <option value="Pending">Pending</option>
@@ -440,21 +442,21 @@ export default function WebOverview({
             </Select>
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">From Date</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">From Date</label>
             <Input
               type="date"
               value={filterDateFrom}
               onChange={(e) => setFilterDateFrom(e.target.value)}
-              className="h-9 text-xs bg-white"
+              className="h-9 text-xs bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">To Date</label>
+            <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">To Date</label>
             <Input
               type="date"
               value={filterDateTo}
               onChange={(e) => setFilterDateTo(e.target.value)}
-              className="h-9 text-xs bg-white"
+              className="h-9 text-xs bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
             />
           </div>
           <div className="flex gap-2">
@@ -468,7 +470,7 @@ export default function WebOverview({
                   setFilterDateFrom('');
                   setFilterDateTo('');
                 }}
-                className="h-9 text-xs font-semibold text-red-650 hover:text-red-750 hover:bg-red-50 flex-1 border border-red-200"
+                className="h-9 text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex-1 border border-rose-200 dark:border-rose-800"
               >
                 Clear Filters
               </Button>
@@ -480,39 +482,39 @@ export default function WebOverview({
 
         <CardContent className="p-0">
           {filteredWebLeads.length === 0 ? (
-            <div className="p-12 text-center text-slate-400">
-              <MessageSquare className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-              <p className="font-bold text-slate-650">No Inquiries Match Filters</p>
-              <p className="text-xs text-slate-500 mt-1">Try clearing your filters or check back later.</p>
+            <div className="p-12 text-center text-slate-400 dark:text-slate-500">
+              <MessageSquare className="h-12 w-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+              <p className="font-bold text-slate-600 dark:text-slate-300">No Inquiries Match Filters</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Try clearing your filters or check back later.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 bg-slate-50/50">
+                  <tr className="border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-slate-950/40">
                     <th className="py-3 px-4 w-10 text-center">
                       <Checkbox
                         checked={filteredWebLeads.length > 0 && selectedLeadIds.length === filteredWebLeads.length}
                         onChange={(e) => handleSelectAll(e.target.checked)}
                       />
                     </th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">ID</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Name</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Email</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Phone</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Service Interested</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Message</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Date</th>
-                    <th className="py-3 px-4 w-12 text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">ID</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Name</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Email</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Phone</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Service Interested</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Message</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Status</th>
+                    <th className="py-3 px-4 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Date</th>
+                    <th className="py-3 px-4 w-12 text-center text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-50">
+                <tbody className="divide-y divide-slate-50 dark:divide-white/5">
                   {filteredWebLeads.map((lead) => {
                     const idCode = `#LD-${lead.id.substring(0, 5).toUpperCase()}`;
                     const isSelected = selectedLeadIds.includes(lead.id);
                     return (
-                      <tr key={lead.id} className={`hover:bg-slate-50/50 transition-colors align-middle ${isSelected ? 'bg-indigo-50/10' : ''}`}>
+                      <tr key={lead.id} className={`hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors align-middle ${isSelected ? 'bg-indigo-50/10 dark:bg-indigo-950/20' : ''}`}>
                         {/* Checkbox Column */}
                         <td className="py-3.5 px-4 text-center">
                           <Checkbox
@@ -522,34 +524,34 @@ export default function WebOverview({
                         </td>
 
                         {/* ID Column */}
-                        <td className="py-3.5 px-4 font-bold text-indigo-650 hover:underline cursor-pointer" onClick={() => handleOpenEditDialog(lead)}>
+                        <td className="py-3.5 px-4 font-bold text-primary hover:underline cursor-pointer" onClick={() => handleOpenEditDialog(lead)}>
                           {idCode}
                         </td>
                         
                         {/* Name Column */}
-                        <td className="py-3.5 px-4 font-bold text-slate-800 text-sm">
+                        <td className="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200 text-sm">
                           {lead.name}
                         </td>
 
                         {/* Email Column */}
-                        <td className="py-3.5 px-4 font-semibold text-slate-500">
+                        <td className="py-3.5 px-4 font-semibold text-slate-500 dark:text-slate-400">
                           {lead.email}
                         </td>
 
                         {/* Phone Column */}
-                        <td className="py-3.5 px-4 font-semibold text-slate-500">
+                        <td className="py-3.5 px-4 font-semibold text-slate-500 dark:text-slate-400">
                           {lead.phone}
                         </td>
                         
                         {/* Service Column */}
                         <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 bg-white text-slate-600 lowercase shadow-sm">
+                          <span className="inline-flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 lowercase shadow-sm">
                             {lead.service_interested || 'general'}
                           </span>
                         </td>
 
                         {/* Message Column */}
-                        <td className="py-3.5 px-4 max-w-[200px] truncate font-medium text-slate-600" title={lead.message}>
+                        <td className="py-3.5 px-4 max-w-[200px] truncate font-medium text-slate-600 dark:text-slate-400" title={lead.message}>
                           {lead.message || 'No inquiry text.'}
                         </td>
                         
@@ -561,7 +563,7 @@ export default function WebOverview({
                         </td>
                         
                         {/* Date Column */}
-                        <td className="py-3.5 px-4 font-bold text-slate-450">
+                        <td className="py-3.5 px-4 font-bold text-slate-450 dark:text-slate-400">
                           {new Date(lead.created_at).toLocaleDateString('en-IN', {
                             day: 'numeric',
                             month: 'short',
@@ -574,7 +576,7 @@ export default function WebOverview({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-slate-400 hover:text-indigo-600 hover:bg-slate-100 rounded-md"
+                            className="h-7 w-7 text-slate-400 dark:text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-white/5 rounded-md"
                             onClick={() => handleOpenEditDialog(lead)}
                             title="Edit Inquiry"
                           >
@@ -602,51 +604,51 @@ export default function WebOverview({
       >
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Name</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Name</label>
             <Input
               type="text"
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              className="h-9 text-xs"
+              className="h-9 text-xs bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Email</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Email</label>
             <Input
               type="email"
               value={editEmail}
               onChange={(e) => setEditEmail(e.target.value)}
-              className="h-9 text-xs"
+              className="h-9 text-xs bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Phone</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Phone</label>
             <Input
               type="text"
               value={editPhone}
               onChange={(e) => setEditPhone(e.target.value)}
-              className="h-9 text-xs"
+              className="h-9 text-xs bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Service Interested</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Service Interested</label>
             <Input
               type="text"
               value={editService}
               onChange={(e) => setEditService(e.target.value)}
-              className="h-9 text-xs"
+              className="h-9 text-xs bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Status</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Status</label>
             <Select
               value={editStatus}
               onChange={(e) => setEditStatus(e.target.value as WebLead['status'])}
-              className="h-9 text-xs bg-white"
+              className="h-9 text-xs bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
             >
               <option value="Pending">Pending</option>
               <option value="Contacted">Contacted</option>
@@ -656,15 +658,15 @@ export default function WebOverview({
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-600 block">Message</label>
+            <label className="text-xs font-bold text-slate-600 dark:text-slate-400 block">Message</label>
             <Textarea
               value={editMessage}
               onChange={(e) => setEditMessage(e.target.value)}
-              className="min-h-[100px] text-xs"
+              className="min-h-[100px] text-xs bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+          <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
             <Button
               variant="ghost"
               onClick={() => {
@@ -677,7 +679,7 @@ export default function WebOverview({
             </Button>
             <Button
               onClick={handleSaveEdit}
-              className="h-9 text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700"
+              className="h-9 text-xs font-semibold bg-primary text-primary-foreground hover:opacity-90"
             >
               Save Changes
             </Button>
@@ -689,19 +691,19 @@ export default function WebOverview({
       <div className="grid gap-6 md:grid-cols-3">
         {/* Left 2 Columns: Traffic Charts & Site Health */}
         <div className="md:col-span-2 space-y-6">
-          <Card className="border-0 shadow-md bg-white">
-            <CardHeader className="border-b pb-4">
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-900/60">
+            <CardHeader className="border-b border-slate-100 dark:border-white/5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-bold text-slate-900">Monthly Traffic Overview</CardTitle>
-                  <CardDescription className="text-xs text-slate-500">Visitor counts and submissions over the past 6 months.</CardDescription>
+                  <CardTitle className="text-lg font-bold text-slate-900 dark:text-white">Monthly Traffic Overview</CardTitle>
+                  <CardDescription className="text-xs text-slate-500 dark:text-slate-400">Visitor counts and submissions over the past 6 months.</CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <span className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                     <span className="h-2.5 w-2.5 rounded-full bg-indigo-600" />
                     Visitors
                   </span>
-                  <span className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                  <span className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                     <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
                     Form Submissions
                   </span>
@@ -710,7 +712,7 @@ export default function WebOverview({
             </CardHeader>
             <CardContent className="p-6">
               {/* Custom CSS Bar Chart (100% Genuine: Visitors at 0, Submissions dynamically scaled) */}
-              <div className="h-64 flex items-end justify-between gap-4 pt-6 border-b border-slate-100">
+              <div className="h-64 flex items-end justify-between gap-4 pt-6 border-b border-slate-100 dark:border-white/5">
                 {chartData.map((d, index) => {
                   const submissionsHeightPercent = maxSubmissions > 0 
                     ? `${(d.submissionsCount / maxSubmissions) * 90 + 5}%` // add small offset so it's visible if it exists
@@ -739,27 +741,27 @@ export default function WebOverview({
 
         {/* Right 1 Column: API Key Integration Panel */}
         <div className="space-y-6">
-          <Card className="border-0 shadow-md bg-white">
-            <CardHeader className="border-b pb-4">
+          <Card className="border-0 shadow-md bg-white dark:bg-slate-900/60">
+            <CardHeader className="border-b border-slate-100 dark:border-white/5 pb-4">
               <div className="flex items-center gap-2">
-                <Key className="h-5 w-5 text-indigo-600" />
-                <CardTitle className="text-base font-bold text-slate-900">API Integration Token</CardTitle>
+                <Key className="h-5 w-5 text-primary" />
+                <CardTitle className="text-base font-bold text-slate-900 dark:text-white">API Integration Token</CardTitle>
               </div>
-              <CardDescription className="text-xs text-slate-500">Provide this token to the web developer to sync website queries automatically.</CardDescription>
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400">Provide this token to the web developer to sync website queries automatically.</CardDescription>
             </CardHeader>
             <CardContent className="p-5 space-y-4">
               <div className="space-y-1.5">
-                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Webform Connector Key</label>
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">Webform Connector Key</label>
                 <div className="flex gap-1.5">
                   <input
                     type={showApiKey ? "text" : "password"}
                     readOnly
                     value="efile_web_token_2026_jblhzdtqrhfeawycecql"
-                    className="flex-1 h-9 px-3 border border-slate-200 rounded-md text-xs font-mono bg-slate-50 text-slate-600 focus:outline-none"
+                    className="flex-1 h-9 px-3 border border-slate-200 dark:border-white/10 rounded-md text-xs font-mono bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-300 focus:outline-none"
                   />
                   <Button
                     variant="outline"
-                    className="h-9 px-2.5 text-xs text-slate-600 bg-white"
+                    className="h-9 px-2.5 text-xs text-slate-600 dark:text-slate-400 bg-background dark:bg-slate-900 border-input dark:border-white/10"
                     onClick={() => setShowApiKey(!showApiKey)}
                   >
                     {showApiKey ? 'Hide' : 'Show'}
@@ -767,33 +769,33 @@ export default function WebOverview({
                 </div>
               </div>
               <Button
-                className="w-full text-xs font-bold h-9 bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="w-full text-xs font-bold h-9 bg-primary text-primary-foreground hover:opacity-90"
                 onClick={handleCopyApiKey}
               >
                 Copy API Key
               </Button>
 
-              <div className="border-t pt-4 space-y-3">
+              <div className="border-t border-slate-100 dark:border-white/5 pt-4 space-y-3">
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-600 flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                     <Shield className="h-4 w-4 text-emerald-500" />
                     SSL Status
                   </span>
-                  <span className="text-emerald-600 font-bold">Secured (TLS 1.3)</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">Secured (TLS 1.3)</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-600 flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                     <Activity className="h-4 w-4 text-emerald-500 animate-pulse" />
                     API Response Time
                   </span>
-                  <span className="text-slate-600 font-bold">42 ms</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-bold">42 ms</span>
                 </div>
                 <div className="flex justify-between items-center text-xs">
-                  <span className="font-semibold text-slate-600 flex items-center gap-1.5">
+                  <span className="font-semibold text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                     <HelpCircle className="h-4 w-4 text-slate-400" />
                     Doc Checklist Version
                   </span>
-                  <span className="text-slate-600 font-bold">v3.4.1</span>
+                  <span className="text-slate-600 dark:text-slate-400 font-bold">v3.4.1</span>
                 </div>
               </div>
             </CardContent>

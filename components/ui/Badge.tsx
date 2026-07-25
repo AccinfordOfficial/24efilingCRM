@@ -14,7 +14,7 @@ const badgeVariants = cva(
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground",
+        outline: "text-foreground border-border",
       },
     },
     defaultVariants: {
@@ -40,7 +40,7 @@ function Badge({ className, variant, onRemove, children, ...props }: BadgeProps)
         <button
           type="button"
           onClick={onRemove}
-          className="ml-1 -mr-1 h-3.5 w-3.5 inline-flex items-center justify-center rounded-full hover:bg-black/10 focus:outline-none"
+          className="ml-1 -mr-1 h-3.5 w-3.5 inline-flex items-center justify-center rounded-full hover:bg-black/10 dark:hover:bg-white/20 focus:outline-none"
         >
           <span className="sr-only">Remove</span>
           <svg className="h-2.5 w-2.5" stroke="currentColor" fill="none" viewBox="0 0 8 8">

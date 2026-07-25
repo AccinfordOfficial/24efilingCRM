@@ -5,11 +5,14 @@ import { FormField } from '../components/ui/FormField';
 import { FormSelect } from '../components/ui/FormSelect';
 import { Dialog } from '../components/ui/Dialog';
 import { useApi } from '../hooks/useApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { supabase } from '../lib/supabaseClient';
 import { toast } from 'sonner';
 import { TrendingUpIcon, UsersIcon, PlusIcon, AwardIcon } from '../components/icons';
 import { CheckCircle2 } from 'lucide-react';
+import { ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { Badge } from '../components/ui/Badge';
 
 interface TargetRecord {
     id: string;
@@ -44,7 +47,8 @@ export const TargetsDashboard: React.FC = () => {
             setIsLoading(true);
             const { data, error } = await supabase.from('sales_targets').select('*');
             if (error) throw error;
-            setTargets((data || []) as TargetRecord[]);
+            setTargets(((data || []) as unknown) as TargetRecord[]);
+
         } catch (e: any) {
             console.error("Error loading targets:", e);
         } finally {
@@ -99,11 +103,11 @@ export const TargetsDashboard: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-bold text-white">Sales Targets & Achievement</h2>
-                    <p className="text-xs text-slate-400">Track monthly sales quotas, run rates, and commission calculations.</p>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Sales Targets & Achievement</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Track monthly sales quotas, run rates, and commission calculations.</p>
                 </div>
                 {isManagerOrAdmin && (
-                    <Button onClick={() => setIsModalOpen(true)} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                    <Button onClick={() => setIsModalOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90">
                         <PlusIcon className="h-4 w-4 mr-1" /> Set Monthly Target
                     </Button>
                 )}
@@ -123,7 +127,7 @@ export const TargetsDashboard: React.FC = () => {
                     const estimatedCommission = (achievedRevenue * (userTarget?.commission_rate || 5)) / 100;
 
                     return (
-                        <Card key={user.id} className="bg-slate-900/60 border-white/10 overflow-hidden relative">
+                        <Card key={user.id} className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10 overflow-hidden relative">
                             <div 
                                 className="absolute top-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-500"
                                 style={{ width: `${percentAchieved}%` }}
@@ -131,36 +135,62 @@ export const TargetsDashboard: React.FC = () => {
                             <CardHeader className="pb-2">
                                 <div className="flex justify-between items-start">
                                     <div>
-                                        <CardTitle className="text-base font-bold text-white">{user.name}</CardTitle>
-                                        <p className="text-xs text-slate-400">{user.role} • {user.branch_name || 'Branch'}</p>
+                                        <CardTitle className="text-base font-bold text-slate-900 dark:text-white">{user.name}</CardTitle>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{user.role} • {user.branch_name || 'Branch'}</p>
                                     </div>
-                                    <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-400 border-emerald-500/20">
+                                    <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
                                         {percentAchieved}% Target
                                     </Badge>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-4 pt-2">
-                                <div>
-                                    <div className="flex justify-between text-xs text-slate-300 mb-1">
-                                        <span>Revenue Progress</span>
-                                        <span className="font-semibold text-white">₹{(achievedRevenue / 1000).toFixed(1)}k / ₹{(revenueTarget / 1000).toFixed(1)}k</span>
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex-1 space-y-2">
+                                        <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
+                                            <span>Revenue Progress</span>
+                                            <span className="font-semibold text-slate-900 dark:text-white">₹{(achievedRevenue / 1000).toFixed(1)}k / ₹{(revenueTarget / 1000).toFixed(1)}k</span>
+                                        </div>
+                                        <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                                            <div 
+                                                className="bg-blue-500 h-2 rounded-full transition-all duration-500" 
+                                                style={{ width: `${percentAchieved}%` }}
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
-                                        <div 
-                                            className="bg-blue-500 h-2 rounded-full transition-all duration-500" 
-                                            style={{ width: `${percentAchieved}%` }}
-                                        />
+                                    <div className="w-20 h-16 relative flex items-center justify-center">
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                                            <PieChart>
+                                                <Pie
+                                                    data={[
+                                                        { value: percentAchieved, color: '#3b82f6' },
+                                                        { value: Math.max(0, 100 - percentAchieved), color: '#cbd5e1' }
+                                                    ]}
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    innerRadius={18}
+                                                    outerRadius={26}
+                                                    startAngle={180}
+                                                    endAngle={0}
+                                                    dataKey="value"
+                                                    stroke="none"
+                                                >
+                                                    <Cell fill="#3b82f6" />
+                                                    <Cell fill="#cbd5e1" />
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+                                        <span className="absolute bottom-1 text-[10px] font-bold text-slate-900 dark:text-white">{percentAchieved}%</span>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800 text-xs">
-                                    <div className="bg-slate-950/40 p-2 rounded">
-                                        <span className="text-slate-500 block text-[10px]">Conversions</span>
-                                        <span className="font-bold text-white text-sm">{userCustomers.length} / {userTarget?.target_conversions || 10}</span>
+                                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-200 dark:border-slate-800 text-xs">
+                                    <div className="bg-slate-50 dark:bg-slate-950/40 p-2 rounded">
+                                        <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Conversions</span>
+                                        <span className="font-bold text-slate-900 dark:text-white text-sm">{userCustomers.length} / {userTarget?.target_conversions || 10}</span>
                                     </div>
-                                    <div className="bg-slate-950/40 p-2 rounded">
-                                        <span className="text-slate-500 block text-[10px]">Commission ({userTarget?.commission_rate || 5}%)</span>
-                                        <span className="font-bold text-emerald-400 text-sm">₹{estimatedCommission.toLocaleString()}</span>
+                                    <div className="bg-slate-50 dark:bg-slate-950/40 p-2 rounded">
+                                        <span className="text-slate-500 dark:text-slate-400 block text-[10px]">Commission ({userTarget?.commission_rate || 5}%)</span>
+                                        <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">₹{estimatedCommission.toLocaleString()}</span>
                                     </div>
                                 </div>
                             </CardContent>
@@ -219,9 +249,9 @@ export const TargetsDashboard: React.FC = () => {
                         />
                     </div>
 
-                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <Button type="button" variant="outline" onClick={() => setIsModalOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                        <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:opacity-90">
                             {isSubmitting ? 'Saving...' : 'Set Target'}
                         </Button>
                     </div>

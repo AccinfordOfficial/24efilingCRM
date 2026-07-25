@@ -157,25 +157,27 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             <DashboardFilterBar currentUserRole={currentUser.role} />
 
             {/* Custom Control Bar (AI Copilot & Customize Layout) */}
-            <div className="flex justify-between items-center gap-4 bg-slate-900/10 border border-white/5 p-3 rounded-xl backdrop-blur-md relative z-20">
-                <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-blue-400" />
-                    <span className="text-xs text-slate-300">Need AI-powered predictions or layouts?</span>
+            {currentUser.role !== 'Sales Executive' && (
+                <div className="flex justify-between items-center gap-4 bg-slate-900/10 border border-white/5 p-3 rounded-xl backdrop-blur-md relative z-20">
+                    <div className="flex items-center gap-2">
+                        <Sparkles className="h-4 w-4 text-blue-400" />
+                        <span className="text-xs text-slate-300">Need AI-powered predictions or layouts?</span>
+                    </div>
+                    <div className="flex gap-2">
+                        <WidgetGrid
+                            userId={currentUser.id}
+                            onLayoutChange={setWidgetLayout}
+                            isSuperAdmin={metrics.isSuperAdmin}
+                        />
+                        <button
+                            onClick={() => setIsCopilotOpen(true)}
+                            className="flex items-center gap-1.5 text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg border-none shadow-md shadow-blue-500/10 transition-all cursor-pointer"
+                        >
+                            <Sparkles className="h-4 w-4" /> Ask Gemini Copilot
+                        </button>
+                    </div>
                 </div>
-                <div className="flex gap-2">
-                    <WidgetGrid
-                        userId={currentUser.id}
-                        onLayoutChange={setWidgetLayout}
-                        isSuperAdmin={metrics.isSuperAdmin}
-                    />
-                    <button
-                        onClick={() => setIsCopilotOpen(true)}
-                        className="flex items-center gap-1.5 text-xs font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-3 py-1.5 rounded-lg border-none shadow-md shadow-blue-500/10 transition-all cursor-pointer"
-                    >
-                        <Sparkles className="h-4 w-4" /> Ask Gemini Copilot
-                    </button>
-                </div>
-            </div>
+            )}
 
             {/* KPI Cards Row */}
             {widgetLayout.kpiStrip && (
@@ -190,7 +192,7 @@ const DashboardOverview: React.FC<DashboardOverviewProps> = ({
             {/* Main content grid (Row 1: Business Analytics and Today's Agenda side by side) */}
             {(widgetLayout.analyticsChart || widgetLayout.todayAgenda) && (
                 <div className="grid gap-5 lg:grid-cols-5 relative z-10">
-                    {widgetLayout.analyticsChart && (
+                    {widgetLayout.analyticsChart && currentUser.role !== 'Sales Executive' && (
                         <div className={widgetLayout.todayAgenda ? 'lg:col-span-3' : 'lg:col-span-5'}>
                             <BusinessAnalyticsChart
                                 trendData={metrics.trendData}

@@ -13,18 +13,20 @@ export const FormField = React.forwardRef<HTMLInputElement, FormFieldProps>(
     ({ label, error, registration, className, ...props }, ref) => {
         return (
             <div className="space-y-1 w-full">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     {label} {props.required && <span className="text-red-500">*</span>}
                 </label>
                 <Input
                     className={cn(
-                        error ? 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500' : 'border-slate-300',
+                        'bg-background dark:bg-slate-950/60 border-input dark:border-white/10 text-foreground dark:text-white',
+                        error ? 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500' : '',
                         className
                     )}
                     ref={ref}
                     {...registration}
                     {...props}
                 />
+
                 {error && (
                     <p className="text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
                         {error}

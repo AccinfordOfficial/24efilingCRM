@@ -98,40 +98,40 @@ export const AutomationRules: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-bold text-white">Workflow Automation Engine</h2>
-                    <p className="text-xs text-slate-400">Build event-driven triggers for WhatsApp greetings, automated task assignments, and SMS alerts.</p>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Workflow Automation Engine</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Build event-driven triggers for WhatsApp greetings, automated task assignments, and SMS alerts.</p>
                 </div>
-                <Button onClick={() => setIsCreateOpen(true)} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                <Button onClick={() => setIsCreateOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90">
                     <PlusIcon className="h-4 w-4 mr-1" /> New Automation Rule
                 </Button>
             </div>
 
             {/* Automation Rules List */}
-            <Card className="bg-slate-900/60 border-white/10">
+            <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10">
                 <CardContent className="p-4">
                     {isLoading ? (
-                        <div className="py-8 text-center text-slate-400 text-sm">Loading automation triggers...</div>
+                        <div className="py-8 text-center text-slate-500 dark:text-slate-400 text-sm">Loading automation triggers...</div>
                     ) : rules.length === 0 ? (
-                        <div className="py-12 text-center text-slate-400">
-                            <Zap className="h-8 w-8 mx-auto mb-2 text-[#1c398e]" />
-                            <p className="font-semibold text-slate-300">No Automation Triggers Active</p>
-                            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                        <div className="py-12 text-center text-slate-500 dark:text-slate-400">
+                            <Zap className="h-8 w-8 mx-auto mb-2 text-primary" />
+                            <p className="font-semibold text-slate-800 dark:text-slate-300">No Automation Triggers Active</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
                                 Create event-driven rules to send automated WhatsApp welcome messages whenever new leads arrive.
                             </p>
                         </div>
                     ) : (
                         <div className="space-y-3">
                             {rules.map((rule) => (
-                                <div key={rule.id} className="flex items-center justify-between p-4 bg-slate-950/40 border border-white/5 rounded-lg">
+                                <div key={rule.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/5 rounded-lg">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-2">
                                             <Zap className="h-4 w-4 text-amber-400" />
-                                            <span className="font-semibold text-white text-sm">{rule.name}</span>
-                                            <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/20">
+                                            <span className="font-semibold text-slate-900 dark:text-white text-sm">{rule.name}</span>
+                                            <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-primary border-blue-500/20">
                                                 {rule.trigger_event.toUpperCase()}
                                             </Badge>
                                         </div>
-                                        <p className="text-xs text-slate-400">{rule.description} • Executed {rule.run_count} times</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{rule.description} • Executed {rule.run_count} times</p>
                                     </div>
 
                                     <div className="flex items-center gap-3">
@@ -180,9 +180,9 @@ export const AutomationRules: React.FC = () => {
                         ]}
                     />
 
-                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                        <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:opacity-90">
                             {isSubmitting ? 'Activating...' : 'Activate Automation'}
                         </Button>
                     </div>

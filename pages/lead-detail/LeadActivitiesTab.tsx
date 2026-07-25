@@ -61,33 +61,33 @@ export const LeadActivitiesTab: React.FC<LeadActivitiesTabProps> = ({
                         value={newNote}
                         onChange={(e) => setNewNote(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && onAddNote()}
-                        className="flex-1"
+                        className="flex-1 bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
                     />
                     <Button onClick={onAddNote}>Add Note</Button>
                 </div>
-                <div className="relative pl-4 border-l-2 border-slate-200 space-y-8">
-                    {isLoadingDetails && <div className="text-center py-4 text-slate-500">Loading history...</div>}
+                <div className="relative pl-4 border-l-2 border-slate-200 dark:border-white/10 space-y-8">
+                    {isLoadingDetails && <div className="text-center py-4 text-slate-500 dark:text-slate-400">Loading history...</div>}
 
                     {activities?.map((activity) => (
                         <div key={activity.id} className="relative">
-                            <div className="absolute -left-[23px] top-1 bg-white border-2 border-slate-200 rounded-full p-1">
+                            <div className="absolute -left-[23px] top-1 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-white/10 rounded-full p-1">
                                 <ActivityIcon type={activity.type} />
                             </div>
-                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                            <div className="bg-slate-50 dark:bg-slate-950/40 p-3 rounded-lg border border-slate-100 dark:border-white/5">
                                 <div className="flex justify-between items-start mb-1">
-                                    <p className="text-sm font-medium text-slate-900">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">
                                         {activity.user?.name || 'Unknown User'}
-                                        <span className="font-normal text-slate-600"> {activity.type === 'Note' ? 'added a note' : 'updated the lead'}</span>
+                                        <span className="font-normal text-slate-600 dark:text-slate-400"> {activity.type === 'Note' ? 'added a note' : 'updated the lead'}</span>
                                     </p>
-                                    <span className="text-xs text-slate-400">{timeAgo(activity.created_at)}</span>
+                                    <span className="text-xs text-slate-400 dark:text-slate-500">{timeAgo(activity.created_at)}</span>
                                 </div>
-                                <p className="text-sm text-slate-600 whitespace-pre-wrap">{activity.content}</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap">{activity.content}</p>
                             </div>
                         </div>
                     ))}
 
                     {!isLoadingDetails && (!activities || activities.length === 0) && (
-                        <p className="text-sm text-slate-500 italic ml-2">No activity recorded yet.</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 italic ml-2">No activity recorded yet.</p>
                     )}
                 </div>
             </CardContent>

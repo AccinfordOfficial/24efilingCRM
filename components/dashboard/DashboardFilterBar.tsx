@@ -80,7 +80,8 @@ export const DashboardFilterBar: React.FC<DashboardFilterBarProps> = ({ currentU
   ];
 
   return (
-    <div className="glass-card p-3 md:p-4 rounded-2xl border border-white/5 flex flex-col w-full relative z-20">
+    <div className="glass-card p-3 md:p-4 rounded-2xl border border-white/5 flex flex-col w-full relative z-40">
+
       {/* Top Row: Date filters & More Filters toggle */}
       <div className="flex flex-wrap items-center gap-3 w-full">
         <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mr-2">

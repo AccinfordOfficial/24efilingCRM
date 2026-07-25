@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { SETUP_SQL_SCRIPT } from '../lib/supabaseClient';
 import { EfilingLogo, MailIcon, LockIcon, LogInIcon, UserIcon, EyeIcon, EyeOffIcon, SuperAdminIcon, AdminIcon, SalesExecIcon, AlertTriangleIcon } from '../components/icons';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { Button } from '../components/ui/Button';
 import { useToast } from '../components/Toast';
 

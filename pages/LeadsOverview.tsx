@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Lead, User, Service, Offer } from '../types';
 import { LeadTable } from '../components/LeadTable';
 import { Button } from '../components/ui/Button';
@@ -15,7 +16,7 @@ interface LeadsOverviewProps {
     users: User[];
     services: Service[];
     offers?: Offer[];
-    onAddLead: () => void;
+    onAddLead?: () => void;
     onUpdateLead: (lead: Lead) => void;
     onViewLead: (leadId: string) => void;
     onUpdateMultipleLeads: (leadIds: string[], updates: Partial<Omit<Lead, 'id'>>) => void;
@@ -27,13 +28,17 @@ interface LeadsOverviewProps {
 }
 
 const MetricCard: React.FC<{ title: string, value: number, icon: React.ElementType, color: string }> = ({ title, value, icon: Icon, color }) => (
-    <div className={`${color} text-white p-4 rounded-xl shadow-md flex items-center gap-4`}>
-        <div className="bg-white/20 p-3 rounded-lg">
-            <Icon className="h-6 w-6" />
+    <div className="glass-card border border-slate-200 dark:border-white/5 p-4 rounded-xl shadow-md flex flex-col justify-between h-28 relative overflow-hidden bg-white dark:bg-slate-900/60">
+        {/* Subtle accent glow background */}
+        <div className={`absolute -top-10 -right-10 w-24 h-24 rounded-full filter blur-2xl opacity-20 ${color}`} />
+        <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{title}</span>
+            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                <Icon className="h-4 w-4 text-slate-600 dark:text-slate-300" />
+            </div>
         </div>
-        <div>
-            <p className="text-2xl font-bold">{value}</p>
-            <p className="text-sm font-medium opacity-90">{title}</p>
+        <div className="flex items-baseline mt-2">
+            <span className="text-3xl font-extrabold text-slate-900 dark:text-white">{value}</span>
         </div>
     </div>
 );
@@ -63,6 +68,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
     setDateRange,
     currentUser,
 }) => {
+    const navigate = useNavigate();
     const [statusFilter, setStatusFilter] = useState('All');
     const [priorityFilter, setPriorityFilter] = useState('All');
     const [serviceFilter, setServiceFilter] = useState('All');
@@ -147,19 +153,20 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
 
     return (
         <div className="space-y-6">
-            <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
-                    <p className="text-slate-500">{descriptionMap[title]}</p>
-                </div>
-                <div className="flex flex-wrap items-end gap-3 justify-start sm:justify-end self-start sm:self-center w-full sm:w-auto">
-                    <div>
-                        <label htmlFor="date-range-filter" className="text-xs font-medium text-slate-600 mb-1 block">Date Range</label>
+            <header>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">{title}</h1>
+                <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{descriptionMap[title]}</p>
+            </header>
+
+            <div className="glass-card border border-slate-200 dark:border-white/5 p-4 rounded-xl flex flex-wrap gap-4 items-center justify-between w-full bg-white dark:bg-slate-900/60 relative z-30">
+                <div className="flex flex-wrap items-end gap-3 w-full">
+                    <div className="w-full sm:w-auto">
+                        <label htmlFor="date-range-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Date Range</label>
                         <Popover
-                            align="end"
+                            align="start"
                             trigger={
-                                <Button id="date-range-filter" variant="outline" className="w-full sm:w-auto justify-start text-left font-normal gap-2 bg-white h-9">
-                                    <CalendarIcon className="h-4 w-4 text-slate-500" />
+                                <Button id="date-range-filter" variant="outline" className="w-full sm:w-auto justify-start text-left font-normal gap-2 bg-background dark:bg-slate-900/50 border-slate-200 dark:border-white/5 text-foreground dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-900/80 h-9">
+                                    <CalendarIcon className="h-4 w-4 text-slate-400" />
                                     <span className="hidden sm:inline">
                                         {dateRange.from && dateRange.to ? (
                                             `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`
@@ -178,7 +185,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor="status-filter" className="text-xs font-medium text-slate-600 mb-1 block">Status</label>
+                        <label htmlFor="status-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Status</label>
                         <SearchableSelect
                             options={statusOptions}
                             value={statusFilter}
@@ -186,7 +193,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor="priority-filter" className="text-xs font-medium text-slate-600 mb-1 block">Priority</label>
+                        <label htmlFor="priority-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Priority</label>
                         <SearchableSelect
                             options={priorityOptions}
                             value={priorityFilter}
@@ -194,7 +201,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor="score-filter" className="text-xs font-medium text-slate-600 mb-1 block">Score</label>
+                        <label htmlFor="score-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Score</label>
                         <SearchableSelect
                             options={scoreOptions}
                             value={scoreFilter}
@@ -202,7 +209,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor="service-filter" className="text-xs font-medium text-slate-600 mb-1 block">Service</label>
+                        <label htmlFor="service-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Service</label>
                         <SearchableSelect
                             options={serviceOptions}
                             value={serviceFilter}
@@ -210,7 +217,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         />
                     </div>
                     <div>
-                        <label htmlFor="assignee-filter" className="text-xs font-medium text-slate-600 mb-1 block">Assignee</label>
+                        <label htmlFor="assignee-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Assignee</label>
                         <SearchableSelect
                             options={assigneeOptions}
                             value={assigneeFilter}
@@ -220,7 +227,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                     {/* Show "Created By" filter only for "All Leads" page and for Admin/Super Admin */}
                     {title === 'All Leads' && ['Super Admin', 'Admin'].includes(currentUser.role) && (
                         <div>
-                            <label htmlFor="created-by-filter" className="text-xs font-medium text-slate-600 mb-1 block">Created By</label>
+                            <label htmlFor="created-by-filter" className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1 block">Created By</label>
                             <SearchableSelect
                                 options={createdByOptions}
                                 value={createdByFilter}
@@ -229,13 +236,13 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         </div>
                     )}
                     {(dateRange.from || dateRange.to) &&
-                        <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })}>
+                        <Button variant="ghost" size="sm" onClick={() => setDateRange({ from: '', to: '' })} className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                             Clear
                         </Button>
                     }
                 </div>
-            </header>
-            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6">
+            </div>
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-6 relative z-10">
                 <MetricCard title="Total Leads" value={filteredLeads.length} icon={BriefcaseIcon} color="bg-slate-700" />
                 <MetricCard title="New" value={leadCounts['New Lead'] || 0} icon={PlusCircleIcon} color="bg-blue-500" />
                 <MetricCard title="In Progress" value={leadCounts['In-Progress'] || 0} icon={ClockIcon} color="bg-yellow-500" />
@@ -249,7 +256,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                 users={users}
                 services={services}
                 offers={offers}
-                onAddLead={onAddLead}
+                onAddLead={onAddLead || (() => navigate('/leads/new'))}
                 onUpdateLead={onUpdateLead}
                 onViewLead={onViewLead}
                 onUpdateMultipleLeads={onUpdateMultipleLeads}
@@ -268,16 +275,16 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                     </CardHeader>
                     <CardContent className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                            <span className="text-slate-600">Total Pipeline Value:</span>
-                            <span className="font-semibold">{formatCurrency(totalPipelineValue)}</span>
+                            <span className="text-slate-600 dark:text-slate-400">Total Pipeline Value:</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(totalPipelineValue)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-slate-600">Converted Value:</span>
-                            <span className="font-semibold">{formatCurrency(convertedValue)}</span>
+                            <span className="text-slate-600 dark:text-slate-400">Converted Value:</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">{formatCurrency(convertedValue)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="text-slate-600">Conversion Rate:</span>
-                            <span className="font-semibold">{conversionRate.toString()}%</span>
+                            <span className="text-slate-600 dark:text-slate-400">Conversion Rate:</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">{conversionRate.toString()}%</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -286,7 +293,7 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
                         <CardTitle>Recent Activity</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p className="text-sm text-slate-500">No recent activity</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">No recent activity</p>
                     </CardContent>
                 </Card>
             </div>

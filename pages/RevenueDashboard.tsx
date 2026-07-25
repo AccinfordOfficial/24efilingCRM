@@ -352,7 +352,7 @@ export default function RevenueDashboard({
                   No transaction logs for this period.
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <AreaChart data={revenueTrendData}>
                     <defs>
                       <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -391,7 +391,7 @@ export default function RevenueDashboard({
               ) : (
                 <>
                   <div className="h-56 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                       <PieChart>
                         <Pie
                           data={serviceDistributionData}

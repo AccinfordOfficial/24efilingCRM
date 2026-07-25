@@ -124,22 +124,22 @@ export default function WebLeadsManagement({
   const activeSalesExecutives = salesExecutives.filter(u => u.is_active);
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
       {/* Header Panel */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Globe className="h-6 w-6 text-indigo-600 animate-pulse" />
+          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+            <Globe className="h-6 w-6 text-indigo-400 animate-pulse" />
             Organic Website Leads
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Review contact inquiries captured from 24efiling.com and convert them instantly to trackable CRM pipeline leads.</p>
+          <p className="text-sm text-slate-400 mt-1">Review contact inquiries captured from 24efiling.com and convert them instantly to trackable CRM pipeline leads.</p>
         </div>
       </div>
 
       {/* Tabs & Search Filter Block */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
         {/* Status Tabs */}
-        <div className="flex border rounded-lg p-1 bg-slate-100 gap-1 self-start">
+        <div className="flex border border-white/10 rounded-lg p-1 bg-slate-900/80 gap-1 self-start">
           {(['Pending', 'Contacted', 'Converted', 'Spam'] as const).map(tab => {
             const count = webLeads.filter(l => l.status === tab).length;
             return (
@@ -151,13 +151,13 @@ export default function WebLeadsManagement({
                 }}
                 className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === tab
-                    ? 'bg-white text-[#1c398e] shadow-sm border border-slate-200/50'
-                    : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/40'
+                    ? 'bg-primary text-white shadow-sm border border-primary/50'
+                    : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {tab}
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  activeTab === tab ? 'bg-blue-50 text-[#1c398e]' : 'bg-slate-200 text-slate-600'
+                  activeTab === tab ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
                 }`}>
                   {count}
                 </span>
@@ -176,7 +176,7 @@ export default function WebLeadsManagement({
               placeholder="Search inquiries..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 text-xs h-9 bg-white w-full border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-[#1c398e]"
+              className="pl-8 text-xs h-9 bg-slate-900/80 text-white w-full border border-white/10 rounded-md focus:outline-none focus:ring-1 focus:ring-primary placeholder-slate-500"
             />
           </div>
 
@@ -185,14 +185,14 @@ export default function WebLeadsManagement({
             <select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as any)}
-              className="text-xs h-9 bg-white w-full border border-slate-200 rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-[#1c398e] font-medium text-slate-700"
+              className="text-xs h-9 bg-slate-900/80 text-white w-full border border-white/10 rounded-md px-3 focus:outline-none focus:ring-1 focus:ring-primary font-medium cursor-pointer"
             >
-              <option value="all">📅 All Time</option>
-              <option value="today">Today</option>
-              <option value="yesterday">Yesterday</option>
-              <option value="week">Last 7 Days</option>
-              <option value="month">Last 30 Days</option>
-              <option value="custom">Custom Range...</option>
+              <option value="all" className="bg-slate-900 text-white">📅 All Time</option>
+              <option value="today" className="bg-slate-900 text-white">Today</option>
+              <option value="yesterday" className="bg-slate-900 text-white">Yesterday</option>
+              <option value="week" className="bg-slate-900 text-white">Last 7 Days</option>
+              <option value="month" className="bg-slate-900 text-white">Last 30 Days</option>
+              <option value="custom" className="bg-slate-900 text-white">Custom Range...</option>
             </select>
           </div>
 
@@ -203,14 +203,14 @@ export default function WebLeadsManagement({
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="text-xs h-9 bg-white border border-slate-200 rounded-md px-2.5 focus:outline-none focus:ring-1 focus:ring-[#1c398e] text-slate-700"
+                className="text-xs h-9 bg-slate-900/80 text-white border border-white/10 rounded-md px-2.5 focus:outline-none focus:ring-1 focus:ring-primary"
               />
               <span className="text-xs text-slate-400 font-bold">to</span>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="text-xs h-9 bg-white border border-slate-200 rounded-md px-2.5 focus:outline-none focus:ring-1 focus:ring-[#1c398e] text-slate-700"
+                className="text-xs h-9 bg-slate-900/80 text-white border border-white/10 rounded-md px-2.5 focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>
           )}
@@ -218,28 +218,28 @@ export default function WebLeadsManagement({
       </div>
 
       {/* Table Card Grid */}
-      <Card className="border border-slate-100 shadow-md bg-white overflow-visible">
+      <Card className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-visible">
         <CardContent className="p-0">
           {filteredWebLeads.length === 0 ? (
             <div className="p-12 text-center text-slate-400">
-              <MessageSquare className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-              <p className="font-bold text-slate-600">No Web Leads Found</p>
-              <p className="text-xs text-slate-500 mt-1">There are no inquiries under this tab matching your search query.</p>
+              <MessageSquare className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+              <p className="font-bold text-white">No Web Leads Found</p>
+              <p className="text-xs text-slate-400 mt-1">There are no inquiries under this tab matching your search query.</p>
             </div>
           ) : (
             <div className="overflow-x-auto min-h-[400px] rounded-t-xl">
               <table className="w-full text-left text-sm border-collapse">
                 <thead>
-                  <tr className="bg-[#1c398e] border-b border-blue-900/10">
-                    <th className="py-4 px-6 text-xs font-bold text-white uppercase tracking-wider rounded-tl-xl">ID</th>
-                    <th className="py-4 px-4 text-xs font-bold text-white uppercase tracking-wider">Customer</th>
-                    <th className="py-4 px-4 text-xs font-bold text-white uppercase tracking-wider">Service</th>
-                    <th className="py-4 px-4 text-xs font-bold text-white uppercase tracking-wider">Status</th>
-                    <th className="py-4 px-4 text-xs font-bold text-white uppercase tracking-wider">Date</th>
-                    <th className="py-4 px-6 text-right text-xs font-bold text-white uppercase tracking-wider rounded-tr-xl">Actions</th>
+                  <tr className="bg-white/5 border-b border-white/10">
+                    <th className="py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider rounded-tl-xl">ID</th>
+                    <th className="py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Customer</th>
+                    <th className="py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Service</th>
+                    <th className="py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+                    <th className="py-4 px-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Date</th>
+                    <th className="py-4 px-6 text-right text-xs font-bold text-slate-400 uppercase tracking-wider rounded-tr-xl">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-white/5">
                   {filteredWebLeads.map((lead) => {
                     const idCode = `#LD-${lead.id.substring(0, 5).toUpperCase()}`;
                     return (
@@ -254,13 +254,13 @@ export default function WebLeadsManagement({
                         
                         {/* Customer Column */}
                         <td className="py-4 px-4">
-                          <p className="font-bold text-slate-900 text-sm">{lead.name}</p>
+                          <p className="font-bold text-white text-sm">{lead.name}</p>
                           <p className="text-xs text-slate-400 mt-0.5 font-medium">{lead.email}</p>
                         </td>
                         
                         {/* Service Column */}
                         <td className="py-4 px-4">
-                          <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-slate-200 bg-white text-slate-600 lowercase shadow-sm">
+                          <span className="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-white/10 bg-white/5 text-slate-300 lowercase shadow-sm">
                             {lead.service_interested || 'general'}
                           </span>
                         </td>
@@ -273,7 +273,7 @@ export default function WebLeadsManagement({
                         </td>
                         
                         {/* Date Column */}
-                        <td className="py-4 px-4 text-xs font-bold text-slate-500">
+                        <td className="py-4 px-4 text-xs font-bold text-slate-400">
                           {new Date(lead.created_at).toLocaleDateString('en-IN', {
                             day: 'numeric',
                             month: 'short',
@@ -285,7 +285,7 @@ export default function WebLeadsManagement({
                         <td className="py-4 px-6 text-right relative">
                           <button
                             onClick={() => setActiveMenuId(activeMenuId === lead.id ? null : lead.id)}
-                            className="p-1 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors inline-flex items-center justify-center h-8 w-8"
+                            className="p-1 text-slate-400 hover:text-white rounded-full hover:bg-white/10 transition-colors inline-flex items-center justify-center h-8 w-8"
                           >
                             <MoreHorizontal className="h-4.5 w-4.5" />
                           </button>
@@ -296,9 +296,9 @@ export default function WebLeadsManagement({
                               {/* Backdrop layer to click away and close */}
                               <div className="fixed inset-0 z-40" onClick={() => setActiveMenuId(null)} />
                               
-                              <div className="absolute right-6 mt-1 w-56 bg-white border border-slate-100 rounded-xl shadow-xl z-50 p-2 text-left text-xs text-slate-800 space-y-1.5 animate-fadeIn">
+                              <div className="absolute right-6 mt-1 w-56 bg-slate-900 border border-white/10 rounded-xl shadow-2xl z-50 p-2 text-left text-xs text-white space-y-1.5 animate-fadeIn">
                                 {/* Assignment Section */}
-                                <div className="px-2 py-1.5 border-b border-slate-50">
+                                <div className="px-2 py-1.5 border-b border-white/5">
                                   <p className="font-extrabold text-[9px] text-slate-400 uppercase tracking-wider">Assign Executive</p>
                                   <div className="mt-1">
                                     <Select

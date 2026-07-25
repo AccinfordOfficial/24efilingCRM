@@ -5,13 +5,19 @@ import { Button } from './ui/Button';
 import { FormField } from './ui/FormField';
 import { FormSelect } from './ui/FormSelect';
 import { useApi } from '../hooks/useApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { SERVICE_OPTIONS } from '../constants';
 import { toast } from 'sonner';
 import { PlusIcon } from './icons';
 import { Sparkles } from 'lucide-react';
 
-const SERVICES = Object.values(SERVICE_OPTIONS).flat();
+const SERVICES_WITH_CATEGORIES = Object.entries(SERVICE_OPTIONS).flatMap(([category, subList]) =>
+    subList.map(sub => ({
+        value: `${category} → ${sub}`,
+        label: `${category} → ${sub}`
+    }))
+);
 
 interface QuickAddLeadProps {
     isOpen: boolean;
@@ -25,9 +31,10 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
 
     const [firstName, setFirstName] = useState('');
     const [phone, setPhone] = useState('');
-    const [service, setService] = useState(SERVICES[0] || 'GST Registration');
+    const [service, setService] = useState(SERVICES_WITH_CATEGORIES[0]?.value || 'GST Services → GST Registration');
     const [priority, setPriority] = useState<'High' | 'Medium' | 'Low'>('Medium');
     const [isSubmitting, setIsSubmitting] = useState(false);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -51,7 +58,6 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
                 status: 'New Lead',
                 assigned_to: profile?.id ? { id: profile.id, name: profile.name, role: profile.role } as any : undefined,
                 branch_id: profile?.branch_id || undefined,
-                branch_name: profile?.branch_name || undefined,
                 source: 'Direct Quick Add',
                 business_category: 'General',
                 industry_type: 'Other',
@@ -78,8 +84,8 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
     return (
         <Dialog isOpen={isOpen} onClose={onClose} title="Quick Add Lead">
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg text-xs text-blue-300 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-blue-400 shrink-0" />
+                <div className="p-3 bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-blue-500 dark:text-blue-400 shrink-0" />
                     <span>Create a lead instantly in 5 seconds. You can fill detailed requirements later.</span>
                 </div>
 
@@ -105,12 +111,13 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <FormSelect
-                        label="Service Requested"
+                        label="Service Requested (Category → Sub-Service)"
                         id="quick_service"
                         value={service}
                         onChange={(e) => setService(e.target.value)}
-                        options={SERVICES.map(s => ({ value: s, label: s }))}
+                        options={SERVICES_WITH_CATEGORIES}
                     />
+
 
                     <FormSelect
                         label="Priority"
@@ -118,19 +125,19 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
                         value={priority}
                         onChange={(e) => setPriority(e.target.value as any)}
                         options={[
-                            { value: 'High', label: '🔥 High Priority' },
-                            { value: 'Medium', label: '⚡ Medium Priority' },
-                            { value: 'Low', label: '🧊 Low Priority' }
+                            { value: 'High', label: 'High' },
+                            { value: 'Medium', label: 'Medium' },
+                            { value: 'Low', label: 'Low' }
                         ]}
                     />
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/10">
                     <Button
                         type="button"
                         variant="ghost"
                         onClick={handleAddMoreDetails}
-                        className="text-xs text-slate-400 hover:text-white"
+                        className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                     >
                         Add Full Details →
                     </Button>
@@ -139,7 +146,7 @@ export const QuickAddLead: React.FC<QuickAddLeadProps> = ({ isOpen, onClose }) =
                         <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isSubmitting} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                        <Button type="submit" disabled={isSubmitting} className="bg-primary text-primary-foreground hover:opacity-90 font-bold">
                             {isSubmitting ? 'Saving...' : 'Save Lead'}
                         </Button>
                     </div>

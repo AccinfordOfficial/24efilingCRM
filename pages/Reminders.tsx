@@ -227,21 +227,21 @@ export default function Reminders({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 text-slate-100">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 text-foreground">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
             Task Reminders
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Create, schedule, and track individual follow-up alerts, customer tasks, and corporate timelines.
           </p>
         </div>
 
         <Button
           onClick={openCreateModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium border-none shadow-lg hover:shadow-blue-500/10 transition-all"
+          className="flex items-center gap-2 bg-primary text-primary-foreground hover:opacity-90 font-medium shadow-lg transition-all"
         >
           <Plus className="h-4 w-4" /> Add Reminder
         </Button>
@@ -251,12 +251,12 @@ export default function Reminders({
         {/* Main Content Area */}
         <div className="lg:col-span-3 space-y-6">
           {/* Navigation Tab & Layout selectors */}
-          <Card className="glass-card border-white/5 bg-slate-900/30 backdrop-blur-md p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex bg-slate-950/40 p-1 rounded-lg border border-white/5 w-full sm:w-auto">
+          <Card className="glass-card border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/30 backdrop-blur-md p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div className="flex bg-slate-200 dark:bg-slate-950/40 p-1 rounded-lg border border-slate-300 dark:border-white/5 w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab('personal')}
                 className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-md transition-all ${
-                  activeTab === 'personal' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                  activeTab === 'personal' ? 'bg-primary text-primary-foreground font-bold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Personal Reminders
@@ -264,7 +264,7 @@ export default function Reminders({
               <button
                 onClick={() => setActiveTab('assigned')}
                 className={`flex-1 sm:flex-initial px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-md transition-all ${
-                  activeTab === 'assigned' ? 'bg-blue-600 text-white' : 'text-slate-400 hover:text-slate-200'
+                  activeTab === 'assigned' ? 'bg-primary text-primary-foreground font-bold shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
                 Team Assigned
@@ -272,7 +272,7 @@ export default function Reminders({
             </div>
 
             <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
-              <div className="flex bg-slate-950/40 p-1 rounded-lg border border-white/5">
+              <div className="flex bg-slate-200 dark:bg-slate-950/40 p-1 rounded-lg border border-slate-300 dark:border-white/5">
                 {[
                   { id: 'list', icon: List },
                   { id: 'calendar', icon: CalendarIcon },
@@ -284,7 +284,7 @@ export default function Reminders({
                       key={item.id}
                       onClick={() => setLayoutMode(item.id as any)}
                       className={`p-2 rounded-md transition-all ${
-                        layoutMode === item.id ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-300'
+                        layoutMode === item.id ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-500 dark:text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -296,21 +296,21 @@ export default function Reminders({
           </Card>
 
           {/* Filters Bar */}
-          <Card className="glass-card border-white/5 bg-slate-900/20 backdrop-blur-md p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <Card className="glass-card border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/20 backdrop-blur-md p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
             <div className="relative w-full sm:w-72">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />
               <Input
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Search reminders..."
-                className="pl-9 bg-slate-950 border-white/5 text-slate-100 text-sm focus:border-blue-500"
+                className="pl-9 bg-background dark:bg-slate-950 border-input dark:border-white/5 text-foreground dark:text-slate-100 text-sm focus:border-primary"
               />
             </div>
 
             <select
               value={priorityFilter}
               onChange={(e) => setPriorityFilter(e.target.value)}
-              className="w-full sm:w-44 bg-slate-950 border border-white/5 text-slate-300 rounded-md p-2 text-xs focus:outline-none"
+              className="w-full sm:w-44 bg-background dark:bg-slate-950 border border-input dark:border-white/5 text-foreground dark:text-slate-300 rounded-md p-2 text-xs focus:outline-none"
             >
               <option value="all">All Priorities</option>
               <option value="high">High Priority</option>
@@ -321,11 +321,11 @@ export default function Reminders({
 
           {/* 1. LIST LAYOUT */}
           {layoutMode === 'list' && (
-            <Card className="glass-card border-white/5 bg-slate-900/30 backdrop-blur-md overflow-hidden">
+            <Card className="glass-card border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/30 backdrop-blur-md overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-white/5 bg-slate-950/20 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <tr className="border-b border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-950/20 text-slate-600 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
                       <th className="py-4 px-6 w-12"></th>
                       <th className="py-4 px-6">Reminder</th>
                       <th className="py-4 px-6">Due Date / Time</th>
@@ -334,50 +334,50 @@ export default function Reminders({
                       <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-white/5 text-sm">
+                  <tbody className="divide-y divide-slate-200 dark:divide-white/5 text-sm">
                     {filteredReminders.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-500">
+                        <td colSpan={6} className="py-12 text-center text-slate-500 dark:text-slate-400">
                           No Reminders scheduled.
                         </td>
                       </tr>
                     ) : (
                       filteredReminders.map((reminder) => {
                         const priorityColors = {
-                          high: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
-                          medium: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
-                          low: 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                          high: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20',
+                          medium: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20',
+                          low: 'bg-blue-500/10 text-primary border border-blue-500/20'
                         };
 
                         return (
-                          <tr key={reminder.id} className={`hover:bg-white/5 transition-colors ${reminder.status === 'completed' ? 'opacity-50' : ''}`}>
+                          <tr key={reminder.id} className={`hover:bg-slate-100 dark:hover:bg-white/5 transition-colors ${reminder.status === 'completed' ? 'opacity-50' : ''}`}>
                             <td className="py-4 px-6">
                               <button
                                 onClick={() => handleToggleCompleted(reminder)}
                                 className={`h-5 w-5 rounded-md border flex items-center justify-center transition-all ${
                                   reminder.status === 'completed'
                                     ? 'bg-emerald-600 border-emerald-500 text-white'
-                                    : 'border-slate-600 hover:border-slate-400 bg-slate-950'
+                                    : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 bg-background dark:bg-slate-950'
                                 }`}
                               >
                                 {reminder.status === 'completed' && <CheckCircle className="h-4 w-4" />}
                               </button>
                             </td>
                             <td className="py-4 px-6">
-                              <p className={`font-bold text-slate-200 ${reminder.status === 'completed' ? 'line-through text-slate-500' : ''}`}>
+                              <p className={`font-bold text-slate-900 dark:text-slate-200 ${reminder.status === 'completed' ? 'line-through text-slate-400 dark:text-slate-500' : ''}`}>
                                 {reminder.title}
                               </p>
                               {reminder.description && (
-                                <p className="text-slate-400 text-xs mt-1 line-clamp-1">{reminder.description}</p>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs mt-1 line-clamp-1">{reminder.description}</p>
                               )}
                             </td>
-                            <td className="py-4 px-6 text-slate-300">
+                            <td className="py-4 px-6 text-slate-700 dark:text-slate-300">
                               <div className="flex items-center gap-1.5 text-xs">
-                                <CalendarIcon className="h-3.5 w-3.5 text-slate-500" />
+                                <CalendarIcon className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
                                 <span>{format(new Date(reminder.due_date), 'dd/MM/yyyy')}</span>
                                 {reminder.due_time && (
                                   <>
-                                    <Clock className="h-3.5 w-3.5 text-slate-500 ml-1.5" />
+                                    <Clock className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500 ml-1.5" />
                                     <span>{reminder.due_time}</span>
                                   </>
                                 )}
@@ -389,7 +389,7 @@ export default function Reminders({
                               </span>
                             </td>
                             <td className="py-4 px-6">
-                              <span className="text-slate-400 text-xs font-semibold capitalize">
+                              <span className="text-slate-600 dark:text-slate-400 text-xs font-semibold capitalize">
                                 {reminder.status}
                               </span>
                             </td>
@@ -397,14 +397,14 @@ export default function Reminders({
                               <div className="flex justify-end gap-1.5">
                                 <button
                                   onClick={() => handleEdit(reminder)}
-                                  className="p-1.5 text-slate-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+                                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/5 rounded-md transition-colors"
                                   title="Edit Reminder"
                                 >
                                   <Plus className="h-4 w-4 rotate-45" /> {/* Just edit symbol representation */}
                                 </button>
                                 <button
                                   onClick={() => handleDelete(reminder.id)}
-                                  className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-white/5 rounded-md transition-colors"
+                                  className="p-1.5 text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-slate-200 dark:hover:bg-white/5 rounded-md transition-colors"
                                   title="Delete Reminder"
                                 >
                                   <Trash2 className="h-4 w-4" />
@@ -423,22 +423,22 @@ export default function Reminders({
 
           {/* 2. CALENDAR LAYOUT */}
           {layoutMode === 'calendar' && (
-            <Card className="glass-card border-white/5 bg-slate-900/30 backdrop-blur-md p-6">
+            <Card className="glass-card border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/30 backdrop-blur-md p-6">
               {/* Calendar Month Selector */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-lg text-slate-200">
+                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-200">
                   {format(currentMonth, 'MMMM yyyy')}
                 </h3>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-                    className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-md"
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-md"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-                    className="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-md"
+                    className="p-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 rounded-md"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </button>
@@ -460,7 +460,7 @@ export default function Reminders({
               <div className="grid grid-cols-7 gap-2">
                 {/* Empty Offsets */}
                 {Array.from({ length: startDayOffset }).map((_, i) => (
-                  <div key={`offset-${i}`} className="h-24 bg-slate-950/10 rounded-lg border border-white/0 opacity-30" />
+                  <div key={`offset-${i}`} className="h-24 bg-slate-100 dark:bg-slate-950/10 rounded-lg border border-slate-200 dark:border-white/0 opacity-30" />
                 ))}
 
                 {/* Actual Days */}
@@ -471,11 +471,11 @@ export default function Reminders({
                   return (
                     <div
                       key={day.toString()}
-                      className={`h-24 p-2 bg-slate-950/30 border rounded-lg flex flex-col justify-between hover:bg-slate-900/40 transition-colors ${
-                        isToday ? 'border-blue-500/50 bg-blue-950/10' : 'border-white/5'
+                      className={`h-24 p-2 bg-slate-50 dark:bg-slate-950/30 border rounded-lg flex flex-col justify-between hover:bg-slate-100 dark:hover:bg-slate-900/40 transition-colors ${
+                        isToday ? 'border-primary/50 bg-primary/5' : 'border-slate-200 dark:border-white/5'
                       }`}
                     >
-                      <span className={`text-xs font-bold ${isToday ? 'text-blue-400 font-extrabold' : 'text-slate-400'}`}>
+                      <span className={`text-xs font-bold ${isToday ? 'text-primary font-extrabold' : 'text-slate-600 dark:text-slate-400'}`}>
                         {format(day, 'd')}
                       </span>
 
@@ -487,10 +487,10 @@ export default function Reminders({
                             onClick={() => handleEdit(r)}
                             className={`px-1.5 py-0.5 rounded text-[9px] truncate font-semibold cursor-pointer ${
                               r.priority === 'high'
-                                ? 'bg-rose-500/20 text-rose-300'
+                                ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300'
                                 : r.priority === 'medium'
-                                ? 'bg-amber-500/20 text-amber-300'
-                                : 'bg-blue-500/20 text-blue-300'
+                                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300'
+                                : 'bg-blue-500/20 text-primary'
                             }`}
                             title={r.title}
                           >
@@ -523,10 +523,10 @@ export default function Reminders({
                 };
 
                 return (
-                  <Card key={colStatus} className={`glass-card border-t-2 border-white/5 bg-slate-900/30 backdrop-blur-md flex flex-col p-4 gap-4 h-[65vh] ${colHeaders[colStatus].color}`}>
-                    <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                      <span className="text-xs font-bold uppercase tracking-wider text-slate-300">{colHeaders[colStatus].title}</span>
-                      <span className="text-[10px] bg-slate-950 px-2 py-0.5 rounded-full font-bold text-slate-400">{columnReminders.length}</span>
+                  <Card key={colStatus} className={`glass-card border-t-2 border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/30 backdrop-blur-md flex flex-col p-4 gap-4 h-[65vh] ${colHeaders[colStatus].color}`}>
+                    <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{colHeaders[colStatus].title}</span>
+                      <span className="text-[10px] bg-slate-100 dark:bg-slate-950 px-2 py-0.5 rounded-full font-bold text-slate-600 dark:text-slate-400">{columnReminders.length}</span>
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-3 pr-1">
@@ -534,12 +534,12 @@ export default function Reminders({
                         <div
                           key={reminder.id}
                           onClick={() => handleEdit(reminder)}
-                          className="bg-slate-950/40 hover:bg-slate-950/70 p-3 rounded-lg border border-white/5 cursor-pointer transition-all space-y-2 hover:translate-y-[-2px] shadow-sm"
+                          className="bg-slate-50 dark:bg-slate-950/40 hover:bg-slate-100 dark:hover:bg-slate-950/70 p-3 rounded-lg border border-slate-200 dark:border-white/5 cursor-pointer transition-all space-y-2 hover:translate-y-[-2px] shadow-sm"
                         >
-                          <h4 className="font-bold text-xs text-slate-200 line-clamp-1">{reminder.title}</h4>
-                          {reminder.description && <p className="text-[10px] text-slate-400 line-clamp-2">{reminder.description}</p>}
+                          <h4 className="font-bold text-xs text-slate-900 dark:text-slate-200 line-clamp-1">{reminder.title}</h4>
+                          {reminder.description && <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2">{reminder.description}</p>}
                           
-                          <div className="flex justify-between items-center pt-1 text-[9px] text-slate-500 font-semibold border-t border-white/5">
+                          <div className="flex justify-between items-center pt-1 text-[9px] text-slate-500 font-semibold border-t border-slate-200 dark:border-white/5">
                             <span>{format(new Date(reminder.due_date), 'dd/MM/yy')}</span>
                             <span className="capitalize">{reminder.priority}</span>
                           </div>
@@ -556,27 +556,27 @@ export default function Reminders({
         {/* Sidebar Info Panel */}
         <div className="space-y-6">
           {/* Upcoming Birthdays Widget */}
-          <Card className="glass-card border-white/5 bg-slate-900/40 backdrop-blur-md p-6">
-            <CardHeader className="p-0 pb-4 border-b border-white/5 flex flex-row items-center gap-2">
+          <Card className="glass-card border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/40 backdrop-blur-md p-6">
+            <CardHeader className="p-0 pb-4 border-b border-slate-200 dark:border-white/5 flex flex-row items-center gap-2">
               <Heart className="h-5 w-5 text-rose-500 shrink-0" />
-              <CardTitle className="text-sm font-bold text-slate-200 uppercase tracking-wider">
+              <CardTitle className="text-sm font-bold text-slate-900 dark:text-slate-200 uppercase tracking-wider">
                 Upcoming Birthdays
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0 pt-4">
               {upcomingBirthdays.length === 0 ? (
-                <p className="text-xs text-slate-500 text-center py-4">No birthdays in the next 30 days.</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-4">No birthdays in the next 30 days.</p>
               ) : (
                 <div className="space-y-3.5">
                   {upcomingBirthdays.map((item, idx) => (
-                    <div key={idx} className="flex justify-between items-start text-xs bg-slate-950/20 p-2.5 rounded-lg border border-white/5">
+                    <div key={idx} className="flex justify-between items-start text-xs bg-slate-50 dark:bg-slate-950/20 p-2.5 rounded-lg border border-slate-200 dark:border-white/5">
                       <div>
-                        <p className="font-bold text-slate-200">{item.name}</p>
+                        <p className="font-bold text-slate-900 dark:text-slate-200">{item.name}</p>
                         <p className="text-[10px] text-slate-500 mt-0.5">{item.type}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-slate-400 font-semibold">{item.date}</p>
-                        <p className="text-[9px] text-rose-400 font-bold mt-0.5">In {item.daysLeft} days</p>
+                        <p className="text-slate-600 dark:text-slate-400 font-semibold">{item.date}</p>
+                        <p className="text-[9px] text-rose-500 font-bold mt-0.5">In {item.daysLeft} days</p>
                       </div>
                     </div>
                   ))}
@@ -586,19 +586,19 @@ export default function Reminders({
           </Card>
 
           {/* Quick Stats Summary */}
-          <Card className="glass-card border-white/5 bg-slate-900/40 backdrop-blur-md p-6 text-xs text-slate-400 space-y-4">
-            <h4 className="font-bold text-slate-200 border-b border-white/5 pb-2 uppercase tracking-wider">Reminder Metrics</h4>
+          <Card className="glass-card border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/40 backdrop-blur-md p-6 text-xs text-slate-600 dark:text-slate-400 space-y-4">
+            <h4 className="font-bold text-slate-900 dark:text-slate-200 border-b border-slate-200 dark:border-white/5 pb-2 uppercase tracking-wider">Reminder Metrics</h4>
             <div className="flex justify-between">
               <span>Total Active:</span>
-              <span className="text-slate-200 font-bold">{reminders.filter(r => r.status !== 'completed').length}</span>
+              <span className="text-slate-900 dark:text-slate-200 font-bold">{reminders.filter(r => r.status !== 'completed').length}</span>
             </div>
             <div className="flex justify-between">
               <span>High Priority:</span>
-              <span className="text-rose-400 font-bold">{reminders.filter(r => r.priority === 'high' && r.status !== 'completed').length}</span>
+              <span className="text-rose-600 dark:text-rose-400 font-bold">{reminders.filter(r => r.priority === 'high' && r.status !== 'completed').length}</span>
             </div>
             <div className="flex justify-between">
               <span>Completed Tasks:</span>
-              <span className="text-emerald-400 font-bold">{reminders.filter(r => r.status === 'completed').length}</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{reminders.filter(r => r.status === 'completed').length}</span>
             </div>
           </Card>
         </div>
@@ -606,62 +606,62 @@ export default function Reminders({
 
       {/* Editor Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="sm:max-w-[550px] bg-slate-900 border border-white/10 text-slate-100">
+        <DialogContent className="sm:max-w-[550px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-100">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+            <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
               {editingReminder ? 'Edit Reminder' : 'Add Reminder'}
             </DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSave} className="space-y-4 py-2">
             {error && (
-              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-300 text-sm flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-rose-400" />
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-300 text-sm flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-rose-500" />
                 {error}
               </div>
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reminder Title</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Reminder Title</label>
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="What do you need to follow up on?"
-                className="bg-slate-950 border-white/10 text-slate-100 focus:border-blue-500"
+                className="bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-slate-100 focus:border-primary"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Description</label>
+              <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Description</label>
               <Textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Add secondary notes, instructions, or summaries..."
-                className="bg-slate-950 border-white/10 text-slate-100 focus:border-blue-500 h-24 resize-none"
+                className="bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-slate-100 focus:border-primary h-24 resize-none"
                 disabled={loading}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Due Date</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Due Date</label>
                 <Input
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="bg-slate-950 border-white/10 text-slate-100"
+                  className="bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-slate-100"
                   disabled={loading}
                 />
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Due Time</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Due Time</label>
                 <Input
                   type="time"
                   value={dueTime}
                   onChange={(e) => setDueTime(e.target.value)}
-                  className="bg-slate-950 border-white/10 text-slate-100"
+                  className="bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-slate-100"
                   disabled={loading}
                 />
               </div>
@@ -669,11 +669,11 @@ export default function Reminders({
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Priority</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Priority</label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as any)}
-                  className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                   disabled={loading}
                 >
                   <option value="low">Low Priority</option>
@@ -684,11 +684,11 @@ export default function Reminders({
 
               {isPrivileged && (
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Reminder Type</label>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Reminder Type</label>
                   <select
                     value={reminderType}
                     onChange={(e) => setReminderType(e.target.value as any)}
-                    className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                    className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                     disabled={loading}
                   >
                     <option value="personal">Personal</option>
@@ -701,11 +701,11 @@ export default function Reminders({
             {/* Conditional Assigned Representative Selection */}
             {reminderType === 'task_assigned' && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Assign Representative</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Assign Representative</label>
                 <select
                   value={assignedToId}
                   onChange={(e) => setAssignedToId(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                   disabled={loading}
                 >
                   <option value="">-- Select Employee --</option>
@@ -719,11 +719,11 @@ export default function Reminders({
             {/* Related Entity fields */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Relate to Lead</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Relate to Lead</label>
                 <select
                   value={relatedLeadId}
                   onChange={(e) => setRelatedLeadId(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                   disabled={loading}
                 >
                   <option value="">-- Optional --</option>
@@ -734,11 +734,11 @@ export default function Reminders({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Relate to Customer</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Relate to Customer</label>
                 <select
                   value={relatedCustomerId}
                   onChange={(e) => setRelatedCustomerId(e.target.value)}
-                  className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                   disabled={loading}
                 >
                   <option value="">-- Optional --</option>
@@ -751,11 +751,11 @@ export default function Reminders({
 
             {editingReminder && (
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</label>
+                <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">Status</label>
                 <select
                   value={status}
                   onChange={(e) => setStatus(e.target.value as any)}
-                  className="w-full bg-slate-950 border border-white/10 text-slate-100 rounded-md p-2 text-sm focus:border-blue-500 focus:outline-none"
+                  className="w-full bg-background dark:bg-slate-950 border border-input dark:border-white/10 text-foreground dark:text-slate-100 rounded-md p-2 text-sm focus:border-primary focus:outline-none"
                   disabled={loading}
                 >
                   <option value="pending">Pending</option>
@@ -771,14 +771,14 @@ export default function Reminders({
                 type="button"
                 variant="ghost"
                 onClick={() => setIsOpen(false)}
-                className="border border-white/10 text-slate-400 hover:text-white hover:bg-white/5"
+                className="border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5"
                 disabled={loading}
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                className="bg-primary text-primary-foreground hover:opacity-90 font-medium"
                 disabled={loading}
               >
                 {loading ? 'Saving...' : 'Save Reminder'}

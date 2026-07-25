@@ -39,7 +39,8 @@ export const AutoAssignmentSettings: React.FC = () => {
                 .order('priority', { ascending: false });
 
             if (error) throw error;
-            setRules((data || []) as AssignmentRule[]);
+            setRules(((data || []) as unknown) as AssignmentRule[]);
+
         } catch (e: any) {
             console.error("Error loading rules:", e);
             toast.error("Failed to load auto-assignment rules");

@@ -4,10 +4,11 @@ import { City } from '../../types';
 
 export function useBranchesApi(core: {
     branches: any[];
+    cities?: City[];
     fetchData: () => Promise<void>;
     logUserActivity: (action: string, details: string) => Promise<void>;
 }) {
-    const { branches, fetchData, logUserActivity } = core;
+    const { branches, cities = [], fetchData, logUserActivity } = core;
 
     const uploadBranchLogo = useCallback(async (file: File) => {
         const fileExt = file.name.split('.').pop();
@@ -18,23 +19,30 @@ export function useBranchesApi(core: {
         return publicUrl;
     }, []);
 
-    const addCity = useCallback(async (cityName: string) => {
+    const addCity = useCallback(async (cityName: string, stateName?: string, status: boolean = true) => {
+        const trimmed = cityName.trim();
+        const existing = (cities || []).find(c => (c.city_name || '').trim().toLowerCase() === trimmed.toLowerCase());
+        if (existing) {
+            throw new Error(`A city named "${trimmed}" already exists.`);
+        }
         try {
-            const cityCode = cityName.substring(0, 3).toUpperCase() + '-' + Math.floor(Math.random() * 10000);
+            const cityCode = trimmed.substring(0, 3).toUpperCase() + '-' + Math.floor(Math.random() * 10000);
             const payload = {
-                city_name: cityName,
+                city_name: trimmed,
                 city_code: cityCode,
-                status: true
+                state: stateName || null,
+                status
             };
             const { data, error } = await (supabase.from('cities') as any).insert([payload]).select().single();
             if (error) throw error;
+            await logUserActivity('City Created', `Created city: ${trimmed}`);
             await fetchData();
             return data;
         } catch (e) {
             console.warn("DB insert failed for city", e);
             throw e;
         }
-    }, [fetchData]);
+    }, [cities, fetchData, logUserActivity]);
 
     const updateCity = useCallback(async (id: string, updates: Partial<City>) => {
         try {
@@ -53,16 +61,22 @@ export function useBranchesApi(core: {
     }, [logUserActivity, fetchData]);
 
     const deleteCity = useCallback(async (id: string) => {
+        const targetCity = (cities || []).find(c => c.id === id);
         try {
-            const { error } = await (supabase.from('cities') as any).delete().eq('id', id);
-            if (error) throw error;
+            if (targetCity) {
+                const { error } = await (supabase.from('cities') as any).delete().ilike('city_name', targetCity.city_name.trim());
+                if (error) throw error;
+            } else {
+                const { error } = await (supabase.from('cities') as any).delete().eq('id', id);
+                if (error) throw error;
+            }
         } catch (e) {
             console.warn("DB delete failed for city", e);
             throw e;
         }
         await logUserActivity('City Deleted', `Deleted city ID: ${id}`);
         await fetchData();
-    }, [logUserActivity, fetchData]);
+    }, [cities, logUserActivity, fetchData]);
 
     const addBranch = useCallback(async (branch: Omit<any, 'id' | 'created_at' | 'updated_at'>) => {
         const managerId = branch.manager_id || null;

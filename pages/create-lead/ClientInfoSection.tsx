@@ -43,35 +43,36 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
 }) => {
     return (
         <>
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 text-[#1c398e]">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/20 text-primary">
                         <UserIcon className="h-6 w-6" />
                     </div>
                     <div>
-                        <CardTitle>Personal Information</CardTitle>
-                        <CardDescription>Basic details about the lead.</CardDescription>
+                        <CardTitle className="dark:text-white">Personal Information</CardTitle>
+                        <CardDescription className="dark:text-slate-400">Basic details about the lead.</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label htmlFor="first_name" className="block text-sm font-medium text-slate-700 mb-1">First Name</label>
+                        <label htmlFor="first_name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">First Name</label>
+
                         <Input id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} placeholder="e.g., John" />
                     </div>
                     <div>
-                        <label htmlFor="last_name" className="block text-sm font-medium text-slate-700 mb-1">Last Name</label>
+                        <label htmlFor="last_name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Last Name</label>
                         <Input id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} placeholder="e.g., Doe" />
                     </div>
                     <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-1">Email</label>
+                        <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
                         <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} placeholder="e.g., john.doe@example.com" />
                     </div>
                     <div>
-                        <label htmlFor="phone_number" className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                        <label htmlFor="phone_number" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
                         <Input id="phone_number" name="phone_number" type="tel" value={formData.phone_number} onChange={handleChange} placeholder="e.g., 9876543210" />
                     </div>
                     <div>
-                        <label htmlFor="pan_number" className="block text-sm font-medium text-slate-700 mb-1">PAN Number</label>
+                        <label htmlFor="pan_number" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">PAN Number</label>
                         <Input 
                             id="pan_number" 
                             name="pan_number" 
@@ -83,7 +84,18 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                         {panError && <p className="text-xs text-red-500 mt-1">{panError}</p>}
                     </div>
                     <div>
-                        <label htmlFor="alternate_mobile" className="block text-sm font-medium text-slate-700 mb-1">
+                        <label htmlFor="aadhar_number" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Aadhaar Card Number</label>
+                        <Input 
+                            id="aadhar_number" 
+                            name="aadhar_number" 
+                            value={formData.aadhar_number || ''} 
+                            onChange={handleChange} 
+                            placeholder="e.g., 1234 5678 9012" 
+                            maxLength={14}
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="alternate_mobile" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
                             Alternate Mobile Number
                         </label>
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
@@ -97,7 +109,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                     placeholder="e.g., 9876543211"
                                 />
                             </div>
-                            <div className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border cursor-pointer transition-all select-none h-10 sm:w-48 shrink-0 ${alternateIsWhatsapp ? 'bg-green-50 border-green-400 text-green-700' : 'bg-slate-50 border-slate-300 text-slate-600'}`}
+                            <div className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border cursor-pointer transition-all select-none h-10 sm:w-48 shrink-0 ${alternateIsWhatsapp ? 'bg-green-50 dark:bg-green-950/40 border-green-400 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-slate-50 dark:bg-slate-950/40 border-slate-300 dark:border-white/10 text-slate-600 dark:text-slate-400'}`}
                                 onClick={() => setAlternateIsWhatsapp(prev => !prev)}
                             >
                                 <input
@@ -117,7 +129,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                             </div>
                         </div>
                         {alternateMobile && (
-                            <p className={`text-xs mt-1.5 font-medium ${alternateIsWhatsapp ? 'text-green-600' : 'text-slate-500'}`}>
+                            <p className={`text-xs mt-1.5 font-medium ${alternateIsWhatsapp ? 'text-green-600 dark:text-green-400' : 'text-slate-500 dark:text-slate-400'}`}>
                                 {alternateIsWhatsapp
                                     ? '✅ This alternate number is also a WhatsApp number.'
                                     : '📱 Alternate number saved as mobile-only (not WhatsApp).'}
@@ -127,20 +139,20 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
                 <CardHeader className="flex flex-row items-center gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 text-purple-600">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
                         <BriefcaseIcon className="h-6 w-6" />
                     </div>
                     <div>
-                        <CardTitle>Business Information</CardTitle>
-                        <CardDescription>Details about the lead's business.</CardDescription>
+                        <CardTitle className="dark:text-white">Business Information</CardTitle>
+                        <CardDescription className="dark:text-slate-400">Details about the lead's business.</CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label htmlFor="business_name" className="block text-sm font-medium text-slate-700 mb-1">Business Name <span className="text-red-500">*</span></label>
+                            <label htmlFor="business_name" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Business Name <span className="text-red-500">*</span></label>
                             <Input 
                                 id="business_name" 
                                 name="business_name" 
@@ -152,47 +164,56 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                             {businessErrors.business_name && <p className="text-xs text-red-500 mt-1">{businessErrors.business_name}</p>}
                         </div>
                         <div>
-                            <label htmlFor="business_category" className="block text-sm font-medium text-slate-700 mb-1">Business Category <span className="text-red-500">*</span></label>
+                            <label htmlFor="business_category" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Business Category <span className="text-red-500">*</span></label>
                             <select 
                                 id="business_category" 
                                 name="business_category" 
                                 value={formData.business_category} 
                                 onChange={handleChange}
-                                className={`flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#1c398e] ${
-                                    businessErrors.business_category ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
+                                className={`flex h-10 w-full rounded-lg border bg-white dark:bg-slate-950 dark:border-white/10 dark:text-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary ${
+                                    businessErrors.business_category ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 dark:border-white/10'
                                 }`}
                             >
-                                <option value="">Select Category</option>
-                                {BUSINESS_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                                <option value="" className="bg-slate-950 text-white">Select Category</option>
+                                {BUSINESS_CATEGORIES.map(cat => {
+                                    const val = typeof cat === 'object' ? cat.value : cat;
+                                    const lbl = typeof cat === 'object' ? cat.label : cat;
+                                    return <option key={val} value={val} className="bg-slate-950 text-white">{lbl}</option>;
+                                })}
                             </select>
                             {businessErrors.business_category && <p className="text-xs text-red-500 mt-1">{businessErrors.business_category}</p>}
                         </div>
                         <div>
-                            <label htmlFor="industry_type" className="block text-sm font-medium text-slate-700 mb-1">Industry Type <span className="text-red-500">*</span></label>
+                            <label htmlFor="industry_type" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Industry Type <span className="text-red-500">*</span></label>
                             <select 
                                 id="industry_type" 
                                 name="industry_type" 
                                 value={formData.industry_type} 
                                 onChange={handleChange}
-                                className={`flex h-10 w-full rounded-lg border bg-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-[#1c398e] ${
-                                    businessErrors.industry_type ? 'border-red-500 focus:ring-red-500' : 'border-slate-300'
+                                className={`flex h-10 w-full rounded-lg border bg-white dark:bg-slate-950 dark:border-white/10 dark:text-white px-3 py-2 text-sm ring-offset-white focus:outline-none focus:ring-2 focus:ring-primary ${
+                                    businessErrors.industry_type ? 'border-red-500 focus:ring-red-500' : 'border-slate-300 dark:border-white/10'
                                 }`}
                             >
-                                <option value="">Select Industry</option>
-                                {INDUSTRY_TYPES.map(ind => <option key={ind} value={ind}>{ind}</option>)}
+                                <option value="" className="bg-slate-950 text-white">Select Industry</option>
+                                {INDUSTRY_TYPES.map(ind => {
+                                    const val = typeof ind === 'object' ? ind.value : ind;
+                                    const lbl = typeof ind === 'object' ? ind.label : ind;
+                                    return <option key={val} value={val} className="bg-slate-950 text-white">{lbl}</option>;
+                                })}
                             </select>
+
                             {businessErrors.industry_type && <p className="text-xs text-red-500 mt-1">{businessErrors.industry_type}</p>}
                         </div>
                     </div>
 
                     {/* Address Fields */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 border-t pt-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8 border-t border-slate-200 dark:border-white/10 pt-8">
                         <div>
-                            <h3 className="font-semibold text-slate-800 mb-4">Personal / Residential Address</h3>
+                            <h3 className="font-semibold text-slate-800 dark:text-white mb-4">Personal / Residential Address</h3>
                             <div className="space-y-4">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="personal_flat_no" className="block text-xs font-semibold text-slate-500 mb-1">Flat / Plot / House No.</label>
+                                        <label htmlFor="personal_flat_no" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Flat / Plot / House No.</label>
                                         <Input
                                             id="personal_flat_no"
                                             value={personalAddress.flatNo}
@@ -201,7 +222,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="personal_street" className="block text-xs font-semibold text-slate-500 mb-1">Street / Area <span className="text-red-500">*</span></label>
+                                        <label htmlFor="personal_street" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Street / Area <span className="text-red-500">*</span></label>
                                         <Input
                                             id="personal_street"
                                             value={personalAddress.street}
@@ -214,7 +235,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="personal_city" className="block text-xs font-semibold text-slate-500 mb-1">City <span className="text-red-500">*</span></label>
+                                        <label htmlFor="personal_city" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">City <span className="text-red-500">*</span></label>
                                         <Input
                                             id="personal_city"
                                             value={personalAddress.city}
@@ -225,7 +246,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         {addressErrors.personal.city && <p className="text-xs text-red-500 mt-1">{addressErrors.personal.city}</p>}
                                     </div>
                                     <div>
-                                        <label htmlFor="personal_state" className="block text-xs font-semibold text-slate-500 mb-1">State / Province <span className="text-red-500">*</span></label>
+                                        <label htmlFor="personal_state" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">State / Province <span className="text-red-500">*</span></label>
                                         <Input
                                             id="personal_state"
                                             value={personalAddress.state}
@@ -238,7 +259,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="personal_zip_code" className="block text-xs font-semibold text-slate-500 mb-1">ZIP / Postal Code <span className="text-red-500">*</span></label>
+                                        <label htmlFor="personal_zip_code" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">ZIP / Postal Code <span className="text-red-500">*</span></label>
                                         <Input
                                             id="personal_zip_code"
                                             value={personalAddress.zipCode}
@@ -249,7 +270,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         {addressErrors.personal.zipCode && <p className="text-xs text-red-500 mt-1">{addressErrors.personal.zipCode}</p>}
                                     </div>
                                     <div>
-                                        <label htmlFor="personal_country" className="block text-xs font-semibold text-slate-500 mb-1">Country <span className="text-red-500">*</span></label>
+                                        <label htmlFor="personal_country" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Country <span className="text-red-500">*</span></label>
                                         <SearchableCountrySelect
                                             id="personal_country"
                                             value={personalAddress.country}
@@ -264,16 +285,16 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
 
                         <div>
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="font-semibold text-slate-800">Business / Office Address</h3>
+                                <h3 className="font-semibold text-slate-800 dark:text-white">Business / Office Address</h3>
                                 <div className="flex items-center gap-2">
                                     <input
                                         type="checkbox"
                                         id="same_address"
                                         checked={isSameAddress}
                                         onChange={(e) => handleSameAddressChange(e.target.checked)}
-                                        className="h-4 w-4 rounded border-slate-300 text-[#1c398e] focus:ring-[#1c398e]/50 cursor-pointer"
+                                        className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
                                     />
-                                    <label htmlFor="same_address" className="text-xs font-semibold text-slate-500 cursor-pointer">
+                                    <label htmlFor="same_address" className="text-xs font-semibold text-slate-500 dark:text-slate-400 cursor-pointer">
                                         Same as Residential
                                     </label>
                                 </div>
@@ -282,7 +303,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                             <div className={`space-y-4 transition-opacity duration-200 ${isSameAddress ? 'opacity-50 pointer-events-none' : ''}`}>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="business_flat_no" className="block text-xs font-semibold text-slate-500 mb-1">Flat / Plot / House No.</label>
+                                        <label htmlFor="business_flat_no" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Flat / Plot / House No.</label>
                                         <Input
                                             id="business_flat_no"
                                             value={businessAddress.flatNo}
@@ -292,7 +313,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         />
                                     </div>
                                     <div>
-                                        <label htmlFor="business_street" className="block text-xs font-semibold text-slate-500 mb-1">Street / Area {!isSameAddress && <span className="text-red-500">*</span>}</label>
+                                        <label htmlFor="business_street" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Street / Area {!isSameAddress && <span className="text-red-500">*</span>}</label>
                                         <Input
                                             id="business_street"
                                             value={businessAddress.street}
@@ -306,7 +327,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="business_city" className="block text-xs font-semibold text-slate-500 mb-1">City {!isSameAddress && <span className="text-red-500">*</span>}</label>
+                                        <label htmlFor="business_city" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">City {!isSameAddress && <span className="text-red-500">*</span>}</label>
                                         <Input
                                             id="business_city"
                                             value={businessAddress.city}
@@ -318,7 +339,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         {!isSameAddress && addressErrors.business.city && <p className="text-xs text-red-500 mt-1">{addressErrors.business.city}</p>}
                                     </div>
                                     <div>
-                                        <label htmlFor="business_state" className="block text-xs font-semibold text-slate-500 mb-1">State / Province {!isSameAddress && <span className="text-red-500">*</span>}</label>
+                                        <label htmlFor="business_state" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">State / Province {!isSameAddress && <span className="text-red-500">*</span>}</label>
                                         <Input
                                             id="business_state"
                                             value={businessAddress.state}
@@ -332,7 +353,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label htmlFor="business_zip_code" className="block text-xs font-semibold text-slate-500 mb-1">ZIP / Postal Code {!isSameAddress && <span className="text-red-500">*</span>}</label>
+                                        <label htmlFor="business_zip_code" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">ZIP / Postal Code {!isSameAddress && <span className="text-red-500">*</span>}</label>
                                         <Input
                                             id="business_zip_code"
                                             value={businessAddress.zipCode}
@@ -344,7 +365,7 @@ export const ClientInfoSection: React.FC<ClientInfoSectionProps> = ({
                                         {!isSameAddress && addressErrors.business.zipCode && <p className="text-xs text-red-500 mt-1">{addressErrors.business.zipCode}</p>}
                                     </div>
                                     <div>
-                                        <label htmlFor="business_country" className="block text-xs font-semibold text-slate-500 mb-1">Country {!isSameAddress && <span className="text-red-500">*</span>}</label>
+                                        <label htmlFor="business_country" className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Country {!isSameAddress && <span className="text-red-500">*</span>}</label>
                                         <SearchableCountrySelect
                                             id="business_country"
                                             value={businessAddress.country}

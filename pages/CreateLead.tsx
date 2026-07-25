@@ -24,11 +24,11 @@ const CreateLead: React.FC<CreateLeadProps> = (props) => {
     return (
         <div className="max-w-[95%] mx-auto space-y-8">
             <div className="text-center">
-                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-gradient-to-br from-[#1c398e] to-blue-600 text-white flex items-center justify-center shadow-lg">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-gradient-to-br from-primary to-blue-600 text-white flex items-center justify-center shadow-lg">
                     <PlusCircleIcon className="h-8 w-8" />
                 </div>
-                <h1 className="text-3xl font-bold tracking-tight">Create New Lead</h1>
-                <p className="text-slate-500 mt-2">Fill in the details below to add a new lead to the system</p>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Create New Lead</h1>
+                <p className="text-slate-500 dark:text-slate-400 mt-2">Fill in the details below to add a new lead to the system</p>
             </div>
 
             <form onSubmit={form.handleSubmit}>
@@ -97,18 +97,19 @@ const CreateLead: React.FC<CreateLeadProps> = (props) => {
                     />
                 </div>
 
-                <div className="sticky bottom-0 bg-white/80 backdrop-blur-md py-4 mt-8 flex items-center justify-between rounded-t-xl border-t z-10">
+                <div className="bg-white dark:bg-slate-900/60 p-6 mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm">
                     <div>
-                        <span className="text-sm text-slate-600">Grand Total:</span>
-                        <p className="text-2xl font-bold text-[#1c398e]">₹{form.grandTotal.toLocaleString('en-IN')}</p>
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-400">Grand Total:</span>
+                        <p className="text-2xl font-bold text-primary">₹{form.grandTotal.toLocaleString('en-IN')}</p>
                     </div>
                     <div className="flex gap-4">
-                        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-                        <Button type="submit">Create Lead</Button>
+                        <Button type="button" variant="outline" onClick={onCancel} className="dark:bg-slate-900 dark:border-white/10 dark:text-slate-300">Cancel</Button>
+                        <Button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 font-semibold">Create Lead</Button>
                     </div>
                 </div>
             </form>
         </div>
+
     );
 };
 

@@ -1,7 +1,14 @@
-// Integration helpers for Razorpay, Exotel, and MSG91
+/**
+ * ⚠️ MOCK INTEGRATIONS — STUB IMPLEMENTATIONS
+ * Razorpay, Exotel, and MSG91 return simulated sandbox data.
+ * Replace with real SDK credentials and endpoints before production deployment.
+ */
+console.warn('[CRM] lib/integrations.ts: Mock integrations active (Razorpay, Exotel, MSG91)');
 
 export const RazorpayIntegration = {
     generatePaymentLink: async (leadId: string, amount: number, customerName: string, phone: string) => {
+        console.warn('[Mock Razorpay] Generating simulated payment link');
+
         const link = `https://rzp.io/i/24efiling-${Math.random().toString(36).substring(7)}`;
         return {
             payment_link: link,

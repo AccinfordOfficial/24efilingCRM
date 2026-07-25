@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Card, CardHeader, CardContent } from '../components/ui/Card';
 import { User, TransferLog } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -73,24 +74,22 @@ const Settings: React.FC<SettingsProps> = ({ currentUser, transferLogs, auditLog
     return (
         <div className="space-y-6">
             <header>
-                <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
-                <p className="text-slate-500">Manage your account and system preferences.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">System Settings</h1>
+                <p className="text-slate-500 dark:text-slate-400">Manage your account and system preferences.</p>
             </header>
 
-
-
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10">
                 <CardHeader>
-                    <div className="border-b border-gray-200">
+                    <div className="border-b border-slate-200 dark:border-white/10">
                         <nav className="-mb-px flex space-x-6 overflow-x-auto custom-scrollbar" aria-label="Tabs">
                             {accessibleTabs.map(tab => (
                                 <button
                                     key={tab.name}
                                     onClick={() => setActiveTab(tab.name)}
                                     className={`${activeTab === tab.name
-                                        ? 'border-[#1c398e] text-[#1c398e]'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-gray-300'
-                                        } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer outline-none focus:text-[#1c398e]`}
+                                        ? 'border-primary text-primary font-bold'
+                                        : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:border-slate-300 dark:hover:border-white/20'
+                                        } whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm transition-colors cursor-pointer outline-none focus:text-primary`}
                                 >
                                     {tab.name}
                                 </button>
@@ -104,6 +103,7 @@ const Settings: React.FC<SettingsProps> = ({ currentUser, transferLogs, auditLog
             </Card>
         </div>
     );
+
 };
 
 export default Settings;

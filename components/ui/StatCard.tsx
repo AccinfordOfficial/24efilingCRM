@@ -81,7 +81,7 @@ export const StatCard: React.FC<StatCardProps> = ({
         
         {chartData && chartData.length > 0 && (
           <div className="h-10 w-28 opacity-70">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
               <AreaChart data={chartData}>
                 <defs>
                   <linearGradient id={`grad-${title.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">

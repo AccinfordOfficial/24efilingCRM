@@ -25,22 +25,22 @@ export const LeadStatusStepper: React.FC<LeadStatusStepperProps> = ({ currentSta
                             <button
                                 disabled={!isUpcoming}
                                 onClick={() => onStatusChange(status)}
-                                className={`relative h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted ? 'bg-[#1c398e] border-[#1c398e] text-white' :
-                                    isCurrent ? 'border-[#1c398e] bg-white scale-110 shadow-lg' :
-                                        'border-slate-300 bg-white group-hover:border-[#1c398e]'
+                                className={`relative h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${isCompleted ? 'bg-primary border-primary text-primary-foreground' :
+                                    isCurrent ? 'border-primary bg-background dark:bg-slate-900 scale-110 shadow-lg' :
+                                        'border-slate-300 dark:border-white/20 bg-background dark:bg-slate-900 group-hover:border-primary'
                                     } ${isUpcoming ? 'cursor-pointer' : 'cursor-default'}`}
                             >
                                 {isCompleted ? <CheckCircleIcon className="h-5 w-5" /> :
-                                    isCurrent ? <div className="h-3 w-3 rounded-full bg-[#1c398e]"></div> :
-                                        <span className="text-slate-400 font-semibold">{index + 1}</span>}
+                                    isCurrent ? <div className="h-3 w-3 rounded-full bg-primary"></div> :
+                                        <span className="text-slate-400 dark:text-slate-500 font-semibold">{index + 1}</span>}
                             </button>
-                            <p className={`mt-2 text-xs text-center w-24 ${isCompleted ? 'text-slate-600' :
-                                isCurrent ? 'font-semibold text-[#1c398e]' :
-                                    'text-slate-500'
+                            <p className={`mt-2 text-xs text-center w-24 ${isCompleted ? 'text-slate-600 dark:text-slate-400' :
+                                isCurrent ? 'font-semibold text-primary' :
+                                    'text-slate-500 dark:text-slate-400'
                                 }`}>{status}</p>
                         </div>
                         {index < WORKFLOW_STAGES.length - 1 && (
-                            <div className={`flex-1 h-0.5 mt-4 ${isCompleted || isCurrent ? 'bg-[#1c398e]' : 'bg-slate-300'}`}></div>
+                            <div className={`flex-1 h-0.5 mt-4 ${isCompleted || isCurrent ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-800'}`}></div>
                         )}
                     </React.Fragment>
                 );

@@ -50,7 +50,7 @@ export const BusinessAnalyticsChart: React.FC<BusinessAnalyticsChartProps> = ({
         </div>
       </CardHeader>
       <CardContent className="p-4 pt-0" style={{ height: '240px' }}>
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           {activeTab === 'leads' ? (
             <AreaChart data={trendData} margin={{ top: 5, right: 10, left: -25, bottom: 0 }}>
               <defs>

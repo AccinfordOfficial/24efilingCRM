@@ -33,7 +33,8 @@ export async function autoAssignLead(leadData: {
             return null;
         }
 
-        for (const rule of rules as AssignmentRule[]) {
+        for (const rule of (rules as unknown) as AssignmentRule[]) {
+
             const cond = rule.conditions || {};
             
             // Check condition match

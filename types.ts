@@ -213,20 +213,33 @@ export type ServiceSet = {
   promo_discount_value?: number;
 }
 
+export interface LeadSource {
+  id: string;
+  name?: string;
+  source_name?: string;
+  code?: string;
+  is_active?: boolean;
+  created_at?: string;
+}
+
 export type Lead = {
   city_id?: string | null;
   city_name?: string | null;
   id: string;
   business_name: string;
   business_category?: string;
+  business_category_id?: string | null;
   industry_type?: string;
+  industry_type_id?: string | null;
   first_name: string;
   last_name: string;
   email: string;
   phone_number: string;
+  whatsapp_number?: string;
   alternate_mobile?: string;
   alternate_is_whatsapp?: boolean;
   pan_number?: string;
+  aadhar_number?: string;
   residential_address?: string;
   business_address?: string;
   personal_flat_no?: string | null;
@@ -276,6 +289,7 @@ export type Lead = {
   reference_number?: string; // Auto-generated reference (e.g. 24EF-2026-0001)
 }
 
+
 export type Customer = {
   city_id?: string | null;
   city_name?: string | null;
@@ -287,6 +301,7 @@ export type Customer = {
   alternate_mobile?: string;
   alternate_is_whatsapp?: boolean;
   pan_number?: string;
+  aadhar_number?: string;
   gender?: 'Male' | 'Female' | 'Other';
   business_name: string;
   business_category?: string;
@@ -327,7 +342,6 @@ export type Customer = {
   created_at: string;
   updated_at: string;
 
-  aadhar_number?: string;
   service_amount?: number;
   tax_amount?: number;
   discount_amount?: number;

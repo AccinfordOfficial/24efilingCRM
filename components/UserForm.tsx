@@ -307,10 +307,10 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                             registration={register('gender')}
                             error={errors.gender?.message as string}
                         >
-                            <option value="" disabled>-- Select Gender --</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                            <option value="Other">Other</option>
+                            <option value="" disabled className="bg-slate-950 text-white">-- Select Gender --</option>
+                            <option value="Male" className="bg-slate-950 text-white">Male</option>
+                            <option value="Female" className="bg-slate-950 text-white">Female</option>
+                            <option value="Other" className="bg-slate-950 text-white">Other</option>
                         </FormSelect>
 
                         {showBranchField && (
@@ -321,9 +321,9 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                     registration={register('city_id', { onChange: handleCityChange })}
                                     error={errors.city_id?.message as string}
                                 >
-                                    <option value="">-- All Cities --</option>
+                                    <option value="" className="bg-slate-950 text-white">-- All Cities --</option>
                                     {cities.map(c => (
-                                        <option key={c.id} value={c.id}>{c.city_name}</option>
+                                        <option key={c.id} value={c.id} className="bg-slate-950 text-white">{c.city_name}</option>
                                     ))}
                                 </FormSelect>
 
@@ -334,11 +334,11 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                     registration={register('branch_id', { onChange: handleBranchChange })}
                                     error={errors.branch_id?.message as string}
                                 >
-                                    <option value="" disabled>-- Select a Branch --</option>
+                                    <option value="" disabled className="bg-slate-950 text-white">-- Select a Branch --</option>
                                     {branches
                                         .filter(b => !watchedCityId || b.city_id === watchedCityId)
                                         .map(b => (
-                                        <option key={b.id} value={b.id}>{b.name} {b.code ? `(${b.code})` : ''}</option>
+                                        <option key={b.id} value={b.id} className="bg-slate-950 text-white">{b.name} {b.code ? `(${b.code})` : ''}</option>
                                     ))}
                                 </FormSelect>
                             </>
@@ -359,16 +359,16 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                             registration={register('reporting_to')}
                             error={errors.reporting_to?.message as string}
                         >
-                            <option value="">-- Independent (Or Top Level) --</option>
+                            <option value="" className="bg-slate-950 text-white">-- Independent (Or Top Level) --</option>
                             {allUsers.filter(u => u.id !== user?.id).map(u => (
-                                <option key={u.id} value={u.id}>{u.name} ({u.role})</option>
+                                <option key={u.id} value={u.id} className="bg-slate-950 text-white">{u.name} ({u.role})</option>
                             ))}
                         </FormSelect>
                     </div>
 
                     <div className="space-y-4">
                         {!user && (
-                            <div className="p-4 rounded-lg bg-white/5 border border-white/5 space-y-4">
+                            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 space-y-4">
                                 <FormField 
                                     label="Password" 
                                     id="password" 
@@ -392,7 +392,7 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
 
                         <div className="p-4 rounded-lg border border-border/50 space-y-4 bg-muted/10">
                             <div className="space-y-1 w-full">
-                                <label className="block text-sm font-medium text-slate-700">
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                                     System Role <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative" ref={roleDropdownRef}>
@@ -411,7 +411,7 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
                                         <ChevronDown className="w-4 h-4 text-muted-foreground opacity-50" />
                                     </button>
                                     {isRoleDropdownOpen && (
-                                        <ul className="absolute z-50 w-full mt-1 overflow-auto bg-popover text-popover-foreground border rounded-md shadow-md max-h-60">
+                                        <ul className="absolute z-50 w-full mt-1 overflow-auto bg-popover text-popover-foreground border rounded-md shadow-md max-h-60 border-slate-200 dark:border-white/10">
                                             {USER_ROLES_WITH_DESCRIPTIONS.map(roleInfo => (
                                                 <li key={roleInfo.role}
                                                     onClick={() => {
@@ -451,11 +451,11 @@ export const UserForm: React.FC<UserFormProps> = ({ isOpen, onClose, onSave, use
 
                 <div className="border-t border-border pt-6">
                     <div className="space-y-1 w-full">
-                        <label className="block text-sm font-medium text-slate-700">Skills & Expertise</label>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">Skills & Expertise</label>
                         <div className="space-y-3">
-                            <Select id="skills" onChange={handleAddSkill} value="" className="bg-background">
-                                <option value="" disabled>Select a skill to add...</option>
-                                {availableSkills.map(skill => <option key={skill} value={skill}>{skill}</option>)}
+                            <Select id="skills" onChange={handleAddSkill} value="" className="bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                                <option value="" disabled className="bg-slate-950 text-white">Select a skill to add...</option>
+                                {availableSkills.map(skill => <option key={skill} value={skill} className="bg-slate-950 text-white">{skill}</option>)}
                             </Select>
                             <div className="flex flex-wrap gap-2 min-h-[32px] p-1">
                                 {selectedSkills.map(skill => (

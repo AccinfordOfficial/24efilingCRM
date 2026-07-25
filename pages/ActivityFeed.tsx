@@ -193,7 +193,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
             </div>
 
             {/* Filters Bar */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm sticky top-4 z-20 space-y-4 md:space-y-0">
+            <div className="bg-white dark:bg-slate-900/80 p-4 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm sticky top-4 z-20 space-y-4 md:space-y-0">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                     {/* Search */}
                     <div className="relative col-span-1 md:col-span-3">
@@ -201,7 +201,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Input
                             type="search"
                             placeholder="Search actions, details..."
-                            className="pl-9 h-10 w-full"
+                            className="pl-9 h-10 w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 text-slate-900 dark:text-slate-100"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -212,7 +212,7 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Popover
                             align="start"
                             trigger={
-                                <Button variant="outline" className={`w-full justify-start text-left font-normal h-10 ${dateRange.from ? 'text-slate-900 border-slate-300 bg-slate-50' : 'text-slate-500'}`}>
+                                <Button variant="outline" className={`w-full justify-start text-left font-normal h-10 dark:bg-slate-950 dark:border-white/10 ${dateRange.from ? 'text-slate-900 dark:text-slate-100 border-slate-300 dark:border-white/10 bg-slate-50 dark:bg-slate-900' : 'text-slate-500 dark:text-slate-400'}`}>
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {dateRange.from ? (
                                         dateRange.to ? `${format(parseISO(dateRange.from), 'MMM d')} - ${format(parseISO(dateRange.to), 'MMM d')}` : format(parseISO(dateRange.from), 'MMM d, yyyy')
@@ -232,11 +232,11 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Select
                             value={roleFilter}
                             onChange={(e) => { setRoleFilter(e.target.value); setUserFilter('all'); }}
-                            className="h-10 w-full"
+                            className="h-10 w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 dark:text-white"
                         >
-                            <option value="all">All Roles</option>
+                            <option value="all" className="bg-slate-950 text-white">All Roles</option>
                             {Object.values(UserRole).filter(role => typeof role === 'string').map(role => (
-                                <option key={role} value={role}>{role}</option>
+                                <option key={role} value={role} className="bg-slate-950 text-white">{role}</option>
                             ))}
                         </Select>
                     </div>
@@ -246,12 +246,12 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Select
                             value={userFilter}
                             onChange={(e) => setUserFilter(e.target.value)}
-                            className="h-10 w-full"
+                            className="h-10 w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 dark:text-white"
                             disabled={users.length === 0}
                         >
-                            <option value="all">All Users</option>
+                            <option value="all" className="bg-slate-950 text-white">All Users</option>
                             {filteredUserOptions.map(user => (
-                                <option key={user.id} value={user.id}>{user.name}</option>
+                                <option key={user.id} value={user.id} className="bg-slate-950 text-white">{user.name}</option>
                             ))}
                         </Select>
                     </div>
@@ -261,13 +261,14 @@ const ActivityFeed: React.FC<ActivityFeedProps> = ({ userActivities, users }) =>
                         <Select
                             value={moduleFilter}
                             onChange={(e) => setModuleFilter(e.target.value)}
-                            className="h-10 w-full"
+                            className="h-10 w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 dark:text-white"
                         >
-                            <option value="all">All Modules</option>
-                            {modules.map(module => <option key={module} value={module}>{module}</option>)}
+                            <option value="all" className="bg-slate-950 text-white">All Modules</option>
+                            {modules.map(module => <option key={module} value={module} className="bg-slate-950 text-white">{module}</option>)}
                         </Select>
                     </div>
                 </div>
+
             </div>
 
             {/* Timeline */}

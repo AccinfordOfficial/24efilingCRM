@@ -33,52 +33,53 @@ const workflowStages: {
     {
       title: 'New Lead',
       status: 'New Lead',
-      headerClass: 'bg-blue-100/80 text-blue-900',
-      bgClass: 'bg-blue-50/50',
-      badgeClass: 'bg-blue-200 text-blue-800',
-      borderAccent: 'border-t-blue-500'
+      headerClass: 'bg-blue-500/10 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-blue-500/20 text-blue-700 dark:text-blue-300',
+      borderAccent: 'border-t-4 border-t-blue-500'
     },
     {
       title: 'Lead Confirmed',
       status: 'Lead Confirmed',
-      headerClass: 'bg-indigo-100/80 text-indigo-900',
-      bgClass: 'bg-indigo-50/50',
-      badgeClass: 'bg-indigo-200 text-indigo-800',
-      borderAccent: 'border-t-indigo-500'
+      headerClass: 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-indigo-500/20 text-indigo-700 dark:text-indigo-300',
+      borderAccent: 'border-t-4 border-t-indigo-500'
     },
     {
       title: 'Documents & Payments',
       status: 'Documents & Payments',
-      headerClass: 'bg-purple-100/80 text-purple-900',
-      bgClass: 'bg-purple-50/50',
-      badgeClass: 'bg-purple-200 text-purple-800',
-      borderAccent: 'border-t-purple-500'
+      headerClass: 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-purple-500/20 text-purple-700 dark:text-purple-300',
+      borderAccent: 'border-t-4 border-t-purple-500'
     },
     {
       title: 'In-Progress',
       status: 'In-Progress',
-      headerClass: 'bg-amber-100/80 text-amber-900',
-      bgClass: 'bg-amber-50/50',
-      badgeClass: 'bg-amber-200 text-amber-800',
-      borderAccent: 'border-t-amber-500'
+      headerClass: 'bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-amber-500/20 text-amber-700 dark:text-amber-300',
+      borderAccent: 'border-t-4 border-t-amber-500'
     },
     {
       title: 'Success',
       status: 'Success',
-      headerClass: 'bg-emerald-100/80 text-emerald-900',
-      bgClass: 'bg-emerald-50/50',
-      badgeClass: 'bg-emerald-200 text-emerald-800',
-      borderAccent: 'border-t-emerald-500'
+      headerClass: 'bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300',
+      borderAccent: 'border-t-4 border-t-emerald-500'
     },
     {
       title: 'Lost',
       status: 'Lost',
-      headerClass: 'bg-red-100/80 text-red-900',
-      bgClass: 'bg-red-50/50',
-      badgeClass: 'bg-red-200 text-red-800',
-      borderAccent: 'border-t-red-500'
+      headerClass: 'bg-rose-500/10 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 font-semibold',
+      bgClass: 'bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-white/10',
+      badgeClass: 'bg-rose-500/20 text-rose-700 dark:text-rose-300',
+      borderAccent: 'border-t-4 border-t-rose-500'
     },
   ];
+
 
 const LeadWorkflow: React.FC<LeadWorkflowProps> = ({ leads, onUpdateLead, onViewLead, onAddLead, onDeleteLeads, dateRange, setDateRange, onOpenLeadForm, currentUser }) => {
   const [draggedOverColumn, setDraggedOverColumn] = useState<string | null>(null);

@@ -8,9 +8,15 @@
   }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.6);
+  }
+
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 20px 80px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.03);
   }
@@ -20,16 +26,27 @@
   }
 
   .glass-card-hover:hover {
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(203, 213, 225, 1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
   }
 
+  .dark .glass-card-hover:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
   .glass-panel {
-    background: rgba(8, 12, 24, 0.4);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(226, 232, 240, 0.8);
+  }
+
+  .dark .glass-panel {
+    background: rgba(8, 12, 24, 0.4);
     border-right: 1px solid rgba(255, 255, 255, 0.05);
   }
 
@@ -51,33 +68,33 @@
 
 @layer base {
   :root {
-    --background: 224 71% 4%;
-    --foreground: 210 40% 98%;
+    --background: 0 0% 98%;
+    --foreground: 222.2 84% 4.9%;
 
-    --card: 222.2 47.4% 11.2%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
 
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 263.4 90% 64.3%; /* Premium Violet */
+    --primary: 226 67% 33%; /* #1c398e */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 217.2 32.6% 12%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 263.4 90% 64.3%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 226 67% 33%;
 
     --radius: 0.75rem;
   }
@@ -118,15 +135,24 @@
     @apply border-border;
   }
 
-  body {
+  html.dark body, body.dark {
     background-image: url('/bg-nexora.png');
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
     background-repeat: no-repeat;
-    @apply text-foreground;
+    @apply bg-slate-950 text-slate-50 antialiased selection:bg-primary/30 transition-colors duration-200;
+  }
+
+  html.light body, body:not(.dark) {
+    background-color: #f8fafc;
+    background-image: radial-gradient(at 0% 0%, rgba(28, 57, 142, 0.06) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
+    background-attachment: fixed;
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-primary/20 transition-colors duration-200;
   }
 }
+
+
 
 /* Custom Scrollbar from original index.html style block */
 /* We can move global styles here */

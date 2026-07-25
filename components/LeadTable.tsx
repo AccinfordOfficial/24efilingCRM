@@ -60,14 +60,14 @@ const BulkActionDropdown: React.FC<{
         <ChevronDown className="h-4 w-4" />
       </Button>
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute z-50 mt-1 w-48 origin-top-right rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
           <div className="py-1">
-            {title && <div className="px-4 py-2 text-xs text-slate-500 uppercase tracking-wider font-semibold">{title}</div>}
+            {title && <div className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-semibold">{title}</div>}
             {items.map(item => (
               <button
                 key={item.value}
                 onClick={() => handleSelect(item.value)}
-                className="w-full text-left block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                className="w-full text-left block px-4 py-2 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 {item.label}
               </button>
@@ -135,9 +135,9 @@ export const LeadTable: React.FC<LeadTableProps> = ({
       const serviceMatch = serviceFilter === 'All' || (lead.service_requested && lead.service_requested.includes(serviceFilter));
 
       const searchMatch = !searchQuery ||
-        lead.business_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (lead.business_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
         (lead.reference_number && lead.reference_number.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        `${lead.first_name} ${lead.last_name}`.toLowerCase().includes(searchQuery.toLowerCase());
+        `${lead.first_name || ''} ${lead.last_name || ''}`.toLowerCase().includes(searchQuery.toLowerCase());
 
       return statusMatch && priorityMatch && assigneeMatch && searchMatch && serviceMatch;
     });
@@ -265,11 +265,11 @@ export const LeadTable: React.FC<LeadTableProps> = ({
 
   return (
     <>
-      <Card>
+      <Card className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 shadow-sm">
         <CardHeader>
           {selectedLeadIds.length > 0 ? (
             <div className="flex w-full items-center justify-between gap-4">
-              <span className="text-sm font-medium text-slate-700">{selectedLeadIds.length} lead{selectedLeadIds.length > 1 ? 's' : ''} selected</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{selectedLeadIds.length} lead{selectedLeadIds.length > 1 ? 's' : ''} selected</span>
               <div className="flex items-center gap-2">
                 <BulkActionDropdown buttonLabel="Change Status" items={statusOptions} onSelect={handleBulkStatusChange} title="Set new status" />
                 <BulkActionDropdown buttonLabel="Change Priority" items={priorityOptions} onSelect={handleBulkPriorityChange} title="Set new priority" />
@@ -284,14 +284,14 @@ export const LeadTable: React.FC<LeadTableProps> = ({
           ) : (
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div>
-                <CardTitle>{title}</CardTitle>
-                <CardDescription>{description}</CardDescription>
+                <CardTitle className="dark:text-white">{title}</CardTitle>
+                <CardDescription className="dark:text-slate-400">{description}</CardDescription>
               </div>
               <div className="flex flex-wrap items-center justify-start md:justify-end gap-2 w-full md:w-auto">
                 {showFilters && (
                   <>
                     <div className="relative flex-grow md:flex-grow-0">
-                      <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                      <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
                       <Input
                         type="search"
                         placeholder="Search..."
@@ -300,27 +300,27 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                         onChange={(e) => setSearchQuery(e.target.value)}
                       />
                     </div>
-                    <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-auto">
-                      <option value="All">All Statuses</option>
-                      {LEAD_STATUSES.map(status => <option key={status} value={status}>{status}</option>)}
+                    <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-auto bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                      <option value="All" className="bg-slate-950 text-white">All Statuses</option>
+                      {LEAD_STATUSES.map(status => <option key={status} value={status} className="bg-slate-950 text-white">{status}</option>)}
                     </Select>
-                    <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="w-auto">
-                      <option value="All">All Priorities</option>
-                      {LEAD_PRIORITIES.map(priority => <option key={priority} value={priority}>{priority}</option>)}
+                    <Select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="w-auto bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                      <option value="All" className="bg-slate-950 text-white">All Priorities</option>
+                      {LEAD_PRIORITIES.map(priority => <option key={priority} value={priority} className="bg-slate-950 text-white">{priority}</option>)}
                     </Select>
-                    <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} className="w-auto">
-                      <option value="All">All Services</option>
-                      {Object.values(SERVICE_OPTIONS).flat().map(service => <option key={service} value={service}>{service}</option>)}
+                    <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} className="w-auto bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                      <option value="All" className="bg-slate-950 text-white">All Services</option>
+                      {Object.values(SERVICE_OPTIONS).flat().map(service => <option key={service} value={service} className="bg-slate-950 text-white">{service}</option>)}
                     </Select>
-                    <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)} className="w-auto">
-                      <option value="All">All Users</option>
-                      <option value="Unassigned">Unassigned</option>
-                      {salesExecutives.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+                    <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)} className="w-auto bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                      <option value="All" className="bg-slate-950 text-white">All Users</option>
+                      <option value="Unassigned" className="bg-slate-950 text-white">Unassigned</option>
+                      {salesExecutives.map(user => <option key={user.id} value={user.id} className="bg-slate-950 text-white">{user.name}</option>)}
                     </Select>
                   </>
                 )}
                 {showAddButton && (
-                  <Button size="sm" className="gap-1" onClick={onAddLead}>
+                  <Button size="sm" className="gap-1 bg-primary text-primary-foreground hover:opacity-90 font-bold" onClick={onAddLead}>
                     <PlusCircleIcon className="h-3.5 w-3.5" />
                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Add Lead</span>
                   </Button>
@@ -330,9 +330,9 @@ export const LeadTable: React.FC<LeadTableProps> = ({
           )}
         </CardHeader>
         <CardContent>
-          <div className="relative w-full overflow-auto max-h-[75vh] border rounded-md">
-            <table className="w-full text-sm text-left">
-              <thead className="text-xs uppercase bg-[#1c398e] text-white sticky top-0 z-10 shadow-sm">
+          <div className="relative w-full overflow-auto max-h-[75vh] border border-slate-200 dark:border-white/10 rounded-md">
+            <table className="w-full text-sm text-left text-slate-700 dark:text-slate-200">
+              <thead className="text-xs uppercase bg-slate-100 dark:bg-slate-900 border-b border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 sticky top-0 z-10 shadow-sm">
                 <tr>
                   <th scope="col" className="p-4 md:px-6">
                     <input
@@ -340,7 +340,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                       ref={selectAllCheckboxRef}
                       checked={selectedLeadIds.length === processedLeads.length && processedLeads.length > 0}
                       onChange={handleSelectAll}
-                      className="h-4 w-4 rounded border-slate-300 text-[#1c398e] focus:ring-[#1c398e]/50 cursor-pointer"
+                      className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary cursor-pointer"
                     />
                   </th>
                   <th scope="col" className="px-4 py-3 md:px-6 text-left font-medium">
@@ -389,73 +389,73 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                     <tr
                       key={lead.id}
                       onClick={onViewLead ? () => onViewLead(lead.id) : undefined}
-                      className={`border-b ${onViewLead ? 'cursor-pointer hover:bg-slate-50' : ''} ${selectedLeadIds.includes(lead.id) ? 'bg-blue-100' : 'bg-white'}`}
+                      className={`border-b border-slate-100 dark:border-white/5 ${onViewLead ? 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/40' : ''} ${selectedLeadIds.includes(lead.id) ? 'bg-blue-50/50 dark:bg-blue-950/30' : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors'}`}
                     >
                       <td className="p-4 md:px-6" onClick={(e) => e.stopPropagation()}>
                         <input
                           type="checkbox"
                           checked={selectedLeadIds.includes(lead.id)}
                           onChange={() => handleSelectOne(lead.id)}
-                          className="h-4 w-4 rounded border-slate-300 text-[#1c398e] focus:ring-[#1c398e]/50 cursor-pointer"
+                          className="h-4 w-4 rounded border-slate-300 dark:border-slate-700 bg-background dark:bg-slate-900 text-primary cursor-pointer"
                         />
                       </td>
-                      <td className="px-4 py-4 md:px-6 font-medium text-slate-900">
+                      <td className="px-4 py-4 md:px-6 font-medium text-slate-900 dark:text-white">
                         <div className="flex items-center gap-3">
                           {lead.avatar_url ? (
-                            <img src={lead.avatar_url} alt={lead.business_name} className="h-10 w-10 rounded-full object-cover" />
+                            <img src={lead.avatar_url} alt={lead.business_name || 'Lead'} className="h-10 w-10 rounded-full object-cover" />
                           ) : (
-                            <div className={`h-10 w-10 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-500 font-bold`}>
-                              {lead.business_name.charAt(0)}
+                            <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex-shrink-0 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold">
+                              {(lead.business_name || lead.first_name || 'L').charAt(0)}
                             </div>
                           )}
                           <div>
-                            <span className="font-semibold text-slate-900">{lead.business_name}</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">{lead.business_name || 'No Business Name'}</span>
                             {lead.reference_number && (
-                              <span className="ml-2 inline-block text-[10px] font-mono font-bold text-[#1c398e] bg-blue-50 border border-blue-200 px-1 py-0.25 rounded">
+                              <span className="ml-2 inline-block text-[10px] font-mono font-bold text-primary bg-primary/10 border border-primary/20 px-1 py-0.25 rounded">
                                 {lead.reference_number}
                               </span>
                             )}
-                            <div className="text-xs text-slate-500">{lead.first_name} {lead.last_name}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">{lead.first_name} {lead.last_name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-4 md:px-6">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(lead.status)}`}>
+                        <span className={`px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusColor(lead.status)}`}>
                           {lead.status}
                         </span>
                       </td>
                       <td className="px-4 py-4 md:px-6">
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 text-xs font-medium rounded-full ${scoreInfo.color} ${scoreInfo.textColor}`}>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${scoreInfo.color} ${scoreInfo.textColor}`}>
                           <TargetIcon className="h-3 w-3" />
                           {lead.score}
                         </span>
                       </td>
-                      <td className="px-4 py-4 md:px-6 hidden md:table-cell text-slate-900 max-w-xs truncate" title={lead.service_requested}>
+                      <td className="px-4 py-4 md:px-6 hidden md:table-cell text-slate-600 dark:text-slate-300 max-w-xs truncate" title={lead.service_requested}>
                         {lead.service_requested}
                       </td>
-                      <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-900">
+                      <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-600 dark:text-slate-300">
                         {lead.assigned_to ? (
                           <div className="flex flex-col">
                             <div className="flex items-center gap-2">
                               <img src={lead.assigned_to.avatar_url} alt={lead.assigned_to.name} className="w-6 h-6 rounded-full" />
-                              <span className="text-sm">{lead.assigned_to.name}</span>
+                              <span className="text-sm text-slate-700 dark:text-slate-200">{lead.assigned_to.name}</span>
                             </div>
                             {lead.assigned_at && (
-                              <span className="text-[10px] text-slate-400 ml-8">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-8">
                                 {new Date(lead.assigned_at).toLocaleDateString()}
                               </span>
                             )}
                             {lead.created_by === currentUser.id && lead.assigned_to.id !== currentUser.id && (
-                              <span className="text-[10px] text-blue-600 font-medium ml-8">
+                              <span className="text-[10px] text-primary font-medium ml-8">
                                 Shared (Owned by you)
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-slate-400">Unassigned</span>
+                          <span className="text-slate-500 dark:text-slate-400">Unassigned</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-900">
+                      <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-600 dark:text-slate-300">
                         {(() => {
                           const creator = users.find(u => u.id === lead.created_by);
                           return creator ? (
@@ -464,20 +464,20 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                                 {creator.avatar_url ? (
                                   <img src={creator.avatar_url} alt={creator.name} className="w-6 h-6 rounded-full" />
                                 ) : (
-                                  <div className="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500">
+                                  <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-600 dark:text-slate-300">
                                     {creator.name.charAt(0)}
                                   </div>
                                 )}
-                                <span className="text-sm">{creator.name}</span>
+                                <span className="text-sm text-slate-700 dark:text-slate-200">{creator.name}</span>
                               </div>
-                              <span className="text-[10px] text-slate-400 ml-8">
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-8">
                                 {timeAgo(lead.created_at)}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-slate-500 text-sm">
+                            <span className="text-slate-500 dark:text-slate-400 text-sm">
                               Unknown <br />
-                              <span className="text-[10px] text-slate-400">{timeAgo(lead.created_at)}</span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">{timeAgo(lead.created_at)}</span>
                             </span>
                           );
                         })()}
@@ -494,8 +494,8 @@ export const LeadTable: React.FC<LeadTableProps> = ({
             </table>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100">
-          <div className="text-xs text-slate-500">
+        <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-200 dark:border-white/10">
+          <div className="text-xs text-slate-500 dark:text-slate-400">
             Showing <strong>{(currentPage - 1) * 20 + 1}</strong> to <strong>{Math.min(currentPage * 20, processedLeads.length)}</strong> of <strong>{processedLeads.length}</strong> leads
           </div>
           {maxPage > 1 && (
@@ -503,7 +503,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
               <Button variant="outline" size="sm" onClick={prev} disabled={currentPage === 1}>
                 Previous
               </Button>
-              <div className="text-sm font-medium text-slate-600 px-2">
+              <div className="text-sm font-medium text-slate-500 dark:text-slate-400 px-2">
                 Page {currentPage} of {maxPage}
               </div>
               <Button variant="outline" size="sm" onClick={next} disabled={currentPage === maxPage}>

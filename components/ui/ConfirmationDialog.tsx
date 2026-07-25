@@ -30,10 +30,10 @@ export const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         </DialogHeader>
 
         <div className="flex items-start gap-4 mt-2">
-          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-            <AlertTriangleIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+          <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 dark:bg-red-950/50 sm:mx-0 sm:h-10 sm:w-10">
+            <AlertTriangleIcon className="h-6 w-6 text-red-600 dark:text-red-400" aria-hidden="true" />
           </div>
-          <DialogDescription className="text-sm text-slate-600 pt-2">
+          <DialogDescription className="text-sm pt-2">
             {description}
           </DialogDescription>
         </div>

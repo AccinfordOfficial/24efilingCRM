@@ -77,15 +77,15 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ currentUser,
 
     return (
         <div className="space-y-6">
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
                 <CardHeader>
-                    <CardTitle>Authentication</CardTitle>
-                    <CardDescription>Manage your password and assigned login methods.</CardDescription>
+                    <CardTitle className="dark:text-white">Authentication</CardTitle>
+                    <CardDescription className="dark:text-slate-400">Manage your password and assigned login methods.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div className="space-y-4">
-                        <h4 className="flex items-center gap-2 font-medium text-sm text-slate-700">
-                            <Key className="w-4 h-4" /> Change Password
+                        <h4 className="flex items-center gap-2 font-bold text-sm text-slate-800 dark:text-slate-200">
+                            <Key className="w-4 h-4 text-blue-400" /> Change Password
                         </h4>
                         <div className="grid md:grid-cols-2 gap-4">
                             <Input
@@ -102,27 +102,27 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ currentUser,
                             />
                         </div>
                         <div className="flex justify-end">
-                            <Button variant="outline" size="sm" onClick={handleSavePassword} disabled={saving}>
+                            <Button variant="primary" size="sm" onClick={handleSavePassword} disabled={saving} className="font-semibold shadow-md">
                                 Update Password
                             </Button>
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t">
+                    <div className="pt-4 border-t border-slate-200 dark:border-white/10">
                         <div className="flex items-center justify-between">
                             <div>
-                                <h4 className="flex items-center gap-2 font-medium text-sm text-slate-700">
-                                    <Smartphone className="w-4 h-4" /> Two-Factor Authentication (2FA)
+                                <h4 className="flex items-center gap-2 font-bold text-sm text-slate-800 dark:text-slate-200">
+                                    <Smartphone className="w-4 h-4 text-purple-400" /> Two-Factor Authentication (2FA)
                                 </h4>
-                                <p className="text-sm text-slate-500 mt-1">Add an extra layer of security to your account.</p>
+                                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Add an extra layer of security to your account.</p>
                             </div>
                             <div className="flex items-center gap-2">
-                                <span className={`text-sm ${securitySettings.two_factor_enabled ? 'text-green-600 font-medium' : 'text-slate-400'}`}>
+                                <span className={`text-sm ${securitySettings.two_factor_enabled ? 'text-emerald-400 font-bold' : 'text-slate-400'}`}>
                                     {securitySettings.two_factor_enabled ? 'Enabled' : 'Disabled'}
                                 </span>
                                 <button
                                     onClick={toggle2FA}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${securitySettings.two_factor_enabled ? 'bg-blue-600' : 'bg-slate-200'}`}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${securitySettings.two_factor_enabled ? 'bg-blue-600' : 'bg-slate-700'}`}
                                 >
                                     <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${securitySettings.two_factor_enabled ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
@@ -132,28 +132,28 @@ export const SecuritySettings: React.FC<SecuritySettingsProps> = ({ currentUser,
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
                 <CardHeader>
-                    <CardTitle>Active Sessions</CardTitle>
-                    <CardDescription>Devices currently logged into your account.</CardDescription>
+                    <CardTitle className="dark:text-white">Active Sessions</CardTitle>
+                    <CardDescription className="dark:text-slate-400">Devices currently logged into your account.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
                         {sessions.map((session, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border">
+                            <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950/60 rounded-xl border border-slate-200 dark:border-white/10">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border text-slate-500">
+                                    <div className="w-10 h-10 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-300">
                                         {session.device.includes('iPhone') ? <Smartphone className="w-5 h-5" /> : <Shield className="w-5 h-5" />}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-sm text-slate-900">{session.device}</p>
-                                        <p className="text-xs text-slate-500">{session.ip} • {session.lastActive}</p>
+                                        <p className="font-bold text-sm text-slate-900 dark:text-white">{session.device}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{session.ip} • {session.lastActive}</p>
                                     </div>
                                 </div>
                                 {session.current ? (
-                                    <span className="text-xs font-medium bg-green-100 text-green-700 px-2 py-1 rounded">Current Device</span>
+                                    <span className="text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full">Current Device</span>
                                 ) : (
-                                    <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 h-8">Revoke</Button>
+                                    <Button variant="ghost" size="sm" className="text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 h-8">Revoke</Button>
                                 )}
                             </div>
                         ))}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Lead, LeadPriority, ServiceSet, User, Service, Offer, Payment } from '../../types';
-import { COUNTRIES } from '../../constants';
+import { COUNTRIES, SERVICE_OPTIONS, SERVICE_HIERARCHY } from '../../constants';
 import { useApi } from '../../hooks/useApi';
 import { getNextPaymentSequenceClientSide, formatPaymentReferenceId } from '../../lib/paymentUtils';
 
@@ -54,6 +54,7 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
         email: '',
         phone_number: '',
         pan_number: '',
+        aadhar_number: '',
         business_name: '',
         business_category: '',
         industry_type: '',
@@ -92,7 +93,48 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
     });
 
     const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-    const activeServices = useMemo(() => (services || []).filter(s => s.is_active), [services]);
+    const activeServices = useMemo(() => {
+        const mergedMap = new Map<string, Service>();
+
+        // 1. First populate from constants (SERVICE_OPTIONS catalog)
+        Object.entries(SERVICE_OPTIONS).forEach(([catName, subList], index) => {
+            mergedMap.set(catName.toLowerCase(), {
+                id: `const-cat-${index}`,
+                name: catName,
+                category: catName,
+                is_active: true,
+                created_at: new Date().toISOString(),
+                sub_services: subList.map((subName, subIdx) => ({
+                    id: `const-sub-${index}-${subIdx}`,
+                    service_id: `const-cat-${index}`,
+                    name: subName,
+                    price: 2999,
+                    amount: 2999,
+                    is_active: true,
+                    created_at: new Date().toISOString()
+                }))
+            } as unknown as Service);
+        });
+
+        // 2. Overlay with database services (preserving custom services or DB sub-services)
+        (services || []).forEach(dbService => {
+            const existing = mergedMap.get(dbService.name.toLowerCase());
+            if (existing) {
+                const mergedSubs = dbService.sub_services && dbService.sub_services.length > 0
+                    ? dbService.sub_services
+                    : existing.sub_services;
+                mergedMap.set(dbService.name.toLowerCase(), {
+                    ...existing,
+                    ...dbService,
+                    sub_services: mergedSubs
+                });
+            } else {
+                mergedMap.set(dbService.name.toLowerCase(), dbService);
+            }
+        });
+
+        return Array.from(mergedMap.values());
+    }, [services]);
 
     useEffect(() => {
         let isMounted = true;
@@ -535,9 +577,48 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
     };
 
     const getSubServicesForSelection = (mainServiceName: string) => {
-        const service = activeServices.find(s => s.name === mainServiceName);
-        if (!service || !service.sub_services) return [];
-        return service.sub_services.filter(sub => sub.is_active).map(sub => sub.name);
+        if (!mainServiceName) return [];
+        const norm = mainServiceName.trim().toLowerCase();
+
+        // 1. Check activeServices (which contains DB services or fallback catalog)
+        const serviceObj = activeServices.find(s => (s.name || '').trim().toLowerCase() === norm);
+        if (serviceObj && serviceObj.sub_services && serviceObj.sub_services.length > 0) {
+            return serviceObj.sub_services
+                .filter(sub => sub.is_active !== false)
+                .map(sub => sub.name);
+        }
+
+        // 2. Check SERVICE_OPTIONS dictionary by category key
+        const optionsMatch = Object.entries(SERVICE_OPTIONS).find(([catName]) => 
+            catName.trim().toLowerCase() === norm
+        );
+        if (optionsMatch && optionsMatch[1] && optionsMatch[1].length > 0) {
+            return optionsMatch[1] as string[];
+        }
+
+        // 3. Check SERVICE_HIERARCHY dictionary
+        const hierarchyMatch = Object.entries(SERVICE_HIERARCHY).find(([catName]) => 
+            catName.trim().toLowerCase() === norm
+        );
+        if (hierarchyMatch && hierarchyMatch[1] && hierarchyMatch[1].length > 0) {
+            return hierarchyMatch[1] as string[];
+        }
+
+        // 4. Reverse lookup: if mainServiceName is itself a subservice in SERVICE_OPTIONS, return its category siblings
+        for (const list of Object.values(SERVICE_OPTIONS)) {
+            if ((list as string[]).some(item => item.trim().toLowerCase() === norm)) {
+                return list as string[];
+            }
+        }
+
+        // 5. Reverse lookup in SERVICE_HIERARCHY
+        for (const list of Object.values(SERVICE_HIERARCHY)) {
+            if ((list as string[]).some(item => item.trim().toLowerCase() === norm)) {
+                return list as string[];
+            }
+        }
+
+        return [];
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

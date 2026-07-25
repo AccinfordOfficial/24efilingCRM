@@ -3,14 +3,16 @@ import { cn } from '../../lib/utils';
 
 interface SwitchProps {
   checked: boolean;
-  onChange: (checked: boolean) => void;
+  onChange?: (checked: boolean) => void;
+  onCheckedChange?: (checked: boolean) => void;
   id?: string;
   className?: string; // Add className prop for flexibility
 }
 
-export const Switch: React.FC<SwitchProps> = ({ checked, onChange, id, className }) => {
+export const Switch: React.FC<SwitchProps> = ({ checked, onChange, onCheckedChange, id, className }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.checked);
+    if (onChange) onChange(e.target.checked);
+    if (onCheckedChange) onCheckedChange(e.target.checked);
   };
 
   return (

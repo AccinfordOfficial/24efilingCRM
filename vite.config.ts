@@ -10,14 +10,31 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
-      define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
-      },
       resolve: {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        chunkSizeWarningLimit: 1000,
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+              'vendor-supabase': ['@supabase/supabase-js'],
+              'vendor-charts': ['recharts'],
+              'vendor-ui': [
+                '@radix-ui/react-dialog',
+                '@radix-ui/react-dropdown-menu',
+                '@radix-ui/react-popover',
+                '@radix-ui/react-select',
+                '@radix-ui/react-tooltip'
+              ],
+            }
+          }
+        }
       }
+
+
     };
 });

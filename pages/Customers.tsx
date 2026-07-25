@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useApi } from '../hooks/useApi';
 import { Customer, User, Lead, Document, Service } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { SearchIcon, FileUp, FileDown, Plus, Trash2 } from 'lucide-react';
@@ -69,7 +70,6 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
 
     const filteredCustomers = useMemo(() => {
         if (!customers) return [];
-        console.log("Filtering customers:", customers.length); // Debug log
         try {
             return customers.filter(customer => {
                 if (!customer) return false;
@@ -150,12 +150,14 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
         try {
             await deleteCustomers(selectedCustomerIds);
             setSelectedCustomerIds([]);
-            setIsDeleteConfirmOpen(false);
         } catch (error: any) {
             alert(`Failed to delete customers: ${error.message || 'Unknown error'}`);
             console.error('Delete failed:', error);
+        } finally {
+            setIsDeleteConfirmOpen(false);
         }
     };
+
 
     const handleExport = (format: 'excel' | 'csv' | 'pdf') => {
         const dataToExport = filteredCustomers.map((c, index) => ({
@@ -188,8 +190,12 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
             link.click();
             setTimeout(() => {
                 document.body.removeChild(link);
+                if (dataUri.startsWith('blob:')) {
+                    URL.revokeObjectURL(dataUri);
+                }
             }, 200);
         };
+
 
         if (format === 'excel') {
             try {
@@ -379,7 +385,12 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                         service_name: row['services required'] || row['service'] || row['service name'] || 'Consulting',
                         lead_source: 'Import',
                         date_of_enroll: new Date().toISOString(),
-                        date_of_completion: row['completed on'] ? new Date(row['completed on']).toISOString() : new Date().toISOString(),
+                        date_of_completion: (() => {
+                            if (!row['completed on']) return new Date().toISOString();
+                            const parsed = new Date(row['completed on']);
+                            return isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+                        })(),
+
 
                         pan_number: row['pan number'] || row['pan'] || row['pan card'] || null,
                         aadhar_number: row['aadhar number'] || row['aadhar'] || row['aadhar card'] || null,
@@ -426,38 +437,38 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
             <header className="flex flex-col gap-4">
                 <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
                     <div className="flex-1">
-                        <h1 className="text-3xl font-bold tracking-tight">All Customers</h1>
-                        <p className="text-slate-500">View and filter all converted leads.</p>
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">All Customers</h1>
+                        <p className="text-slate-500 dark:text-slate-400">View and filter all converted leads.</p>
                     </div>
                     <div className="flex flex-wrap items-center justify-start xl:justify-end gap-2 w-full xl:w-auto">
                         <div className="relative">
-                            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500" />
+                            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
                             <Input
                                 type="search"
                                 placeholder="Search customers..."
-                                className="pl-8 w-full sm:w-64 bg-white"
+                                className="pl-8 w-full sm:w-64 bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-white"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
                         <Button
                             variant={showFilters ? "default" : "outline"}
-                            className="bg-white gap-2"
+                            className="bg-background dark:bg-slate-900 border-input dark:border-white/10 text-foreground dark:text-white gap-2"
                             onClick={() => setShowFilters(!showFilters)}
                         >
-                            <span className="text-slate-700">Filters</span>
+                            <span className="text-slate-700 dark:text-slate-300">Filters</span>
                         </Button>
                         <div className="flex items-center gap-2">
-                            <div className="relative">
+                            <div className="relative flex items-center gap-2">
                                 <input type="file" id="import-file" className="hidden" accept=".xlsx, .xls, .csv" onChange={handleImport} />
-                                <Button variant="outline" size="sm" className="gap-2 bg-white" onClick={() => document.getElementById('import-file')?.click()}>
+                                <Button variant="outline" size="sm" className="gap-2 bg-background dark:bg-slate-900 border-input dark:border-white/10 text-foreground dark:text-white" onClick={() => document.getElementById('import-file')?.click()}>
                                     <FileUp className="h-4 w-4" /> Import
                                 </Button>
-                                <Button size="sm" variant="outline" className="gap-1 h-9" onClick={() => handleExport('pdf')}>
+                                <Button size="sm" variant="outline" className="gap-1 h-9 bg-background dark:bg-slate-900 border-input dark:border-white/10 text-foreground dark:text-white" onClick={() => handleExport('pdf')}>
                                     <FileDown className="h-3.5 w-3.5" />
                                     PDF
                                 </Button>
-                                <Button size="sm" className="gap-1 h-9 bg-indigo-600 hover:bg-indigo-700" onClick={() => setIsAddCustomerOpen(true)}>
+                                <Button size="sm" className="gap-1 h-9 bg-primary text-primary-foreground hover:opacity-90" onClick={() => setIsAddCustomerOpen(true)}>
                                     <Plus className="h-3.5 w-3.5" />
                                     Add Customer
                                 </Button>
@@ -478,67 +489,68 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                     handleExport(e.target.value as any);
                                     e.target.value = ''; // Reset immediate to allow re-selection
                                 }}
-                                className="w-[110px] bg-white"
+                                className="w-[110px] bg-background dark:bg-slate-900 border-slate-300 dark:border-white/10 text-foreground dark:text-white"
                             >
-                                <option value="" disabled>Export</option>
-                                <option value="excel">Excel</option>
-                                <option value="csv">CSV</option>
-                                <option value="pdf">PDF</option>
+                                <option value="" disabled className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Export</option>
+                                <option value="excel" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Excel</option>
+                                <option value="csv" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">CSV</option>
+                                <option value="pdf" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">PDF</option>
                             </Select>
                         </div>
                     </div>
                 </div>
 
                 {showFilters && (
-                    <div className="p-4 bg-slate-50 border rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="p-4 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-white/10 rounded-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in slide-in-from-top-2">
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Service</label>
-                            <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} className="w-full bg-white">
-                                <option value="All">All Services</option>
-                                {serviceOptions.map(service => <option key={service} value={service}>{service}</option>)}
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Service</label>
+                            <Select value={serviceFilter} onChange={(e) => setServiceFilter(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white">
+                                <option value="All" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">All Services</option>
+                                {serviceOptions.map(service => <option key={service} value={service} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{service}</option>)}
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Assigned To</label>
-                            <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)} className="w-full bg-white">
-                                <option value="All">All Users</option>
-                                {salesExecutives.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Assigned To</label>
+                            <Select value={assigneeFilter} onChange={(e) => setAssigneeFilter(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white">
+                                <option value="All" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">All Users</option>
+                                {salesExecutives.map(user => <option key={user.id} value={user.id} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{user.name}</option>)}
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Lead Source</label>
+                            <Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white">
+                                <option value="All" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">All Sources</option>
+                                {leadSources.map(source => <option key={source.id} value={source.source_name} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">{source.source_name}</option>)}
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Lead Source</label>
-                            <Select value={sourceFilter} onChange={(e) => setSourceFilter(e.target.value)} className="w-full bg-white">
-                                <option value="All">All Sources</option>
-                                {leadSources.map(source => <option key={source.id} value={source.source_name}>{source.source_name}</option>)}
-                            </Select>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Enrollment Date Range</label>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Enrollment Date Range</label>
                             <div className="flex gap-2">
-                                <Input type="date" value={dateRange.start} onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))} className="bg-white text-xs" />
-                                <Input type="date" value={dateRange.end} onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} className="bg-white text-xs" />
+                                <Input type="date" value={dateRange.start} onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))} className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs border-slate-300 dark:border-white/10" />
+                                <Input type="date" value={dateRange.end} onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))} className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs border-slate-300 dark:border-white/10" />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Total Amount Range</label>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Total Amount Range</label>
                             <div className="flex gap-2">
-                                <Input type="number" placeholder="Min" value={amountRange.min} onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))} className="bg-white text-xs" />
-                                <Input type="number" placeholder="Max" value={amountRange.max} onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))} className="bg-white text-xs" />
+                                <Input type="number" placeholder="Min" value={amountRange.min} onChange={(e) => setAmountRange(prev => ({ ...prev, min: e.target.value }))} className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs border-slate-300 dark:border-white/10" />
+                                <Input type="number" placeholder="Max" value={amountRange.max} onChange={(e) => setAmountRange(prev => ({ ...prev, max: e.target.value }))} className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white text-xs border-slate-300 dark:border-white/10" />
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-xs font-semibold text-slate-500 uppercase">Payment Status</label>
-                            <Select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full bg-white">
-                                <option value="All">All Statuses</option>
-                                <option value="Paid">Fully Paid</option>
-                                <option value="Due">Payment Due</option>
+                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Payment Status</label>
+                            <Select value={paymentStatus} onChange={(e) => setPaymentStatus(e.target.value)} className="w-full bg-white dark:bg-slate-950 border-slate-300 dark:border-white/10 text-slate-900 dark:text-white">
+                                <option value="All" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">All Statuses</option>
+                                <option value="Paid" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Fully Paid</option>
+                                <option value="Due" className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">Payment Due</option>
                             </Select>
                         </div>
 
                         <div className="flex items-end">
                             <Button
                                 variant="ghost"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full justify-start px-0"
+                                className="text-rose-600 dark:text-rose-400 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 w-full justify-start px-0"
                                 onClick={() => {
                                     setServiceFilter('All');
                                     setAssigneeFilter('All');
@@ -563,16 +575,16 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="relative overflow-auto max-h-[70vh] -mx-4 md:-mx-6 border-b rounded-t-md">
+                    <div className="relative overflow-auto max-h-[70vh] -mx-4 md:-mx-6 border-b border-slate-200 dark:border-white/10 rounded-t-md">
                         <table className="w-full text-xs text-left">
-                            <thead className="text-xs uppercase bg-[#1c398e] text-white sticky top-0 z-10 shadow-sm">
+                            <thead className="text-xs uppercase bg-[#1c398e] dark:bg-slate-800 text-white sticky top-0 z-10 shadow-sm">
                                 <tr>
                                     <th className="px-4 py-3 whitespace-nowrap w-[40px]">
                                         <input
                                             type="checkbox"
                                             onChange={handleSelectAll}
                                             checked={filteredCustomers.length > 0 && selectedCustomerIds.length === filteredCustomers.length}
-                                            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                            className="rounded border-slate-300 text-primary focus:ring-primary"
                                         />
                                     </th>
                                     <th className="px-4 py-3 whitespace-nowrap">S.No</th>
@@ -596,18 +608,18 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                     <tr
                                         key={customer.id}
                                         onClick={() => onViewCustomer(customer.id)}
-                                        className="border-b cursor-pointer hover:bg-slate-50 bg-white"
+                                        className="border-b border-slate-200 dark:border-white/5 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 bg-white dark:bg-slate-900/60 text-slate-900 dark:text-slate-100"
                                     >
                                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                                             <input
                                                 type="checkbox"
                                                 onChange={() => handleSelectOne(customer.id)}
                                                 checked={selectedCustomerIds.includes(customer.id)}
-                                                className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                                                className="rounded border-slate-300 text-primary focus:ring-primary"
                                             />
                                         </td>
                                         <td className="px-4 py-3">{index + 1}</td>
-                                        <td className="px-4 py-3 font-semibold text-slate-700 whitespace-nowrap">{customer.reference_number || '-'}</td>
+                                        <td className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">{customer.reference_number || '-'}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{new Date(customer.date_of_enroll).toLocaleDateString()}</td>
                                         <td className="px-4 py-3 font-medium">
                                             <div className="flex items-center gap-2">
@@ -618,10 +630,10 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                             <div className="flex flex-col gap-0.5">
                                                 <span>{customer.phone}</span>
                                                 {customer.alternate_mobile && (
-                                                    <span className="flex items-center gap-1 text-[10px] text-slate-500">
+                                                    <span className="flex items-center gap-1 text-[10px] text-slate-500 dark:text-slate-400">
                                                         {customer.alternate_mobile}
                                                         {customer.alternate_is_whatsapp && (
-                                                            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 border border-green-200 px-1 py-0 rounded-full font-bold">
+                                                            <span className="inline-flex items-center gap-0.5 bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800 px-1 py-0 rounded-full font-bold">
                                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
                                                                 WA
                                                             </span>
@@ -632,8 +644,8 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex flex-col">
-                                                <span className="text-[10px] text-slate-500">PAN: {customer.pan_number || '-'}</span>
-                                                <span className="text-[10px] text-slate-500">AAD: {customer.aadhar_number || '-'}</span>
+                                                <span className="text-[10px] text-slate-500 dark:text-slate-400">PAN: {customer.pan_number || '-'}</span>
+                                                <span className="text-[10px] text-slate-500 dark:text-slate-400">AAD: {customer.aadhar_number || '-'}</span>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 whitespace-nowrap">
@@ -642,11 +654,11 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                         <td className="px-4 py-3 text-right">₹{customer.service_amount?.toLocaleString() || 0}</td>
                                         <td className="px-4 py-3 text-right">₹{customer.tax_amount?.toLocaleString() || 0}</td>
                                         <td className="px-4 py-3 text-right font-semibold">₹{customer.total_amount?.toLocaleString() || 0}</td>
-                                        <td className="px-4 py-3 text-right text-green-600">₹{customer.paid_amount?.toLocaleString() || 0}</td>
-                                        <td className="px-4 py-3 text-right text-red-600">₹{customer.due_amount?.toLocaleString() || 0}</td>
+                                        <td className="px-4 py-3 text-right text-emerald-600 dark:text-emerald-400 font-semibold">₹{customer.paid_amount?.toLocaleString() || 0}</td>
+                                        <td className="px-4 py-3 text-right text-rose-600 dark:text-rose-400 font-semibold">₹{customer.due_amount?.toLocaleString() || 0}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">{customer.date_of_completion ? new Date(customer.date_of_completion).toLocaleDateString() : '-'}</td>
                                         <td className="px-4 py-3 whitespace-nowrap">
-                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${customer.status === 'Success' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-700'}`}>
+                                            <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${customer.status === 'Success' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
                                                 {customer.status || 'Success'}
                                             </span>
                                         </td>
@@ -654,7 +666,7 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                 ))}
                                 {filteredCustomers.length === 0 && (
                                     <tr>
-                                        <td colSpan={15} className="text-center py-10 text-slate-500">
+                                        <td colSpan={15} className="text-center py-10 text-slate-500 dark:text-slate-400">
                                             No customers found matching your criteria.
                                         </td>
                                     </tr>
@@ -663,8 +675,8 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                         </table>
                     </div>
                 </CardContent>
-                <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-100">
-                    <div className="text-xs text-slate-500">
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-slate-200 dark:border-white/10">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                         Showing <strong>{(currentPage - 1) * 20 + 1}</strong> to <strong>{Math.min(currentPage * 20, filteredCustomers.length)}</strong> of <strong>{filteredCustomers.length}</strong> customers
                     </div>
                     {maxPage > 1 && (
@@ -672,7 +684,7 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                         <Button variant="outline" size="sm" onClick={prev} disabled={currentPage === 1}>
                             Previous
                         </Button>
-                        <div className="text-sm font-medium text-slate-600 px-2">
+                        <div className="text-sm font-medium text-slate-600 dark:text-slate-400 px-2">
                             Page {currentPage} of {maxPage}
                         </div>
                         <Button variant="outline" size="sm" onClick={next} disabled={currentPage === maxPage}>
@@ -691,9 +703,9 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="relative overflow-auto max-h-[400px] -mx-4 md:-mx-6 border-b rounded-t-md">
+                    <div className="relative overflow-auto max-h-[400px] -mx-4 md:-mx-6 border-b border-slate-200 dark:border-white/10 rounded-t-md">
                         <table className="w-full text-sm">
-                            <thead className="text-xs uppercase bg-slate-700 text-white sticky top-0 z-10 shadow-sm">
+                            <thead className="text-xs uppercase bg-slate-700 dark:bg-slate-800 text-white sticky top-0 z-10 shadow-sm">
                                 <tr>
                                     <th scope="col" className="px-4 py-3 md:px-6 text-left font-medium">Lead</th>
                                     <th scope="col" className="px-4 py-3 md:px-6 hidden sm:table-cell text-left font-medium">Service Requested</th>
@@ -706,29 +718,29 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                                     <tr
                                         key={lead.id}
                                         onClick={() => onViewLead(lead.id)}
-                                        className="border-b cursor-pointer hover:bg-slate-50 bg-white"
+                                        className="border-b border-slate-200 dark:border-white/5 cursor-pointer hover:bg-slate-50 dark:hover:bg-white/5 bg-white dark:bg-slate-900/60 text-slate-900 dark:text-slate-100"
                                     >
-                                        <td className="px-4 py-4 md:px-6 font-medium text-slate-900 whitespace-nowrap">
-                                            <div className="font-semibold text-slate-900">{lead.business_name}</div>
-                                            <div className="text-xs text-slate-500">{lead.first_name} {lead.last_name}</div>
+                                        <td className="px-4 py-4 md:px-6 font-medium text-slate-900 dark:text-white whitespace-nowrap">
+                                            <div className="font-semibold text-slate-900 dark:text-white">{lead.business_name}</div>
+                                            <div className="text-xs text-slate-500 dark:text-slate-400">{lead.first_name} {lead.last_name}</div>
                                         </td>
-                                        <td className="px-4 py-4 md:px-6 hidden sm:table-cell text-slate-900">{lead.service_requested}</td>
-                                        <td className="px-4 py-4 md:px-6 hidden md:table-cell text-slate-900">
+                                        <td className="px-4 py-4 md:px-6 hidden sm:table-cell text-slate-900 dark:text-slate-100">{lead.service_requested}</td>
+                                        <td className="px-4 py-4 md:px-6 hidden md:table-cell text-slate-900 dark:text-slate-100">
                                             {lead.assigned_to ? (
                                                 <div className="flex items-center gap-2">
                                                     <img src={lead.assigned_to.avatar_url} alt={lead.assigned_to.name} className="w-6 h-6 rounded-full" />
                                                     {lead.assigned_to.name}
                                                 </div>
                                             ) : (
-                                                <span className="text-slate-400">Unassigned</span>
+                                                <span className="text-slate-400 dark:text-slate-500">Unassigned</span>
                                             )}
                                         </td>
-                                        <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-900">{new Date(lead.last_contacted).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+                                        <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-900 dark:text-slate-100">{new Date(lead.last_contacted).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                                     </tr>
                                 ))}
                                 {lostLeads.length === 0 && (
                                     <tr>
-                                        <td colSpan={4} className="text-center py-10 text-slate-500">
+                                        <td colSpan={4} className="text-center py-10 text-slate-500 dark:text-slate-400">
                                             No lost leads to display.
                                         </td>
                                     </tr>
@@ -738,7 +750,7 @@ const Customers: React.FC<CustomersProps> = ({ customers, users, leads, onViewCu
                     </div>
                 </CardContent>
                 <CardFooter>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                         Showing <strong>{lostLeads.length}</strong> lost leads
                     </div>
                 </CardFooter>

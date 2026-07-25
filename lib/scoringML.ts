@@ -23,7 +23,8 @@ export function predictLeadConversionML(lead: Partial<Lead>): MLPredictionResult
     }
 
     // Factor 2: Financial commitment / budget
-    const value = Number(lead.total_payment || lead.advance_payment) || 0;
+    const value = Number(lead.total_payment || lead.advance_amount) || 0;
+
     if (value > 20000) {
         score += 20;
         positiveFactors.push('High deal value (> ₹20,000)');

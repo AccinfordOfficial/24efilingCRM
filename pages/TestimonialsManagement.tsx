@@ -148,30 +148,30 @@ export default function TestimonialsManagement({
   const getStatusBadge = (status: Testimonial['status']) => {
     switch (status) {
       case 'Approved':
-        return 'bg-emerald-100 text-emerald-700 border border-emerald-200';
+        return 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
       case 'Pending':
-        return 'bg-amber-100 text-amber-700 border border-amber-200';
+        return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
       case 'Rejected':
-        return 'bg-rose-100 text-rose-700 border border-rose-200';
+        return 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
       default:
-        return 'bg-slate-100 text-slate-700';
+        return 'bg-slate-800 text-slate-400 border border-slate-700';
     }
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
       {/* Header Panel */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <Quote className="h-6 w-6 text-indigo-600 rotate-180" />
+          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+            <Quote className="h-6 w-6 text-indigo-400 rotate-180" />
             Client Testimonials Board
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Moderate client reviews, star ratings, and success quotes. Approved testimonials display on the public website frontpage.</p>
+          <p className="text-sm text-slate-400 mt-1">Moderate client reviews, star ratings, and success quotes. Approved testimonials display on the public website frontpage.</p>
         </div>
         <Button
           onClick={handleOpenModal}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-4 self-start md:self-auto flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-4 self-start md:self-auto flex items-center gap-2 border border-white/10 shadow-lg"
         >
           <PlusCircle className="h-4 w-4" />
           Add Custom Testimonial
@@ -179,7 +179,7 @@ export default function TestimonialsManagement({
       </div>
 
       {/* Tabs Filter Block */}
-      <div className="flex border rounded-lg p-1 bg-slate-100 gap-1 self-start">
+      <div className="flex border border-white/10 rounded-lg p-1 bg-slate-900/80 gap-1 self-start">
         {(['All', 'Pending', 'Approved', 'Rejected'] as const).map(tab => {
           const count = tab === 'All'
             ? testimonials.length
@@ -190,13 +190,13 @@ export default function TestimonialsManagement({
               onClick={() => setActiveFilter(tab)}
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
                 activeFilter === tab
-                  ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/50'
-                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/40'
+                  ? 'bg-primary text-white shadow-sm border border-primary/50'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {tab}
               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                activeFilter === tab ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-200 text-slate-600'
+                activeFilter === tab ? 'bg-white/20 text-white' : 'bg-slate-800 text-slate-400'
               }`}>
                 {count}
               </span>
@@ -207,18 +207,18 @@ export default function TestimonialsManagement({
 
       {/* Reviews Cards Grid */}
       {filteredTestimonials.length === 0 ? (
-        <div className="p-12 text-center text-slate-400 border rounded-2xl bg-white shadow-sm">
-          <AlertTriangle className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-          <p className="font-bold text-slate-600">No Testimonials Found</p>
-          <p className="text-xs text-slate-500 mt-1">There are no client reviews matching this filter currently.</p>
+        <div className="p-12 text-center text-slate-400 border border-white/10 rounded-2xl bg-slate-900/80 backdrop-blur-md shadow-xl">
+          <AlertTriangle className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+          <p className="font-bold text-white">No Testimonials Found</p>
+          <p className="text-xs text-slate-400 mt-1">There are no client reviews matching this filter currently.</p>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTestimonials.map((testimonial) => (
-            <Card key={testimonial.id} className="border-0 shadow-md bg-white overflow-hidden flex flex-col justify-between group hover:shadow-lg transition-shadow relative">
+            <Card key={testimonial.id} className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden flex flex-col justify-between group hover:border-white/20 transition-all relative">
               {/* Status Header Badge */}
               <div className="absolute top-4 right-4 z-10">
-                <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm border ${getStatusBadge(testimonial.status)}`}>
+                <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm border ${getStatusBadge(testimonial.status)}`}>
                   {testimonial.status}
                 </span>
               </div>
@@ -229,21 +229,21 @@ export default function TestimonialsManagement({
                   {renderStars(testimonial.rating)}
                 </div>
                 <div className="relative">
-                  <Quote className="h-8 w-8 text-slate-100 absolute -top-4 -left-2 rotate-180 -z-0" />
-                  <p className="text-slate-600 font-semibold text-xs leading-relaxed z-10 relative pl-4">
+                  <Quote className="h-8 w-8 text-white/5 absolute -top-4 -left-2 rotate-180 -z-0" />
+                  <p className="text-slate-300 font-semibold text-xs leading-relaxed z-10 relative pl-4">
                     "{testimonial.review_text}"
                   </p>
                 </div>
               </CardContent>
 
               {/* User Identity Header */}
-              <div className="bg-slate-50/50 px-5 py-3 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <div className="bg-slate-950/40 px-5 py-3 border-t border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-slate-500 font-bold">
+                  <div className="h-9 w-9 rounded-full bg-slate-800 flex-shrink-0 flex items-center justify-center text-slate-400 font-bold border border-white/5">
                     <User className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 text-xs">{testimonial.client_name}</p>
+                    <p className="font-bold text-white text-xs">{testimonial.client_name}</p>
                     {testimonial.company && (
                       <p className="text-[10px] text-slate-400 font-bold">{testimonial.company}</p>
                     )}
@@ -252,7 +252,7 @@ export default function TestimonialsManagement({
               </div>
 
               {/* Moderator Action Buttons */}
-              <CardFooter className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <CardFooter className="bg-slate-950/60 px-5 py-3 border-t border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-1">
                   {testimonial.status !== 'Approved' && (
                     <Button

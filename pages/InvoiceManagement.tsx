@@ -8,9 +8,9 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../components/ui/Dialog';
 
 import { format } from 'date-fns';
-import { pdf } from '@react-pdf/renderer';
 import { InvoiceDocument } from '../components/InvoicePDF';
 import { supabase } from '../lib/supabaseClient';
+
 
 interface InvoiceManagementProps {
   invoices: Invoice[];
@@ -218,8 +218,10 @@ export default function InvoiceManagement({
     };
 
     try {
-      // 1. Generate Blob
+      // 1. Generate Blob dynamically
+      const { pdf } = await import('@react-pdf/renderer');
       const blob = await pdf(<InvoiceDocument data={invoiceData} />).toBlob();
+
       const fileName = `${invoiceNumber}.pdf`;
 
       // 2. Upload to storage bucket

@@ -27,12 +27,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] w-full h-full p-8 text-center bg-slate-50 rounded-xl border border-slate-200">
-          <div className="bg-red-50 p-4 rounded-full mb-4">
+        <div className="flex flex-col items-center justify-center min-h-[400px] w-full h-full p-8 text-center bg-slate-50 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-white/10">
+          <div className="bg-red-50 dark:bg-red-950/40 p-4 rounded-full mb-4">
             <AlertTriangle className="h-10 w-10 text-red-500" />
           </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h2>
-          <p className="text-slate-500 mb-6 max-w-md">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Something went wrong</h2>
+          <p className="text-slate-500 dark:text-slate-400 mb-6 max-w-md">
             We encountered an unexpected error while trying to load this page. Please try refreshing the page.
           </p>
           <Button onClick={() => window.location.reload()} className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
+
 import { User, Lead, Customer, Notification, UserActivity, OrganizationSettings, Service, Offer, WebLead, Blog, Testimonial, City, TransferLog, Invoice, CompanyPolicy, Reminder, Announcement, SupportTicket, KnowledgeBaseArticle, EmployeeFeedback, WorkOrder, WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate } from '../../types';
 import { calculateLeadScore } from '../../lib/scoring';
 import { defaultWebLeadsSeed, defaultBlogsSeed, defaultTestimonialsSeed } from './seeds';
@@ -234,22 +235,18 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
 
             // PHASE 2: Fetch leads with FK joins
             let leadsData: any[] | null = null;
-            let leadsError: any = null;
             const leadsWithJoin = await supabase.from('leads')
                 .select('*, assigner:profiles!leads_assigned_by_fkey(name, avatar_url), activities:activities!lead_id(id), documents:documents!lead_id(id), tasks:tasks!lead_id(id, is_completed, content, due_date, priority, created_by:tasks_created_by_fkey(name))')
                 .order('created_at', { ascending: false })
                 .limit(500);
 
-            if (leadsWithJoin.error && leadsWithJoin.error.message.includes('schema cache')) {
-                console.warn('Schema cache miss on leads→profiles join. Falling back to plain leads fetch. Run FIX_SCHEMA_CACHE_RELOAD.sql in Supabase to fix permanently.', leadsWithJoin.error.message);
-                const fallback = await supabase.from('leads').select('*, activities:activities!lead_id(id), documents:documents!lead_id(id), tasks:tasks!lead_id(id, is_completed, content, due_date, priority)').order('created_at', { ascending: false }).limit(500);
-                leadsData = fallback.data;
-                leadsError = fallback.error;
+            if (leadsWithJoin.error) {
+                console.warn('FK join failed on leads query, falling back to plain leads select:', leadsWithJoin.error.message);
+                const fallback = await supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(500);
+                leadsData = fallback.data || [];
             } else {
-                leadsData = leadsWithJoin.data;
-                leadsError = leadsWithJoin.error;
+                leadsData = leadsWithJoin.data || [];
             }
-            if (leadsError) throw new Error(`Leads: ${leadsError.message}`);
 
             // PHASE 3: Fetch customers with FK joins
             let customersData: any[] | null = null;
@@ -257,14 +254,12 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                 .select('*, created_by:profiles!customers_created_by_fkey(*), assigned_to:profiles!customers_assigned_to_fkey(*), leads:leads!lead_id(id)')
                 .limit(500);
 
-            if (customersWithJoin.error && customersWithJoin.error.message.includes('schema cache')) {
-                console.warn('Schema cache miss on customers→profiles join. Falling back. Run FIX_SCHEMA_CACHE_RELOAD.sql in Supabase to fix permanently.', customersWithJoin.error.message);
+            if (customersWithJoin.error) {
+                console.warn('FK join failed on customers query, falling back to plain customers select:', customersWithJoin.error.message);
                 const fallback = await supabase.from('customers').select('*').limit(500);
-                customersData = fallback.data;
-            } else if (customersWithJoin.error) {
-                throw new Error(`Customers: ${customersWithJoin.error.message}`);
+                customersData = fallback.data || [];
             } else {
-                customersData = customersWithJoin.data;
+                customersData = customersWithJoin.data || [];
             }
 
             if (categoriesData) setBusinessCategories(categoriesData);
@@ -404,9 +399,21 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                 });
                 setServices(catalog);
             }
-            if (branchesData) setBranches(branchesData);
-            if (citiesData) setCities(citiesData as City[]);
+            if (citiesData) {
+                const uniqueCities: City[] = [];
+                const seen = new Set<string>();
+                for (const c of (citiesData as City[])) {
+                    const key = (c.city_name || '').trim().toLowerCase();
+                    if (key && !seen.has(key)) {
+                        seen.add(key);
+                        uniqueCities.push(c);
+                    }
+                }
+                setCities(uniqueCities);
+            }
             if (offersData) setOffers(offersData as Offer[]);
+            if (notificationsData) setNotifications(notificationsData as Notification[]);
+            if (userActivitiesData) setUserActivities(userActivitiesData as UserActivity[]);
 
             // CACHE PERSISTENCE
             const cachePayload = {
@@ -570,8 +577,12 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
         setWhatsappMessages,
         whatsappTemplates,
         setWhatsappTemplates,
+        documents: leads.flatMap(l => (l.documents || []).map(d => ({ ...d, lead_id: l.id }))),
+        tasks: leads.flatMap(l => (l.tasks || []).map(t => ({ ...t, lead_id: l.id }))),
         fetchData,
+        refreshData: fetchData,
         logUserActivity,
         logAuditAction
     };
 }
+

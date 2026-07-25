@@ -1,17 +1,18 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Customer } from '../../types';
 
 export function useCustomersApi(core: {
     profile: any;
     customers: Customer[];
+    setCustomers?: React.Dispatch<React.SetStateAction<Customer[]>>;
     fetchData: () => Promise<void>;
     logUserActivity: (action: string, details: string) => Promise<void>;
     businessCategories: any[];
     industryTypes: any[];
     leadSources: any[];
 }) {
-    const { profile, customers, fetchData, logUserActivity, businessCategories, industryTypes, leadSources } = core;
+    const { profile, customers, setCustomers, fetchData, logUserActivity, businessCategories, industryTypes, leadSources } = core;
 
     const addCustomer = useCallback(async (customerData: Partial<Customer>) => {
         if (!profile) throw new Error("User not authenticated");
@@ -69,8 +70,11 @@ export function useCustomersApi(core: {
         if (error) throw error;
 
         await logUserActivity('Customer Created', `Created customer: ${customerData.name}`);
+        if (setCustomers) {
+            setCustomers(prev => [(payload as unknown as Customer), ...prev]);
+        }
         await fetchData();
-    }, [profile, customers, fetchData, logUserActivity, businessCategories, industryTypes, leadSources]);
+    }, [profile, customers, setCustomers, fetchData, logUserActivity, businessCategories, industryTypes, leadSources]);
 
     const importCustomers = useCallback(async (customersData: any[]) => {
         if (!profile) throw new Error("User not authenticated");

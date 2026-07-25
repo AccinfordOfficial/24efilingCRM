@@ -199,19 +199,19 @@ export const TASK_PRIORITIES: TaskPriority[] = ['High', 'Medium', 'Low'];
 export const getStatusColor = (status: Lead['status']) => {
   switch (status) {
     case 'New Lead':
-      return 'bg-blue-100 text-blue-800';
+      return 'bg-blue-500/10 text-blue-400 border border-blue-500/20';
     case 'Lead Confirmed':
-      return 'bg-indigo-100 text-indigo-800';
+      return 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20';
     case 'In-Progress':
-      return 'bg-yellow-100 text-yellow-800';
+      return 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20';
     case 'Documents & Payments':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-purple-500/10 text-purple-400 border border-purple-500/20';
     case 'Success':
-      return 'bg-green-100 text-green-800';
+      return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
     case 'Lost':
-      return 'bg-red-100 text-red-800';
+      return 'bg-rose-500/10 text-rose-400 border border-rose-500/20';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-slate-500/10 text-slate-400 border border-slate-500/20';
   }
 };
 

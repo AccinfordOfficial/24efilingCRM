@@ -232,19 +232,19 @@ export default function BlogsManagement({
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
       {/* Header Panel */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <FileText className="h-6 w-6 text-indigo-600" />
+          <h1 className="text-2xl font-extrabold tracking-tight flex items-center gap-2 bg-gradient-to-r from-white via-slate-100 to-indigo-200 bg-clip-text text-transparent">
+            <FileText className="h-6 w-6 text-indigo-400" />
             Website Blogs & Content Manager
           </h1>
-          <p className="text-sm text-slate-500 mt-1">Compose educational resources, startup insights, and company updates to publish directly to the main website.</p>
+          <p className="text-sm text-slate-400 mt-1">Compose educational resources, startup insights, and company updates to publish directly to the main website.</p>
         </div>
         <Button
           onClick={handleOpenCreateModal}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold h-10 px-4 self-start md:self-auto flex items-center gap-2"
+          className="bg-primary hover:bg-primary/90 text-white font-bold h-10 px-4 self-start md:self-auto flex items-center gap-2 border border-white/10 shadow-lg"
         >
           <PlusCircle className="h-4 w-4" />
           Write New Article
@@ -258,8 +258,8 @@ export default function BlogsManagement({
             onClick={() => setSelectedCategory('All')}
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
               selectedCategory === 'All'
-                ? 'bg-slate-900 border-slate-900 text-white'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                ? 'bg-primary border-primary/50 text-white shadow-md'
+                : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
             All Categories
@@ -270,8 +270,8 @@ export default function BlogsManagement({
               onClick={() => setSelectedCategory(cat)}
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${
                 selectedCategory === cat
-                  ? 'bg-slate-900 border-slate-900 text-white'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-primary border-primary/50 text-white shadow-md'
+                  : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
               {cat}
@@ -287,39 +287,39 @@ export default function BlogsManagement({
             placeholder="Search articles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-8 text-xs h-9 bg-white w-full border border-slate-200 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+            className="pl-8 text-xs h-9 bg-slate-900/80 text-white w-full border border-white/10 rounded-md focus:outline-none focus:ring-1 focus:ring-primary placeholder-slate-500"
           />
         </div>
       </div>
 
       {/* Blogs Grid */}
       {filteredBlogs.length === 0 ? (
-        <div className="p-12 text-center text-slate-400 border rounded-2xl bg-white shadow-sm">
-          <AlertCircle className="h-12 w-12 text-slate-300 mx-auto mb-3" />
-          <p className="font-bold text-slate-600">No Articles Found</p>
-          <p className="text-xs text-slate-500 mt-1">There are no articles listed under this category yet.</p>
+        <div className="p-12 text-center text-slate-400 border border-white/10 rounded-2xl bg-slate-900/80 backdrop-blur-md shadow-xl">
+          <AlertCircle className="h-12 w-12 text-slate-500 mx-auto mb-3" />
+          <p className="font-bold text-white">No Articles Found</p>
+          <p className="text-xs text-slate-400 mt-1">There are no articles listed under this category yet.</p>
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredBlogs.map((blog) => (
-            <Card key={blog.id} className="border-0 shadow-md bg-white overflow-hidden flex flex-col group hover:shadow-lg transition-shadow">
+            <Card key={blog.id} className="border border-white/10 shadow-xl bg-slate-900/80 backdrop-blur-md text-white overflow-hidden flex flex-col group hover:border-white/20 transition-all">
               {/* Card Image */}
-              <div className="h-44 relative bg-slate-100 overflow-hidden shrink-0">
+              <div className="h-44 relative bg-slate-950 overflow-hidden shrink-0">
                 <img
                   src={blog.image_url || 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500'}
                   alt={blog.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 opacity-90"
                 />
-                <span className="absolute top-3 left-3 text-[10px] font-extrabold bg-white/90 backdrop-blur-sm text-slate-900 border border-slate-200/50 px-2 py-0.5 rounded-full shadow-sm">
+                <span className="absolute top-3 left-3 text-[10px] font-extrabold bg-slate-900/90 backdrop-blur-sm text-white border border-white/10 px-2.5 py-0.5 rounded-full shadow-sm">
                   {blog.category}
                 </span>
                 <button
                   type="button"
                   onClick={() => toggleBlogStatus(blog)}
-                  className={`absolute top-3 right-3 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow-sm cursor-pointer border ${
+                  className={`absolute top-3 right-3 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full shadow-sm cursor-pointer border ${
                     blog.status === 'Published'
-                      ? 'bg-emerald-500 text-white border-emerald-400'
-                      : 'bg-slate-500 text-white border-slate-400'
+                      ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                      : 'bg-slate-800 text-slate-300 border-slate-700'
                   }`}
                   title="Click to toggle status"
                 >
@@ -330,16 +330,16 @@ export default function BlogsManagement({
               {/* Card Content */}
               <CardContent className="p-4 flex-1 flex flex-col justify-between">
                 <div className="space-y-2">
-                  <h3 className="font-extrabold text-slate-900 text-sm md:text-base line-clamp-2 leading-tight min-h-[2.5rem]">
+                  <h3 className="font-extrabold text-white text-sm md:text-base line-clamp-2 leading-tight min-h-[2.5rem]">
                     {blog.title}
                   </h3>
-                  <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                  <p className="text-xs text-slate-400 line-clamp-3 leading-relaxed">
                     {blog.content}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 shrink-0">
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-white/5 shrink-0">
+                  <div className="flex items-center gap-1.5 text-xs text-slate-400">
                     <User className="h-3.5 w-3.5 text-slate-400" />
                     <span className="truncate max-w-[80px] font-semibold">{blog.author}</span>
                   </div>
@@ -351,7 +351,7 @@ export default function BlogsManagement({
               </CardContent>
 
               {/* Card Footer actions */}
-              <CardFooter className="bg-slate-50/50 px-4 py-3 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <CardFooter className="bg-slate-950/40 px-4 py-3 border-t border-white/5 flex items-center justify-between shrink-0">
                 <span className="text-[10px] font-semibold text-slate-400">
                   Updated: {new Date(blog.updated_at || blog.created_at).toLocaleDateString('en-IN')}
                 </span>

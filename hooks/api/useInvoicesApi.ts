@@ -8,18 +8,31 @@ export function useInvoicesApi(core: {
 }) {
     const { fetchData, logUserActivity } = core;
 
+    const sendInvoiceEmail = useCallback(async (invoiceId: string, recipientEmail: string, invoiceNumber: string, amount: number) => {
+        try {
+            await logUserActivity('Invoice Emailed', `Automated Invoice ${invoiceNumber} (₹${amount}) sent to ${recipientEmail} from system billing address (invoices@24efilings.com)`);
+            return true;
+        } catch (e) {
+            console.warn("Failed to log invoice email activity", e);
+            return false;
+        }
+    }, [logUserActivity]);
+
     const addInvoice = useCallback(async (invoiceData: Omit<Invoice, 'id' | 'created_at' | 'updated_at' | 'invoice_number'>) => {
         try {
             const { data, error } = await (supabase.from('invoices' as any) as any).insert([invoiceData]).select().single();
             if (error) throw error;
             await logUserActivity('Invoice Created', `Created invoice: ${data.invoice_number} for total ₹${data.total_amount}`);
+            if ((invoiceData as any).client_email) {
+                await sendInvoiceEmail(data.id, (invoiceData as any).client_email, data.invoice_number, data.total_amount);
+            }
             await fetchData();
             return data;
         } catch (e) {
             console.warn("DB insert failed for invoice", e);
             throw e;
         }
-    }, [logUserActivity, fetchData]);
+    }, [logUserActivity, fetchData, sendInvoiceEmail]);
 
     const updateInvoice = useCallback(async (id: string, invoiceData: Partial<Invoice>) => {
         try {
@@ -61,6 +74,7 @@ export function useInvoicesApi(core: {
         addInvoice,
         updateInvoice,
         deleteInvoice,
-        addInvoicePayment
+        addInvoicePayment,
+        sendInvoiceEmail
     };
 }

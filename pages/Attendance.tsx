@@ -7,7 +7,8 @@ import { FormSelect } from '../components/ui/FormSelect';
 import { FormTextarea } from '../components/ui/FormTextarea';
 import { Dialog } from '../components/ui/Dialog';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { useApi } from '../hooks/useApi';
 import { toast } from 'sonner';
 import { ClockIcon, CalendarIcon, PlusIcon } from '../components/icons';
@@ -59,10 +60,11 @@ export const Attendance: React.FC = () => {
                 .select('*')
                 .eq('user_id', profile?.id || '')
                 .eq('date', todayDateStr)
-                .single();
+                .maybeSingle();
+
 
             if (attData) {
-                setTodayAttendance(attData as AttendanceRecord);
+                setTodayAttendance((attData as unknown) as AttendanceRecord);
             }
 
             // Fetch leave requests
@@ -71,7 +73,8 @@ export const Attendance: React.FC = () => {
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            setLeaveRequests((leaveData || []) as LeaveRequestRecord[]);
+            setLeaveRequests(((leaveData || []) as unknown) as LeaveRequestRecord[]);
+
         } catch (e) {
             console.error(e);
         } finally {
@@ -159,24 +162,24 @@ export const Attendance: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h2 className="text-xl font-bold text-white">Attendance & Leave Management</h2>
-                    <p className="text-xs text-slate-400">Daily check-in/out, work-from-home tracking, and leave application workflow.</p>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Attendance & Leave Management</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Daily check-in/out, work-from-home tracking, and leave application workflow.</p>
                 </div>
-                <Button onClick={() => setIsLeaveModalOpen(true)} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                <Button onClick={() => setIsLeaveModalOpen(true)} className="bg-primary text-primary-foreground hover:opacity-90">
                     <PlusIcon className="h-4 w-4 mr-1" /> Apply for Leave
                 </Button>
             </div>
 
             {/* Check-In Action Widget */}
-            <Card className="bg-gradient-to-r from-slate-900 to-slate-950 border-white/10 p-6">
+            <Card className="bg-white dark:bg-slate-900/80 border-slate-200 dark:border-white/10 p-6">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div className="flex items-center gap-4">
-                        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-blue-400">
+                        <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl text-primary">
                             <ClockIcon className="h-8 w-8" />
                         </div>
                         <div>
-                            <h3 className="text-lg font-bold text-white">Today's Shift Tracker</h3>
-                            <p className="text-xs text-slate-400">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Today's Shift Tracker</h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">
                                 {todayAttendance ? `Checked in at ${new Date(todayAttendance.check_in).toLocaleTimeString()}` : 'You have not checked in yet today.'}
                             </p>
                         </div>
@@ -192,7 +195,7 @@ export const Attendance: React.FC = () => {
                                 Check Out
                             </Button>
                         ) : (
-                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-xs px-3 py-1.5">
+                            <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-xs px-3 py-1.5">
                                 Shift Completed ({new Date(todayAttendance.check_out).toLocaleTimeString()})
                             </Badge>
                         )}
@@ -201,10 +204,10 @@ export const Attendance: React.FC = () => {
             </Card>
 
             {/* Leave Requests Table */}
-            <Card className="bg-slate-900/60 border-white/10">
+            <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-base font-bold text-white flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-blue-400" /> Leave Requests & Approvals
+                    <CardTitle className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-primary" /> Leave Requests & Approvals
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-2">
@@ -212,13 +215,13 @@ export const Attendance: React.FC = () => {
                         leaveRequests.map((req) => {
                             const applicant = users.find(u => u.id === req.user_id);
                             return (
-                                <div key={req.id} className="p-3 bg-slate-950/40 border border-white/5 rounded-lg flex items-center justify-between">
+                                <div key={req.id} className="p-3 bg-slate-50 dark:bg-slate-950/40 border border-slate-200 dark:border-white/5 rounded-lg flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-semibold text-white">{applicant?.name || 'Employee'} • <span className="capitalize">{req.leave_type} Leave</span></p>
-                                        <p className="text-xs text-slate-400">{req.start_date} to {req.end_date} • {req.reason || 'No reason provided'}</p>
+                                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{applicant?.name || 'Employee'} • <span className="capitalize">{req.leave_type} Leave</span></p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{req.start_date} to {req.end_date} • {req.reason || 'No reason provided'}</p>
                                     </div>
                                     <Badge variant="outline" className={
-                                        req.status === 'approved' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                        req.status === 'approved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
                                     }>
                                         {req.status.toUpperCase()}
                                     </Badge>
@@ -226,7 +229,7 @@ export const Attendance: React.FC = () => {
                             );
                         })
                     ) : (
-                        <p className="text-xs text-slate-500 py-6 text-center">No leave applications filed.</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 py-6 text-center">No leave applications filed.</p>
                     )}
                 </CardContent>
             </Card>
@@ -274,9 +277,9 @@ export const Attendance: React.FC = () => {
                         required
                     />
 
-                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
+                    <div className="flex justify-end gap-2 pt-4 border-t border-slate-200 dark:border-slate-800">
                         <Button type="button" variant="outline" onClick={() => setIsLeaveModalOpen(false)}>Cancel</Button>
-                        <Button type="submit" disabled={isSubmittingLeave} className="bg-[#1c398e] hover:bg-[#152c6f] text-white">
+                        <Button type="submit" disabled={isSubmittingLeave} className="bg-primary text-primary-foreground hover:opacity-90">
                             {isSubmittingLeave ? 'Submitting...' : 'Submit Request'}
                         </Button>
                     </div>

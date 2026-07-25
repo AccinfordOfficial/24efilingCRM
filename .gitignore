@@ -26,6 +26,7 @@ dist-ssr
 # Environment and custom files
 .env
 .env.*
-! .env.example
+!.env.example
+
 sql_archive/
 

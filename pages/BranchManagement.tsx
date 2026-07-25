@@ -215,8 +215,15 @@ export default function BranchManagement({ branches, users, cities = [], onAddBr
               {/* Logo Area */}
               <div className="px-6 relative flex justify-between items-end -mt-10 mb-3">
                 <div className="h-20 w-20 rounded-2xl bg-slate-900 p-1.5 shadow-lg border border-white/10 overflow-hidden relative group-hover:-translate-y-1 transition-transform">
-                  {branch.logo_url ? (
-                    <img src={branch.logo_url} alt={`${branch.name} Logo`} className="w-full h-full object-contain rounded-xl" />
+                  {branch.logo_url && !branch.logo_url.startsWith('blob:') ? (
+                    <img 
+                      src={branch.logo_url} 
+                      alt={`${branch.name} Logo`} 
+                      className="w-full h-full object-contain rounded-xl"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full bg-white/5 rounded-xl flex items-center justify-center">
                       <Building className="h-8 w-8 text-slate-500" />

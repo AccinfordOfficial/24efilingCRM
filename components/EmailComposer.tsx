@@ -5,7 +5,8 @@ import { FormField } from './ui/FormField';
 import { FormSelect } from './ui/FormSelect';
 import { FormTextarea } from './ui/FormTextarea';
 import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { toast } from 'sonner';
 import { MailIcon, SendIcon } from './icons';
 

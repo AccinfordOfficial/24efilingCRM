@@ -689,6 +689,451 @@ export type Database = {
           branch_id?: string | null
         }
       }
+      attendance: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          check_in: string | null
+          check_out: string | null
+          status: string
+          notes: string | null
+          created_at: string | null
+          updated_at: string | null
+          branch_id: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date: string
+          check_in?: string | null
+          check_out?: string | null
+          status?: string
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          branch_id?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          check_in?: string | null
+          check_out?: string | null
+          status?: string
+          notes?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+          branch_id?: string | null
+        }
+      }
+      leave_requests: {
+        Row: {
+          id: string
+          user_id: string
+          leave_type: string
+          start_date: string
+          end_date: string
+          reason: string | null
+          status: string
+          approved_by: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          leave_type: string
+          start_date: string
+          end_date: string
+          reason?: string | null
+          status?: string
+          approved_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          leave_type?: string
+          start_date?: string
+          end_date?: string
+          reason?: string | null
+          status?: string
+          approved_by?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      lead_assignment_rules: {
+        Row: {
+          id: string
+          name: string
+          is_active: boolean
+          rule_type: string
+          conditions: Json | null
+          assigned_users: Json | null
+          branch_id: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          is_active?: boolean
+          rule_type?: string
+          conditions?: Json | null
+          assigned_users?: Json | null
+          branch_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          is_active?: boolean
+          rule_type?: string
+          conditions?: Json | null
+          assigned_users?: Json | null
+          branch_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      automation_rules: {
+        Row: {
+          id: string
+          name: string
+          description: string | null
+          trigger_event: string
+          conditions: Json | null
+          actions: Json | null
+          is_active: boolean
+          run_count: number | null
+          last_run: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          description?: string | null
+          trigger_event: string
+          conditions?: Json | null
+          actions?: Json | null
+          is_active?: boolean
+          run_count?: number | null
+          last_run?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          description?: string | null
+          trigger_event?: string
+          conditions?: Json | null
+          actions?: Json | null
+          is_active?: boolean
+          run_count?: number | null
+          last_run?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      document_templates: {
+        Row: {
+          id: string
+          name: string
+          category: string
+          body_html: string
+          variables: Json | null
+          is_active: boolean
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          category: string
+          body_html: string
+          variables?: Json | null
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          category?: string
+          body_html?: string
+          variables?: Json | null
+          is_active?: boolean
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      email_logs: {
+        Row: {
+          id: string
+          recipient: string
+          subject: string
+          body: string | null
+          status: string
+          sent_at: string | null
+          error: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          recipient: string
+          subject: string
+          body?: string | null
+          status?: string
+          sent_at?: string | null
+          error?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          recipient?: string
+          subject?: string
+          body?: string | null
+          status?: string
+          sent_at?: string | null
+          error?: string | null
+          created_at?: string | null
+        }
+      }
+      expenses: {
+        Row: {
+          id: string
+          category: string
+          description: string
+          amount: number
+          date: string
+          payment_method: string | null
+          receipt_url: string | null
+          created_by: string | null
+          branch_id: string | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          category: string
+          description: string
+          amount: number
+          date: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          created_by?: string | null
+          branch_id?: string | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          category?: string
+          description?: string
+          amount?: number
+          date?: string
+          payment_method?: string | null
+          receipt_url?: string | null
+          created_by?: string | null
+          branch_id?: string | null
+          created_at?: string | null
+        }
+      }
+      recurring_services: {
+        Row: {
+          id: string
+          customer_id: string
+          service_name: string
+          frequency: string
+          next_due_date: string
+          amount: number | null
+          status: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          service_name: string
+          frequency: string
+          next_due_date: string
+          amount?: number | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          service_name?: string
+          frequency?: string
+          next_due_date?: string
+          amount?: number | null
+          status?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      sales_targets: {
+        Row: {
+          id: string
+          user_id: string
+          period_type: string
+          period_start: string
+          period_end: string
+          target_amount: number
+          achieved_amount: number | null
+          target_leads: number | null
+          achieved_leads: number | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          period_type: string
+          period_start: string
+          period_end: string
+          target_amount: number
+          achieved_amount?: number | null
+          target_leads?: number | null
+          achieved_leads?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          period_type?: string
+          period_start?: string
+          period_end?: string
+          target_amount?: number
+          achieved_amount?: number | null
+          target_leads?: number | null
+          achieved_leads?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      service_deliveries: {
+        Row: {
+          id: string
+          customer_id: string
+          service_name: string
+          status: string
+          current_step: string | null
+          steps_progress: Json | null
+          assigned_to: string | null
+          due_date: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          customer_id: string
+          service_name: string
+          status: string
+          current_step?: string | null
+          steps_progress?: Json | null
+          assigned_to?: string | null
+          due_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          customer_id?: string
+          service_name?: string
+          status?: string
+          current_step?: string | null
+          steps_progress?: Json | null
+          assigned_to?: string | null
+          due_date?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+      team_messages: {
+        Row: {
+          id: string
+          channel: string
+          sender_id: string
+          sender_name: string
+          sender_avatar: string | null
+          content: string
+          attachments: Json | null
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          channel: string
+          sender_id: string
+          sender_name: string
+          sender_avatar?: string | null
+          content: string
+          attachments?: Json | null
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          channel?: string
+          sender_id?: string
+          sender_name?: string
+          sender_avatar?: string | null
+          content?: string
+          attachments?: Json | null
+          created_at?: string | null
+        }
+      }
+      offers: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          code: string
+          discount_percent: number | null
+          discount_amount: number | null
+          valid_from: string | null
+          valid_until: string | null
+          is_active: boolean
+          branch_id: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          code: string
+          discount_percent?: number | null
+          discount_amount?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+          is_active?: boolean
+          branch_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          code?: string
+          discount_percent?: number | null
+          discount_amount?: number | null
+          valid_from?: string | null
+          valid_until?: string | null
+          is_active?: boolean
+          branch_id?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
+
     }
     Views: {
       [_ in never]: never

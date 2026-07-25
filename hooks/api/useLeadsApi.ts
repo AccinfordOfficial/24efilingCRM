@@ -1,7 +1,21 @@
-import { useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { Lead, User } from '../../types';
+import { Database } from '../../types/database.types';
 import { autoAssignLead } from '../../lib/leadAssignment';
+
+
+const UUID_KEYS = [
+    'referred_by_customer_id',
+    'referred_by_employee_id',
+    'assigned_to',
+    'assigned_by',
+    'created_by',
+    'branch_id',
+    'business_category_id',
+    'industry_type_id',
+    'lead_source_id'
+];
 
 export function useLeadsApi(core: {
     profile: any;
@@ -10,12 +24,13 @@ export function useLeadsApi(core: {
     businessCategories: any[];
     industryTypes: any[];
     leadSources: any[];
+    setLeads?: React.Dispatch<React.SetStateAction<Lead[]>>;
     addNotification: (notificationData: any) => Promise<void>;
     addActivityToLead: (leadId: string, activityData: any, user: any) => Promise<void>;
     fetchData: () => Promise<void>;
     logUserActivity: (action: string, details: string) => Promise<void>;
 }) {
-    const { profile, leads, users, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, fetchData, logUserActivity } = core;
+    const { profile, leads, users, setLeads, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, fetchData, logUserActivity } = core;
 
     const leadToCustomer = useCallback((lead: Lead): any => {
         const serviceSets = lead.service_sets || [];
@@ -98,7 +113,7 @@ export function useLeadsApi(core: {
         }
         const referenceNumber = `E-${String(seqVal).padStart(3, '0')}-${currentYear}`;
 
-        const { assigned_to, documents, activities, tasks, payments, service_sets, assigner, created_at, ...rest } = leadData as any;
+        const { assigned_to, documents, activities, tasks, payments, service_sets, assigner, created_at, branch_name, branch_name_label, ...rest } = leadData as any;
         const catObj = businessCategories.find(c => c.name === leadData.business_category);
         const indObj = industryTypes.find(i => i.name === leadData.industry_type);
         const srcObj = leadSources.find(s => s.source_name === leadData.source);
@@ -134,15 +149,23 @@ export function useLeadsApi(core: {
         };
         delete dbLeadData.business_category;
         delete dbLeadData.industry_type;
+
+        // Convert any empty string UUID fields to null to prevent Postgres UUID syntax errors
+        for (const key of UUID_KEYS) {
+            if (dbLeadData[key] === '' || (typeof dbLeadData[key] === 'string' && !dbLeadData[key].trim())) {
+                dbLeadData[key] = null;
+            }
+        }
+
         let data: any = null;
         let error: any = null;
         try {
             const res = await (supabase.from('leads') as any).insert([dbLeadData]).select().single();
             data = res.data;
             error = res.error;
-            if (error && (error.message.includes('reference_number') || error.message.includes('schema cache') || error.code === '42703')) {
+            if (error && (error.message.includes('reference_number') || error.message.includes('schema cache') || error.message.includes('aadhar') || error.code === '42703')) {
                 console.warn("Database missing columns, retrying lead insert with safe payload.", error.message);
-                const { reference_number, created_by, assigned_by, pan_number, ...dbLeadDataSafe } = dbLeadData;
+                const { reference_number, created_by, assigned_by, pan_number, aadhar_number, ...dbLeadDataSafe } = dbLeadData;
                 const retryRes = await (supabase.from('leads') as any).insert([dbLeadDataSafe]).select().single();
                 data = retryRes.data;
                 error = retryRes.error;
@@ -157,17 +180,41 @@ export function useLeadsApi(core: {
                 user_id: assigned_to.id,
                 type: 'Lead Assigned',
                 title: 'New Lead Assigned',
-                message: `You have been assigned a new lead: ${leadData.business_name}.`,
+                message: `You have been assigned a new lead: ${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}.`,
                 link: { page: 'Lead Detail', id: (data as any).id }
             });
+        } else {
+            // Notify Head Office Sales Executives and Admins to route the new Head Office lead
+            console.log('[NOTIF] Head Office branch triggered. Total users available:', users.length);
+            const recipients = users.filter(u => {
+                const r = (u.role || '').toLowerCase().replace(/_/g, ' ');
+                return r.includes('sales') || r.includes('admin') || r.includes('manager') || r.includes('super');
+            });
+            console.log('[NOTIF] Matched recipients:', recipients.length, recipients.map(u => `${u.name} (${u.role})`));
+            if (recipients.length === 0) {
+                console.warn('[NOTIF] No recipients found! Users array:', users.map(u => `${u.name}:${u.role}`));
+            }
+            for (const exec of recipients) {
+                console.log('[NOTIF] Sending notification to:', exec.name, exec.id);
+                await addNotification({
+                    user_id: exec.id,
+                    type: 'Lead Assigned',
+                    title: 'New Head Office Lead - Pending Assignment',
+                    message: `New lead (${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}) assigned to Head Office. Please follow up and assign to a sales executive.`,
+                    link: { page: 'Lead Detail', id: (data as any).id }
+                });
+            }
         }
         await addActivityToLead((data as any).id, {
             type: 'Status Change',
             content: `created the lead and assigned it to ${assigned_to?.name || 'Unassigned'}.`,
         }, profile);
         await logUserActivity('Lead Created', `Created new lead: ${leadData.business_name} (${leadData.service_requested})`);
+        if (setLeads && data) {
+            setLeads(prev => [(data as unknown as Lead), ...prev]);
+        }
         await fetchData();
-    }, [profile, leads, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, logUserActivity, fetchData]);
+    }, [profile, leads, users, setLeads, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, logUserActivity, fetchData]);
 
     const updateLead = useCallback(async (leadData: Lead, convertToCustomer: boolean = false, dateOfBirth?: string, aadharNumber?: string) => {
         if (!profile) throw new Error("User not authenticated");
@@ -201,13 +248,20 @@ export function useLeadsApi(core: {
         delete dbLeadData.business_category;
         delete dbLeadData.industry_type;
 
+        // Convert any empty string UUID fields to null to prevent Postgres UUID syntax errors
+        for (const key of UUID_KEYS) {
+            if (dbLeadData[key] === '' || (typeof dbLeadData[key] === 'string' && !dbLeadData[key].trim())) {
+                dbLeadData[key] = null;
+            }
+        }
+
         let updateError: any = null;
         try {
             const res = await (supabase.from('leads') as any).update(dbLeadData).eq('id', leadData.id);
             updateError = res.error;
-            if (updateError && (updateError.message.includes('reference_number') || updateError.message.includes('schema cache') || updateError.code === '42703')) {
+            if (updateError && (updateError.message.includes('reference_number') || updateError.message.includes('schema cache') || updateError.message.includes('aadhar') || updateError.code === '42703')) {
                 console.warn("Database missing columns, retrying lead update with safe payload.", updateError.message);
-                const { reference_number, created_by, assigned_by, pan_number, ...dbLeadDataSafe } = dbLeadData as any;
+                const { reference_number, created_by, assigned_by, pan_number, aadhar_number, ...dbLeadDataSafe } = dbLeadData as any;
                 const retryRes = await (supabase.from('leads') as any).update(dbLeadDataSafe).eq('id', leadData.id);
                 updateError = retryRes.error;
             }
@@ -398,8 +452,11 @@ export function useLeadsApi(core: {
         }
 
         await logUserActivity('Lead Updated', `Updated lead: ${leadData.business_name}. Status: ${leadData.status}`);
+        if (setLeads) {
+            setLeads(prev => prev.map(l => l.id === leadData.id ? { ...l, ...leadData } : l));
+        }
         await fetchData();
-    }, [profile, leads, users, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, leadToCustomer, logUserActivity, fetchData]);
+    }, [profile, leads, setLeads, users, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, leadToCustomer, logUserActivity, fetchData]);
 
     const updateMultipleLeads = useCallback(async (leadIds: string[], updates: Partial<Omit<Lead, 'id'>>) => {
         const { assigned_to, ...rest } = updates;
@@ -437,7 +494,8 @@ export function useLeadsApi(core: {
           .range(from, to);
         
         if (error) throw error;
-        return { data: data as Lead[], totalCount: count || 0, page, pageSize };
+        return { data: (data as unknown) as Lead[], totalCount: count || 0, page, pageSize };
+
     }, []);
 
     return {

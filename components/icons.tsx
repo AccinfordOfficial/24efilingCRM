@@ -351,3 +351,14 @@ export const SalesExecIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <path d="M4.5 1V3" stroke="white" strokeWidth="1.2" strokeLinecap="round" />
   </svg>
 );
+
+export { 
+  Send as SendIcon,
+  TrendingUp as TrendingUpIcon,
+  Award as AwardIcon,
+  MessageSquare as MessageSquareIcon,
+  AlertCircle as AlertCircleIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Sparkles as SparklesIcon,
+  BarChart3 as BarChart3Icon
+} from 'lucide-react';

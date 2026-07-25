@@ -4,7 +4,8 @@ import { Button } from '../ui/Button';
 import { Input } from '../ui/Input';
 import { User } from '../../types';
 import { useApi } from '../../hooks/useApi';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
+
 import { supabase } from '../../lib/supabaseClient';
 import { Loader2, Camera } from 'lucide-react';
 
@@ -81,21 +82,21 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
     };
 
     return (
-        <Card>
+        <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
             <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>Update your personal details and preferences.</CardDescription>
+                <CardTitle className="dark:text-white">Profile Information</CardTitle>
+                <CardDescription className="dark:text-slate-400">Update your personal details and preferences.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex items-center gap-6">
                     <div className="relative group">
-                        <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-2 border-white shadow-md">
+                        <div className="w-24 h-24 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden border-2 border-white/20 shadow-md">
                             {uploading ? (
-                                <Loader2 className="w-8 h-8 animate-spin text-slate-500" />
+                                <Loader2 className="w-8 h-8 animate-spin text-slate-500 dark:text-slate-400" />
                             ) : profileData.avatar_url ? (
                                 <img src={profileData.avatar_url} alt="Profile" className="w-full h-full object-cover" />
                             ) : (
-                                <span className="text-2xl font-bold text-slate-400">{profileData.name.charAt(0)}</span>
+                                <span className="text-2xl font-bold text-slate-400 dark:text-slate-300">{profileData.name.charAt(0)}</span>
                             )}
                         </div>
                         <input
@@ -107,40 +108,40 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                         />
                         <button
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute bottom-0 right-0 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-sm"
+                            className="absolute bottom-0 right-0 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-sm cursor-pointer"
                             title="Upload Avatar"
                         >
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
                     <div>
-                        <h3 className="font-medium text-lg">{currentUser.name || 'User'}</h3>
-                        <p className="text-slate-500 text-sm">{currentUser.role}</p>
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white">{currentUser.name || 'User'}</h3>
+                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{currentUser.role} {currentUser.branch_name ? `• ${currentUser.branch_name}` : ''}</p>
                     </div>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Full Name</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
                         <Input value={profileData.name} onChange={e => setProfileData({ ...profileData, name: e.target.value })} />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Email</label>
-                        <Input value={profileData.email} disabled className="bg-slate-100 text-slate-500 cursor-not-allowed" />
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
+                        <Input value={profileData.email} disabled className="bg-slate-100 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 cursor-not-allowed border-slate-200 dark:border-white/10" />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Mobile Number</label>
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Mobile Number</label>
                         <Input value={profileData.phone_number} onChange={e => setProfileData({ ...profileData, phone_number: e.target.value })} placeholder="+91..." />
                     </div>
                 </div>
 
-                <div className="border-t pt-4">
-                    <h4 className="font-medium mb-3">Preferences</h4>
+                <div className="border-t border-slate-200 dark:border-white/10 pt-4">
+                    <h4 className="font-bold text-slate-900 dark:text-white mb-3">Preferences</h4>
                     <div className="grid md:grid-cols-3 gap-4">
                         <div className="space-y-2">
-                            <label className="text-sm text-slate-600">Language</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Language</label>
                             <select
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                className="w-full h-10 px-3 rounded-md border border-input bg-background dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-200 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 value={profileData.preferences.language}
                                 onChange={e => setProfileData({ ...profileData, preferences: { ...profileData.preferences, language: e.target.value } })}
                             >
@@ -150,9 +151,9 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm text-slate-600">Timezone</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Timezone</label>
                             <select
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                className="w-full h-10 px-3 rounded-md border border-input bg-background dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-200 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 value={profileData.preferences.timezone}
                                 onChange={e => setProfileData({ ...profileData, preferences: { ...profileData.preferences, timezone: e.target.value } })}
                             >
@@ -161,9 +162,9 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <label className="text-sm text-slate-600">Theme</label>
+                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Theme</label>
                             <select
-                                className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                className="w-full h-10 px-3 rounded-md border border-input bg-background dark:bg-slate-950 border-slate-200 dark:border-white/10 text-slate-900 dark:text-slate-200 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                                 value={profileData.preferences.theme}
                                 onChange={e => setProfileData({ ...profileData, preferences: { ...profileData.preferences, theme: e.target.value } })}
                             >
@@ -176,7 +177,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                 </div>
 
                 <div className="flex justify-end pt-4">
-                    <Button onClick={handleSave} disabled={saving}>
+                    <Button onClick={handleSave} disabled={saving} variant="primary" className="font-semibold shadow-md">
                         {saving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : 'Save Changes'}
                     </Button>
                 </div>

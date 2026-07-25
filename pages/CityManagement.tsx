@@ -8,10 +8,49 @@ import { StatCard } from '../components/ui/StatCard';
 import { ConfirmationDialog } from '../components/ui/ConfirmationDialog';
 import { useToast } from '../components/Toast';
 
+const INDIAN_STATES = [
+  'Andhra Pradesh',
+  'Arunachal Pradesh',
+  'Assam',
+  'Bihar',
+  'Chhattisgarh',
+  'Goa',
+  'Gujarat',
+  'Haryana',
+  'Himachal Pradesh',
+  'Jharkhand',
+  'Karnataka',
+  'Kerala',
+  'Madhya Pradesh',
+  'Maharashtra',
+  'Manipur',
+  'Meghalaya',
+  'Mizoram',
+  'Nagaland',
+  'Odisha',
+  'Punjab',
+  'Rajasthan',
+  'Sikkim',
+  'Tamil Nadu',
+  'Telangana',
+  'Tripura',
+  'Uttar Pradesh',
+  'Uttarakhand',
+  'West Bengal',
+  'Andaman and Nicobar Islands',
+  'Chandigarh',
+  'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi',
+  'Jammu and Kashmir',
+  'Ladakh',
+  'Lakshadweep',
+  'Puducherry'
+];
+
 interface CityManagementProps {
   cities: City[];
   branches?: Branch[];
-  onAddCity: (cityName: string) => Promise<any>;
+  onAddCity: (cityName: string, stateName?: string, status?: boolean) => Promise<any>;
   onUpdateCity: (id: string, updates: Partial<City>) => Promise<void>;
   onDeleteCity: (id: string) => Promise<void>;
 }
@@ -83,20 +122,13 @@ export default function CityManagement({
     try {
       if (editingCity) {
         await onUpdateCity(editingCity.id, {
-          city_name: cityName,
+          city_name: cityName.trim(),
           state: stateName || null,
           status,
         });
         toast.addToast('City updated successfully', 'success');
       } else {
-        const addedCity = await onAddCity(cityName);
-        // If state or status was modified from default, update it immediately
-        if (addedCity && (stateName || !status)) {
-          await onUpdateCity(addedCity.id, {
-            state: stateName || null,
-            status,
-          });
-        }
+        await onAddCity(cityName.trim(), stateName || undefined, status);
         toast.addToast('City created successfully', 'success');
       }
       setIsFormOpen(false);
@@ -185,8 +217,8 @@ export default function CityManagement({
                 filteredCities.map((city) => (
                   <tr key={city.id} className="hover:bg-white/[0.02] transition">
                     <td className="px-6 py-4 font-medium text-white">{city.city_name}</td>
-                    <td className="px-6 py-4 text-slate-300">
-                      <span className="bg-white/5 border border-white/10 px-2 py-0.5 rounded text-xs font-mono">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-mono font-bold tracking-wider text-blue-300 bg-blue-500/10 border border-blue-500/20 shadow-sm whitespace-nowrap">
                         {city.city_code}
                       </span>
                     </td>
@@ -274,13 +306,18 @@ export default function CityManagement({
 
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-300">State / Region</label>
-                <Input
-                  type="text"
-                  placeholder="e.g. Telangana"
+                <select
                   value={stateName}
                   onChange={(e) => setStateName(e.target.value)}
-                  className="bg-slate-900 border-white/10 text-white placeholder-slate-600 rounded-lg"
-                />
+                  className="w-full h-10 px-3 rounded-lg border border-white/10 bg-slate-900 text-white text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                >
+                  <option value="" className="bg-slate-900 text-slate-400">Select State...</option>
+                  {INDIAN_STATES.map((state) => (
+                    <option key={state} value={state} className="bg-slate-900 text-white">
+                      {state}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="flex items-center justify-between pt-2">

@@ -8,7 +8,8 @@ import {
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';
 import { Avatar, AvatarImage, AvatarFallback } from './ui/Avatar';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { useLeads } from '../hooks/queries/useLeads';
 import { useUsers } from '../hooks/queries/useUsers';
 
@@ -93,14 +94,13 @@ const superAdminNav: NavSection[] = [
     items: [
       { path: '/my-day', label: 'My Day', icon: Calendar },
       { path: '/leads', label: 'All Leads', icon: Briefcase },
-      { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
-      { path: '/my-leads', label: 'My Leads', icon: Target },
-      { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
       { path: '/customers', label: 'Customers', icon: Users },
+      { path: '/services', label: 'Services Catalog', icon: Layers },
       { path: '/targets', label: 'Sales Targets', icon: Target },
       { path: '/auto-assignment', label: 'Auto Assignment Rules', icon: Layers },
     ]
   },
+
   {
     title: 'Analytics',
     items: [
@@ -179,8 +179,10 @@ const adminNav: NavSection[] = [
       { path: '/my-leads', label: 'My Leads', icon: Target },
       { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
       { path: '/customers', label: 'Customers', icon: Users },
+      { path: '/services', label: 'Services Catalog', icon: Layers },
     ]
   },
+
   {
     title: 'Analytics',
     items: [
@@ -214,21 +216,16 @@ const adminNav: NavSection[] = [
     ]
   },
   {
-    title: 'Business & Web',
-    items: [
-      { path: '/web', label: '24eFiling Web Dropdown', icon: Globe },
-    ]
-  },
-  {
     title: 'Communication',
     items: [
-      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
+      { path: '/team-chat', label: 'Internal Team Chat', icon: MessageSquare }
     ]
   },
   {
     title: 'System',
     items: [
       { path: '/notifications', label: 'Notifications', icon: Bell },
+      { path: '/settings', label: 'Settings', icon: Settings },
     ]
   }
 ];
@@ -243,19 +240,17 @@ const salesExecNav: NavSection[] = [
   {
     title: 'Sales',
     items: [
-      { path: '/leads', label: 'All Leads', icon: Briefcase },
       { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
       { path: '/my-leads', label: 'My Leads', icon: Target },
-      { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
       { path: '/customers', label: 'Customers', icon: Users },
+      { path: '/services', label: 'Services Catalog', icon: Layers },
     ]
   },
+
   {
     title: 'Analytics',
     items: [
-      { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
-      { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
-      { path: '/reports', label: 'Reports & Analytics', icon: FileText },
+      { path: '/performance', label: 'My Performance', icon: BarChart3 },
     ]
   },
   {
@@ -280,13 +275,14 @@ const salesExecNav: NavSection[] = [
   {
     title: 'Communication',
     items: [
-      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare }
+      { path: '/team-chat', label: 'Internal Team Chat', icon: MessageSquare }
     ]
   },
   {
     title: 'System',
     items: [
       { path: '/notifications', label: 'Notifications', icon: Bell },
+      { path: '/settings', label: 'Settings', icon: Settings },
     ]
   }
 ];

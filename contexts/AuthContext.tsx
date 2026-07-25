@@ -15,6 +15,7 @@ interface AuthContextType {
   signUp: (name: string, email: string, password: string) => Promise<void>;
   createUserByAdmin: (userData: { name: string; email: string; password?: string; role: AppUser['role']; branch_id?: string; branch_name?: string; is_active?: boolean; phone_number?: string; department?: string; skills?: string[]; avatar_url?: string; date_of_birth?: string; gender?: string; }) => Promise<void>;
   signOut: () => Promise<void>;
+  logout: () => Promise<void>;
   sendPasswordResetEmail: (email: string) => Promise<void>;
   updateUserPassword: (password: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -214,6 +215,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (!session?.user) return;
 
     const updatePresence = async () => {
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
       try {
         await supabase
           .from('profiles')
@@ -439,7 +441,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         .from('profiles')
         .update({ branch_id: userData.branch_id } as any)
         .eq('email', cleanEmail);
-        
+
       if (updateError) {
          console.error("Failed to set user branch:", updateError);
       }
@@ -461,8 +463,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     localStorage.removeItem('crm_user_profile');
     localStorage.removeItem('crm_api_cache');
+    setSession(null);
+    setProfile(null);
     const { error } = await supabase.auth.signOut();
-    if (error) throw new Error(error.message);
+    if (error) console.error("SignOut error:", error);
   };
 
   const sendPasswordResetEmail = async (email: string): Promise<void> => {
@@ -495,6 +499,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     signUp,
     createUserByAdmin,
     signOut,
+    logout: signOut,
     sendPasswordResetEmail,
     updateUserPassword,
     refreshProfile,

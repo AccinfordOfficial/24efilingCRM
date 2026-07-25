@@ -12,19 +12,20 @@ export const FormTextarea = React.forwardRef<HTMLTextAreaElement, FormTextareaPr
     ({ label, error, registration, className, ...props }, ref) => {
         return (
             <div className="space-y-1 w-full">
-                <label className="block text-sm font-medium text-slate-700">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
                     {label} {props.required && <span className="text-red-500">*</span>}
                 </label>
                 <textarea
                     className={cn(
-                        "flex min-h-[80px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
-                        error ? 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500' : 'border-slate-300',
+                        "flex min-h-[80px] w-full rounded-md border bg-background dark:bg-slate-950/60 border-input dark:border-white/10 text-foreground dark:text-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+                        error ? 'border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500' : '',
                         className
                     )}
                     ref={ref}
                     {...registration}
                     {...props}
                 />
+
                 {error && (
                     <p className="text-xs text-red-500 font-medium animate-in fade-in slide-in-from-top-1 duration-200">
                         {error}

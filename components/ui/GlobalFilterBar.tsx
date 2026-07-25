@@ -64,7 +64,8 @@ export const GlobalFilterBar: React.FC<GlobalFilterBarProps> = ({ extraFilters, 
     ];
 
     return (
-        <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-wrap items-center gap-3">
+        <div className="bg-white dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-wrap items-center gap-3 relative z-40">
+
             {/* Core Organization Filters */}
             {!isSalesExecutive && (
                 <>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Lead, Activity, Document, Task, Payment, TaskPriority } from '../types';
-import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Select } from '../components/ui/Select';
@@ -14,6 +14,7 @@ import { getNextPaymentSequenceClientSide, formatPaymentReferenceId } from '../l
 import { StandardInvoice, InvoiceItem } from '../components/StandardInvoice';
 import { Dialog } from '../components/ui/Dialog';
 import { EditPaymentDialog } from '../components/EditPaymentDialog';
+import { CompletenessMeter } from '../components/ui/CompletenessMeter';
 
 // Import split components
 import { LeadStatusStepper } from './lead-detail/LeadStatusStepper';
@@ -55,7 +56,16 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
     onUpdateTask,
     onDeleteTask
 }) => {
-    const { fetchLeadDetails } = useApi({ fetchOnMount: false });
+    const fetchLeadDetails = async (leadId: string) => {
+        const { data: actData } = await supabase.from('activities').select('*').eq('lead_id', leadId).order('created_at', { ascending: false });
+        const { data: docData } = await supabase.from('documents').select('*').eq('lead_id', leadId).order('uploaded_at', { ascending: false });
+        const { data: taskData } = await supabase.from('tasks').select('*, created_by:profiles!tasks_created_by_fkey(name)').eq('lead_id', leadId).order('due_date', { ascending: true });
+        return {
+            activities: actData || [],
+            documents: docData || [],
+            tasks: taskData || []
+        };
+    };
 
     // Local state for tabs
     const [activeTab, setActiveTab] = useState<'overview' | 'activities' | 'documents' | 'tasks' | 'payments'>('overview');
@@ -401,14 +411,35 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
 
     const receiptSubtotal = invoiceItems.reduce((sum, item) => sum + item.total, 0);
 
+    const getLeadCompleteness = (l: Lead) => {
+        const fields = [
+            { name: 'Business Name', filled: !!l.business_name },
+            { name: 'First Name', filled: !!l.first_name },
+            { name: 'Last Name', filled: !!l.last_name },
+            { name: 'Email Address', filled: !!l.email },
+            { name: 'Phone Number', filled: !!l.phone_number },
+            { name: 'PAN Number', filled: !!l.pan_number },
+            { name: 'Aadhaar Card', filled: !!l.aadhar_number },
+            { name: 'Personal Address', filled: !!(l.residential_address || l.personal_city) },
+            { name: 'Business Address', filled: !!(l.business_address || l.business_city) },
+            { name: 'Service Requested', filled: !!(l.service_requested || (l.service_sets && l.service_sets.length > 0)) },
+        ];
+        const filledCount = fields.filter(f => f.filled).length;
+        const missingFields = fields.filter(f => !f.filled).map(f => f.name);
+        const percentage = Math.round((filledCount / fields.length) * 100);
+        return { percentage, missingFields };
+    };
+
+    const leadCompleteness = getLeadCompleteness(lead);
+
     return (
         <div className="space-y-6">
-            <header className="flex items-start justify-between gap-4">
+            <header className="flex flex-col sm:flex-row items-start justify-between gap-4">
                 <div className="flex items-center gap-4 flex-1">
                     <Button variant="ghost" size="icon" onClick={onBack} className="h-10 w-10 shrink-0 self-start">
                         <ArrowLeftIcon className="h-5 w-5" />
                     </Button>
-                    <div className="relative h-20 w-20 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+                    <div className="relative h-20 w-20 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
                         {lead.avatar_url ? (
                             <img src={lead.avatar_url} alt={lead.business_name} className="h-full w-full rounded-full object-cover" />
                         ) : (
@@ -416,20 +447,21 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         )}
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
+                        <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
                             {lead.business_name}
                             {lead.reference_number && (
-                                <span className="text-xs font-mono font-bold bg-blue-50 text-[#1c398e] border border-blue-200 px-2 py-0.5 rounded shadow-sm">
+                                <span className="text-xs font-mono font-bold bg-blue-50 dark:bg-blue-900/30 text-primary border border-blue-200 dark:border-blue-800 px-2 py-0.5 rounded shadow-sm">
                                     {lead.reference_number}
                                 </span>
                             )}
                         </h1>
-                        <p className="text-slate-500">{lead.first_name} {lead.last_name}</p>
-                        <p className="text-xs text-slate-400 mt-1">Lead since {new Date(lead.created_at).toLocaleDateString()}</p>
+                        <p className="text-slate-500 dark:text-slate-400">{lead.first_name} {lead.last_name}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Lead since {new Date(lead.created_at).toLocaleDateString()}</p>
                     </div>
                 </div>
-                <div className="self-start flex gap-2">
-                     <Button variant="outline" className="gap-2" onClick={handleOpenReceipt}>
+                <div className="self-start flex flex-wrap items-center gap-3">
+                    <CompletenessMeter percentage={leadCompleteness.percentage} missingFields={leadCompleteness.missingFields} title="Lead Profile" />
+                    <Button variant="outline" className="gap-2" onClick={handleOpenReceipt}>
                         <FileTextIcon className="h-4 w-4" /> View Receipt
                     </Button>
                     <Button variant="primary" className="gap-2" onClick={onEditLead}> <EditIcon className="h-4 w-4" /> Edit Lead</Button>
@@ -446,20 +478,20 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                          <CardContent>
                             <LeadStatusStepper currentStatus={lead.status} onStatusChange={handleStatusUpdate} />
                              {lead.status !== 'Lost' && lead.status !== 'Success' && (
-                                <div className="mt-6 text-center border-t pt-4">
+                                <div className="mt-6 text-center border-t border-slate-200 dark:border-white/10 pt-4">
                                     <Button variant="destructive" size="sm" onClick={() => handleStatusUpdate('Lost')}>Mark as Lost</Button>
-                                    <Button variant="outline" size="sm" onClick={() => handleStatusUpdate('Success')} className="ml-2 text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 border-green-200">Mark as Success</Button>
+                                    <Button variant="outline" size="sm" onClick={() => handleStatusUpdate('Success')} className="ml-2 text-green-600 dark:text-green-400 hover:text-green-700 bg-green-50 dark:bg-green-950/40 hover:bg-green-100 border-green-200 dark:border-green-800">Mark as Success</Button>
                                 </div>
                             )}
                         </CardContent>
                     </Card>
 
                     {/* Tab Navigation */}
-                    <div className="flex border-b border-slate-200 gap-6">
+                    <div className="flex border-b border-slate-200 dark:border-white/10 gap-6">
                         <button 
                             onClick={() => setActiveTab('overview')} 
                             className={`pb-3 font-semibold text-sm border-b-2 transition-all ${
-                                activeTab === 'overview' ? 'border-[#1c398e] text-[#1c398e]' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                activeTab === 'overview' ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                         >
                             Overview
@@ -467,7 +499,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         <button 
                             onClick={() => setActiveTab('activities')} 
                             className={`pb-3 font-semibold text-sm border-b-2 transition-all ${
-                                activeTab === 'activities' ? 'border-[#1c398e] text-[#1c398e]' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                activeTab === 'activities' ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                         >
                             Activities ({displayActivities?.length || 0})
@@ -475,7 +507,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         <button 
                             onClick={() => setActiveTab('documents')} 
                             className={`pb-3 font-semibold text-sm border-b-2 transition-all ${
-                                activeTab === 'documents' ? 'border-[#1c398e] text-[#1c398e]' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                activeTab === 'documents' ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                         >
                             Documents ({displayDocuments?.length || 0})
@@ -483,7 +515,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         <button 
                             onClick={() => setActiveTab('tasks')} 
                             className={`pb-3 font-semibold text-sm border-b-2 transition-all ${
-                                activeTab === 'tasks' ? 'border-[#1c398e] text-[#1c398e]' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                activeTab === 'tasks' ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                         >
                             Tasks ({displayTasks?.length || 0})
@@ -491,7 +523,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         <button 
                             onClick={() => setActiveTab('payments')} 
                             className={`pb-3 font-semibold text-sm border-b-2 transition-all ${
-                                activeTab === 'payments' ? 'border-[#1c398e] text-[#1c398e]' : 'border-transparent text-slate-500 hover:text-slate-700'
+                                activeTab === 'payments' ? 'border-primary text-primary font-bold' : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                             }`}
                         >
                             Payments ({lead.payments?.length || 0})
@@ -576,16 +608,16 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                     <Card>
                          <CardContent className="p-4 grid grid-cols-2 gap-4">
                              <div>
-                                <h4 className="text-xs font-semibold uppercase text-slate-500">Status</h4>
+                                <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Status</h4>
                                 <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(lead.status)}`}>
                                     {lead.status}
                                 </span>
                             </div>
                             <div>
-                                <h4 className="text-xs font-semibold uppercase text-slate-500">Priority</h4>
+                                <h4 className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">Priority</h4>
                                 <div className="flex items-center gap-2">
                                     <div className={`h-2.5 w-2.5 rounded-full ${getPriorityColor(lead.priority)}`}></div>
-                                    <span className="text-sm font-medium">{lead.priority}</span>
+                                    <span className="text-sm font-medium text-slate-900 dark:text-white">{lead.priority}</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -597,13 +629,13 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                             {lead.assigned_to ? (
                                 <img src={lead.assigned_to.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(lead.assigned_to.name)}`} alt={lead.assigned_to.name} className="h-10 w-10 rounded-full" />
                             ) : (
-                                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-[#1c398e] font-bold text-sm shrink-0">HO</div>
+                                <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-primary font-bold text-sm shrink-0">HO</div>
                             )}
                             <div>
                                 <CardTitle className="text-base">Assigned To</CardTitle>
                                 <CardDescription className="flex items-center gap-1">
                                     {lead.assigned_to ? lead.assigned_to.name : (
-                                        <span className="font-semibold text-[#1c398e]">🏢 Head Office</span>
+                                        <span className="font-semibold text-primary">🏢 Head Office</span>
                                     )}
                                 </CardDescription>
                             </div>
@@ -678,7 +710,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                 >
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-slate-700 mb-1">Task Content</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Task Content</label>
                             <Input 
                                 value={editTaskContent} 
                                 onChange={(e) => setEditTaskContent(e.target.value)} 
@@ -686,7 +718,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Due Date</label>
                                 <Input 
                                     type="datetime-local" 
                                     value={editTaskDueDate} 
@@ -694,7 +726,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Priority</label>
                                 <Select
                                     value={editTaskPriority}
                                     onChange={(e) => setEditTaskPriority(e.target.value as TaskPriority)}
@@ -703,7 +735,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                                 </Select>
                             </div>
                         </div>
-                        <div className="flex justify-end gap-2 pt-4 border-t">
+                        <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
                             <Button variant="ghost" onClick={() => setIsEditTaskDialogOpen(false)}>Cancel</Button>
                             <Button onClick={handleSaveTaskEdit}>Save Changes</Button>
                         </div>

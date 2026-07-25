@@ -69,38 +69,38 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllR
         <div className="space-y-6">
             <header className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-                    <p className="text-slate-500">Stay updated with the latest activities across the CRM.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Notifications</h1>
+                    <p className="text-slate-500 dark:text-slate-400">Stay updated with the latest activities across the CRM.</p>
                 </div>
                 {notifications.length > 0 && (
-                    <Button variant="outline" onClick={onMarkAllRead} disabled={unreadCount === 0}>
+                    <Button variant="outline" onClick={onMarkAllRead} disabled={unreadCount === 0} className="dark:bg-slate-900 dark:border-white/10 dark:text-white">
                         Mark all as read
                     </Button>
                 )}
             </header>
-            <Card>
+            <Card className="dark:bg-slate-900/80 dark:border-white/10">
                 <CardHeader>
-                    <CardTitle>Recent Notifications</CardTitle>
-                    <CardDescription>
+                    <CardTitle className="dark:text-white">Recent Notifications</CardTitle>
+                    <CardDescription className="dark:text-slate-400">
                         You have {notifications.length} notifications. {unreadCount > 0 ? `${unreadCount} unread.` : 'All caught up!'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
                     {notifications.length > 0 ? (
-                        <ul className="divide-y divide-slate-200 -mx-6">
+                        <ul className="divide-y divide-slate-200 dark:divide-white/10 -mx-6">
                             {notifications.map(notification => (
                                 <li
                                     key={notification.id}
-                                    className={`py-4 px-6 flex items-start gap-4 transition-colors ${!notification.is_read ? 'bg-blue-50/50' : ''} ${notification.link ? 'cursor-pointer hover:bg-slate-100/50' : ''}`}
+                                    className={`py-4 px-6 flex items-start gap-4 transition-colors ${!notification.is_read ? 'bg-blue-50/50 dark:bg-blue-500/10' : ''} ${notification.link ? 'cursor-pointer hover:bg-slate-100/50 dark:hover:bg-white/5' : ''}`}
                                     onClick={() => notification.link && onNavigate(notification.link.page, notification.link.id)}
                                 >
                                     <NotificationIcon type={notification.type} />
                                     <div className="flex-1">
-                                        <p className="font-semibold text-slate-800">{notification.title}</p>
-                                        <p className="text-sm text-slate-600">{notification.message}</p>
+                                        <p className="font-semibold text-slate-800 dark:text-slate-100">{notification.title}</p>
+                                        <p className="text-sm text-slate-600 dark:text-slate-300">{notification.message}</p>
                                     </div>
                                     <div className="flex flex-col items-end flex-shrink-0">
-                                        <p className="text-xs text-slate-400 whitespace-nowrap">{timeAgo(notification.created_at)}</p>
+                                        <p className="text-xs text-slate-400 dark:text-slate-500 whitespace-nowrap">{timeAgo(notification.created_at)}</p>
                                         {!notification.is_read && (
                                             <div className="mt-2 h-2 w-2 rounded-full bg-blue-500"></div>
                                         )}
@@ -108,6 +108,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllR
                                 </li>
                             ))}
                         </ul>
+
                     ) : (
                         <div className="text-center py-12 text-slate-500">
                             <BellIcon className="h-10 w-10 mx-auto text-slate-300" />

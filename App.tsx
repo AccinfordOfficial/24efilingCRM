@@ -6,7 +6,8 @@ import { ErrorBoundary } from './components/ui/ErrorBoundary';
 import { supabase } from './lib/supabaseClient'; // Import supabase for storage operations
 import { User, Lead, Document, Customer, Task, TaskPriority, City, Branch } from './types';
 import { useToast } from './components/Toast';
-import { useAuth } from './context/AuthContext';
+import { useAuth } from './contexts/AuthContext';
+
 import { useApi } from './hooks/useApi';
 import { UserForm } from './components/UserForm';
 import { LeadForm } from './components/LeadForm';
@@ -57,21 +58,22 @@ const Support = lazy(() => import('./pages/Support'));
 const EmployeeFeedback = lazy(() => import('./pages/EmployeeFeedback'));
 const WorkOrders = lazy(() => import('./pages/WorkOrders'));
 const WhatsAppDashboard = lazy(() => import('./pages/WhatsAppDashboard'));
-import { AutoAssignmentSettings } from './pages/AutoAssignmentSettings';
-import { TargetsDashboard } from './pages/TargetsDashboard';
-import { ServiceDelivery } from './pages/ServiceDelivery';
-import { RenewalsPipeline } from './pages/RenewalsPipeline';
-import { MyDay } from './pages/MyDay';
-import { ClientPortalView } from './pages/ClientPortalView';
-import { Attendance } from './pages/Attendance';
-import { ExpenseManager } from './pages/ExpenseManager';
-import { AutomationRules } from './pages/AutomationRules';
-import { DocumentTemplates } from './pages/DocumentTemplates';
-import { IntegrationsCenter } from './pages/IntegrationsCenter';
-import { RevenueForecasting } from './pages/RevenueForecasting';
-import { ChurnPrediction } from './pages/ChurnPrediction';
-import { GstComplianceCalendar } from './pages/GstComplianceCalendar';
-import { TeamChat } from './pages/TeamChat';
+const AutoAssignmentSettings = lazy(() => import('./pages/AutoAssignmentSettings').then(m => ({ default: m.AutoAssignmentSettings })));
+const TargetsDashboard = lazy(() => import('./pages/TargetsDashboard').then(m => ({ default: m.TargetsDashboard })));
+const ServiceDelivery = lazy(() => import('./pages/ServiceDelivery').then(m => ({ default: m.ServiceDelivery })));
+const RenewalsPipeline = lazy(() => import('./pages/RenewalsPipeline').then(m => ({ default: m.RenewalsPipeline })));
+const MyDay = lazy(() => import('./pages/MyDay').then(m => ({ default: m.MyDay })));
+const ClientPortalView = lazy(() => import('./pages/ClientPortalView').then(m => ({ default: m.ClientPortalView })));
+const Attendance = lazy(() => import('./pages/Attendance').then(m => ({ default: m.Attendance })));
+const ExpenseManager = lazy(() => import('./pages/ExpenseManager').then(m => ({ default: m.ExpenseManager })));
+const AutomationRules = lazy(() => import('./pages/AutomationRules').then(m => ({ default: m.AutomationRules })));
+const DocumentTemplates = lazy(() => import('./pages/DocumentTemplates').then(m => ({ default: m.DocumentTemplates })));
+const IntegrationsCenter = lazy(() => import('./pages/IntegrationsCenter').then(m => ({ default: m.IntegrationsCenter })));
+const RevenueForecasting = lazy(() => import('./pages/RevenueForecasting').then(m => ({ default: m.RevenueForecasting })));
+const ChurnPrediction = lazy(() => import('./pages/ChurnPrediction').then(m => ({ default: m.ChurnPrediction })));
+const GstComplianceCalendar = lazy(() => import('./pages/GstComplianceCalendar').then(m => ({ default: m.GstComplianceCalendar })));
+const TeamChat = lazy(() => import('./pages/TeamChat').then(m => ({ default: m.TeamChat })));
+
 import { CompanyProvider } from './contexts/CompanyContext';
 import { GlobalFilterProvider, useGlobalFilter } from './contexts/GlobalFilterContext';
 import { GlobalFilterBar } from './components/ui/GlobalFilterBar';
@@ -101,7 +103,9 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   'Lead Detail': { title: 'Lead Detail', subtitle: 'Viewing lead information and activity.' },
   'Customer Detail': { title: 'Customer Detail', subtitle: 'Viewing customer information and history.' },
   'Create New Lead': { title: 'Create New Lead', subtitle: 'Add a new potential customer to the system.' },
-  'Services': { title: 'Manage Services', subtitle: 'Add and manage services and sub-services.' },
+  'Services': { title: 'Services Catalog', subtitle: 'Explore company offerings, sub-services, pricing, and document requirements.' },
+  'Services Catalog': { title: 'Services Catalog & Management', subtitle: 'Explore company offerings, sub-services, pricing, and document requirements.' },
+
   'Offers & Coupons': { title: 'Offers & Coupons', subtitle: 'Manage discount campaigns, coupons, and referral offers.' },
   'Revenue Dashboard': { title: 'Revenue Dashboard', subtitle: 'Detailed revenue tracking, branch breakdowns, and time filters.' },
   'Employee Performance': { title: 'Employee Performance', subtitle: 'Track user conversions, rankings, and lead progression.' },
@@ -173,6 +177,16 @@ const uploadBranchLogo = async (file: File): Promise<string> => {
   }
 };
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
+
 function App() {
   const authData = useAuth();
   const apiData = useApi();
@@ -188,7 +202,12 @@ function App() {
   }, [navigate]);
 
   if (!authData.profile) {
-    return <FilteredAppContent authData={authData} apiData={apiData} />;
+    return (
+      <>
+        <ScrollToTop />
+        <FilteredAppContent authData={authData} apiData={apiData} />
+      </>
+    );
   }
 
   return (
@@ -199,7 +218,8 @@ function App() {
         allCities={apiData.cities} 
         allBranches={apiData.branches}
       >
-      <FilteredAppContent authData={authData} apiData={apiData} />
+        <ScrollToTop />
+        <FilteredAppContent authData={authData} apiData={apiData} />
       </GlobalFilterProvider>
     </CompanyProvider>
   );
@@ -957,16 +977,16 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   if (!profile || !viewProfile) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 gap-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-background dark:bg-slate-950 gap-4 text-foreground dark:text-white">
         {profileError ? (
           <div className="text-center px-4">
-            <p className="text-red-600 mb-2 font-medium">Error loading profile</p>
-            <p className="text-sm text-slate-500 mb-4">{profileError}</p>
-            <p className="text-xs text-slate-400 mb-4">User ID: {session?.user?.id}</p>
+            <p className="text-red-600 dark:text-red-400 mb-2 font-medium">Error loading profile</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{profileError}</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">User ID: {session?.user?.id}</p>
             <div className="flex gap-3 mt-4 justify-center">
               <button
                 onClick={() => refreshProfile()}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow-sm text-sm font-medium transition-colors"
+                className="px-4 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded shadow-sm text-sm font-medium transition-colors"
               >
                 Retry
               </button>
@@ -976,7 +996,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
                   localStorage.clear();
                   window.location.reload();
                 }}
-                className="px-4 py-2 bg-white border border-slate-300 hover:bg-slate-50 rounded shadow-sm text-sm font-medium text-slate-700 transition-colors"
+                className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800 rounded shadow-sm text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors"
               >
                 Force Sign Out
               </button>
@@ -984,8 +1004,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           </div>
         ) : (
           <>
-            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
-            <p className="text-slate-600 font-medium animate-pulse">Initializing Application...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 dark:border-blue-900 border-t-primary"></div>
+            <p className="text-slate-600 dark:text-slate-300 font-medium animate-pulse">Initializing Application...</p>
           </>
         )}
       </div>
@@ -1009,9 +1029,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
           <div className="text-6xl">🔍</div>
-          <h2 className="text-2xl font-bold text-slate-800">Lead Not Found</h2>
-          <p className="text-slate-500 max-w-md">This lead may have been removed or you may not have permission to view it.</p>
-          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Lead Not Found</h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-md">This lead may have been removed or you may not have permission to view it.</p>
+          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-colors">Go Back</button>
         </div>
       );
     }
@@ -1036,9 +1056,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
           <div className="text-6xl">🔍</div>
-          <h2 className="text-2xl font-bold text-slate-800">Customer Not Found</h2>
-          <p className="text-slate-500 max-w-md">This customer record may have been removed or you may not have permission to view it.</p>
-          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">Go Back</button>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Customer Not Found</h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-md">This customer record may have been removed or you may not have permission to view it.</p>
+          <button onClick={() => navigate(-1)} className="mt-2 px-5 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:opacity-90 transition-colors">Go Back</button>
         </div>
       );
     }
@@ -1086,6 +1106,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             leads={roleScopedLeads}
             users={users}
             currentUser={viewProfile!}
+            onAddLead={handleNavigateToCreateLead}
             onUpdateLead={handleUpdateLead}
             onUpdateMultipleLeads={updateMultipleLeads}
             onDeleteMultipleLeads={deleteMultipleLeads}
@@ -1112,6 +1133,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             leads={roleScopedLeads.filter(l => l.assigned_to?.id === viewProfile?.id)}
             users={users}
             currentUser={viewProfile!}
+            onAddLead={handleNavigateToCreateLead}
             onUpdateLead={handleUpdateLead}
             onUpdateMultipleLeads={updateMultipleLeads}
             onDeleteMultipleLeads={deleteMultipleLeads}
@@ -1361,6 +1383,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             leads={roleScopedLeads}
             users={users}
             currentUser={viewProfile!}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
             onViewLead={handleViewLead}
             onUpdateLead={handleUpdateLead}
             onAddActivity={addActivityToLead}
@@ -1371,6 +1395,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             leads={roleScopedLeads}
             customers={roleScopedCustomers}
             currentUser={viewProfile!}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
             onViewLead={handleViewLead}
             onViewCustomer={handleViewCustomer}
             onUploadDocument={(leadId, file, docType) => handleUploadDocument(leadId, file, docType)}
@@ -1378,10 +1404,12 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         } />
         <Route path="/notifications" element={
           <Notifications
-            notifications={notifications}
-            onMarkAsRead={markNotificationsAsRead}
-            onViewLead={handleViewLead}
-            onViewCustomer={handleViewCustomer}
+            notifications={userNotifications}
+            onMarkAllRead={() => profile?.id && markNotificationsAsRead(profile.id)}
+            onNavigate={(page, id) => {
+              if (page === 'Lead Detail') navigate(`/leads/${id}`);
+              if (page === 'Customer Detail') navigate(`/customers/${id}`);
+            }}
           />
         } />
         <Route path="/settings" element={
@@ -1416,6 +1444,28 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onDeleteTestimonial={deleteTestimonial}
           />
         } />
+        <Route path="/services" element={
+          <ServiceManagement 
+            services={services}
+            onAddService={addService}
+            onUpdateService={updateService}
+            onDeleteService={deleteService}
+            onAddSubService={addSubService}
+            onUpdateSubService={updateSubService}
+            onDeleteSubService={deleteSubService}
+          />
+        } />
+        <Route path="/services-catalog" element={
+          <ServiceManagement 
+            services={services}
+            onAddService={addService}
+            onUpdateService={updateService}
+            onDeleteService={deleteService}
+            onAddSubService={addSubService}
+            onUpdateSubService={updateSubService}
+            onDeleteSubService={deleteSubService}
+          />
+        } />
         <Route path="/web/services" element={
           <ServiceManagement 
             services={services}
@@ -1427,6 +1477,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onDeleteSubService={deleteSubService}
           />
         } />
+
         <Route path="/offers" element={
           <OffersManagement
             offers={offers}
@@ -1445,6 +1496,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onConvertWebLeadToCrmLead={convertWebLeadToCrmLead}
           />
         } />
+        <Route path="/my-day" element={<MyDay />} />
         <Route path="/auto-assignment" element={<AutoAssignmentSettings />} />
         <Route path="/targets" element={<TargetsDashboard />} />
         <Route path="/service-delivery" element={<ServiceDelivery />} />

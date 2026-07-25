@@ -3,14 +3,15 @@ import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { useApi } from '../hooks/useApi';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { toast } from 'sonner';
 import { CalendarIcon, ClockIcon, PhoneIcon, MessageSquareIcon, AlertCircleIcon } from '../components/icons';
 import { Sparkles, CheckCircle2 } from 'lucide-react';
 
 export const MyDay: React.FC = () => {
     const { profile } = useAuth();
-    const { leads, tasks, customers } = useApi({ fetchOnMount: false });
+    const { leads = [], tasks = [], customers = [] } = useApi();
 
     // Filter leads & tasks assigned to current user
     const myLeads = useMemo(() => {

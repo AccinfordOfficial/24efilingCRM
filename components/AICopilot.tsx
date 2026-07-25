@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GoogleGenAI, Chat, GenerateContentResponse } from "@google/genai";
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
+
 import { Card, CardContent } from './ui/Card';
 import { Input } from './ui/Input';
 import { Button } from './ui/Button';
@@ -22,16 +23,19 @@ interface Message {
   text: string;
 }
 
+import { sanitizeHtml } from '../lib/sanitize';
+
 const Markdown = ({ content }: { content: string }) => {
   const formattedContent = content
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    .replace(/```([\s\S]*?)```/g, (match, p1) => `<pre class="bg-slate-950 p-2 rounded-md overflow-x-auto text-[10px] text-slate-300"><code>${p1.trim()}</code></pre>`)
-    .replace(/`(.*?)`/g, '<code class="bg-slate-950 px-1 rounded-sm text-xs text-blue-400">$1</code>')
+    .replace(/```([\s\S]*?)```/g, (match, p1) => `<pre class="bg-slate-100 dark:bg-slate-950 p-2 rounded-md overflow-x-auto text-[10px] text-slate-800 dark:text-slate-300"><code>${p1.trim()}</code></pre>`)
+    .replace(/`(.*?)`/g, '<code class="bg-slate-100 dark:bg-slate-950 px-1 rounded-sm text-xs text-primary">$1</code>')
     .replace(/\n/g, '<br />');
 
-  return <div className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: formattedContent }} />;
+  return <div className="text-xs leading-relaxed" dangerouslySetInnerHTML={{ __html: sanitizeHtml(formattedContent) }} />;
 };
+
 
 export default function AICopilot({
   isOpen,
@@ -161,22 +165,22 @@ export default function AICopilot({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-slate-950/95 border-l border-white/10 backdrop-blur-xl z-50 flex flex-col shadow-2xl transition-all duration-300 ease-in-out text-slate-100">
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white dark:bg-slate-950/95 border-l border-slate-200 dark:border-white/10 backdrop-blur-xl z-50 flex flex-col shadow-2xl transition-all duration-300 ease-in-out text-slate-900 dark:text-slate-100">
       {/* Copilot Header */}
-      <div className="p-4 border-b border-white/10 flex justify-between items-center bg-slate-900/40">
+      <div className="p-4 border-b border-slate-200 dark:border-white/10 flex justify-between items-center bg-slate-50 dark:bg-slate-900/40">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-blue-400 animate-pulse" />
-          <h2 className="font-bold text-base bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
+          <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+          <h2 className="font-bold text-base bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-300 bg-clip-text text-transparent">
             Gemini AI Copilot
           </h2>
         </div>
-        <button onClick={onClose} className="p-1 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors">
+        <button onClick={onClose} className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
           <X className="h-5 w-5" />
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-white/5 bg-slate-950/50 p-1">
+      <div className="flex border-b border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-slate-950/50 p-1">
         {[
           { key: 'insights', label: 'Insights', icon: BrainCircuit },
           { key: 'tasks', label: 'Action items', icon: ListTodo },
@@ -188,7 +192,7 @@ export default function AICopilot({
               key={t.key}
               onClick={() => setActiveTab(t.key as any)}
               className={`flex-1 flex flex-col items-center gap-1.5 py-2.5 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all ${
-                activeTab === t.key ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20' : 'text-slate-400 hover:text-slate-200'
+                activeTab === t.key ? 'bg-primary/10 text-primary border border-primary/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -203,30 +207,30 @@ export default function AICopilot({
         {/* 1. INSIGHTS TAB */}
         {activeTab === 'insights' && (
           <div className="space-y-4">
-            <Card className="glass-card border-white/5 bg-slate-900/30 backdrop-blur-md p-4">
-              <div className="flex justify-between items-center border-b border-white/5 pb-2 mb-3">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Predictive Analytics</span>
-                {summarizing && <RefreshCw className="h-3 w-3 text-blue-400 animate-spin" />}
+            <Card className="glass-card border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/30 backdrop-blur-md p-4">
+              <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-2 mb-3">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Predictive Analytics</span>
+                {summarizing && <RefreshCw className="h-3 w-3 text-primary animate-spin" />}
               </div>
               
-              <div className="text-slate-300 text-xs leading-relaxed space-y-2">
+              <div className="text-slate-700 dark:text-slate-300 text-xs leading-relaxed space-y-2">
                 <Markdown content={insightsSummary} />
               </div>
             </Card>
 
-            <Card className="glass-card border-white/5 bg-slate-900/30 backdrop-blur-md p-4 space-y-3">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Conversion Probability Metrics</h4>
+            <Card className="glass-card border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-900/30 backdrop-blur-md p-4 space-y-3">
+              <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conversion Probability Metrics</h4>
               <div className="space-y-2 text-xs">
                 {leads.slice(0, 3).map((l, index) => {
                   const prob = [85, 70, 45][index] || 60;
                   return (
                     <div key={l.id} className="space-y-1">
                       <div className="flex justify-between font-semibold">
-                        <span className="text-slate-300 truncate max-w-[200px]">{l.name}</span>
-                        <span className="text-blue-400 font-bold">{prob}% likelihood</span>
+                        <span className="text-slate-800 dark:text-slate-300 truncate max-w-[200px]">{l.name}</span>
+                        <span className="text-primary font-bold">{prob}% likelihood</span>
                       </div>
-                      <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-blue-500 h-full rounded-full" style={{ width: `${prob}%` }} />
+                      <div className="w-full bg-slate-200 dark:bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                        <div className="bg-primary h-full rounded-full" style={{ width: `${prob}%` }} />
                       </div>
                     </div>
                   );
@@ -239,17 +243,17 @@ export default function AICopilot({
         {/* 2. ACTION ITEMS TAB */}
         {activeTab === 'tasks' && (
           <div className="space-y-3">
-            <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">High Priority Follow-ups</h4>
+            <h4 className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">High Priority Follow-ups</h4>
             {reminders.length === 0 && tasks.length === 0 ? (
-              <p className="text-xs text-slate-500 text-center py-6">All clear! No pending tasks due.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 text-center py-6">All clear! No pending tasks due.</p>
             ) : (
               <div className="space-y-2.5">
                 {reminders.slice(0, 4).map(r => (
-                  <div key={r.id} className="p-3 bg-slate-900/40 border border-white/5 rounded-lg flex items-start gap-2.5">
+                  <div key={r.id} className="p-3 bg-slate-100 dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-lg flex items-start gap-2.5">
                     <div className="h-1.5 w-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0" />
                     <div>
-                      <p className="text-xs font-bold text-slate-200">{r.title}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5 capitalize">Due: {new Date(r.due_date).toLocaleDateString()}</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{r.title}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 capitalize">Due: {new Date(r.due_date).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))}
@@ -264,8 +268,8 @@ export default function AICopilot({
             <div className="flex-1 overflow-y-auto space-y-4 pr-1 max-h-[42vh]">
               {messages.length === 0 && (
                 <div className="text-center py-12 space-y-2">
-                  <Sparkles className="h-8 w-8 text-slate-600 mx-auto" />
-                  <p className="text-xs text-slate-500 font-semibold">How can I assist you with CRM statistics today?</p>
+                  <Sparkles className="h-8 w-8 text-slate-400 dark:text-slate-600 mx-auto" />
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">How can I assist you with CRM statistics today?</p>
                 </div>
               )}
 
@@ -275,8 +279,8 @@ export default function AICopilot({
                   <div key={idx} className={`flex gap-2 max-w-[90%] ${isUser ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
                     <div className={`p-3 rounded-2xl border text-xs ${
                       isUser
-                        ? 'bg-blue-600/10 border-blue-500/20 text-blue-100 rounded-tr-none'
-                        : 'bg-slate-900/30 border-white/5 text-slate-300 rounded-tl-none'
+                        ? 'bg-primary/10 border-primary/20 text-primary dark:text-blue-100 rounded-tr-none'
+                        : 'bg-slate-100 dark:bg-slate-900/30 border-slate-200 dark:border-white/5 text-slate-800 dark:text-slate-300 rounded-tl-none'
                     }`}>
                       <Markdown content={m.text} />
                     </div>
@@ -284,24 +288,24 @@ export default function AICopilot({
                 );
               })}
               {isLoading && (
-                <div className="mr-auto max-w-[80%] bg-slate-900/30 border border-white/5 p-3 rounded-2xl rounded-tl-none text-xs text-slate-500 flex items-center gap-1">
-                  <span className="h-1.5 w-1.5 bg-blue-400 rounded-full animate-bounce" />
-                  <span className="h-1.5 w-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.2s]" />
-                  <span className="h-1.5 w-1.5 bg-blue-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                <div className="mr-auto max-w-[80%] bg-slate-100 dark:bg-slate-900/30 border border-slate-200 dark:border-white/5 p-3 rounded-2xl rounded-tl-none text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                  <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" />
+                  <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
+                  <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
                 </div>
               )}
               <div ref={messagesEndRef} />
             </div>
 
             {/* Chat bottom Form */}
-            <form onSubmit={handleSendMessage} className="border-t border-white/10 pt-3 mt-auto flex gap-2">
+            <form onSubmit={handleSendMessage} className="border-t border-slate-200 dark:border-white/10 pt-3 mt-auto flex gap-2">
               <Input
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Ask about branch conversions..."
-                className="bg-slate-950 border-white/10 text-slate-100 text-xs focus:border-blue-500 flex-1"
+                className="bg-background dark:bg-slate-950 border-input dark:border-white/10 text-foreground dark:text-slate-100 text-xs focus:border-primary flex-1"
               />
-              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shrink-0">
+              <Button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 shrink-0">
                 <Send className="h-4 w-4" />
               </Button>
             </form>
