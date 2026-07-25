@@ -46,8 +46,12 @@ const NavLink: React.FC<{
   onClick: () => void;
   count?: number | null;
 }> = ({ path, label, icon: Icon, active, onClick, count }) => {
+  const tourId = `tour-sidebar-${path === '/' ? 'dashboard' : path.replace(/^\//, '').replace(/\//g, '-')}`;
+  const aliasId = path === '/branch-management' ? 'tour-sidebar-branches' : tourId;
+
   return (
     <Link
+      id={aliasId}
       to={path}
       onClick={onClick}
       className={cn(

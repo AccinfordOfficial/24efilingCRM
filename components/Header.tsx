@@ -142,7 +142,17 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
           {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
         </button>
 
-        <Link to="/notifications" className="relative">
+        <Link to="/leads/new">
+          <Button 
+            id="tour-header-create-lead"
+            size="sm" 
+            className="hidden sm:flex gap-1.5 bg-primary hover:bg-primary/95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm"
+          >
+            <PlusIcon className="h-3.5 w-3.5" /> Create Lead
+          </Button>
+        </Link>
+
+        <Link id="tour-header-notifications" to="/notifications" className="relative">
           <Button variant="ghost" size="icon" className="rounded-full relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5">
             <BellIcon className="h-5 w-5" />
             {unreadCount > 0 && (

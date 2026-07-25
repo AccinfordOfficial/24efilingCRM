@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import ResetPassword from './pages/ResetPassword';
 import { ConfirmationDialog } from './components/ui/ConfirmationDialog';
 import { SuccessConversionModal } from './components/ui/SuccessConversionModal';
+import { OnboardingTour } from './components/OnboardingTour';
 import { Toaster } from './components/ui/Toaster';
 import { TooltipProvider } from './components/ui/Tooltip';
 
@@ -1541,6 +1542,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           onUploadDocument={editingLead ? (file) => handleUploadDocument(editingLead.id, file, 'Other Documents') : undefined}
           onDeleteDocument={editingLead ? (docId) => handleDeleteDocument(editingLead.id, docId) : undefined}
         />
+        <OnboardingTour currentUserRole={viewProfile?.role} />
         <Toaster />
       </Suspense>
       </TooltipProvider>

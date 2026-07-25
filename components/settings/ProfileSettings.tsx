@@ -81,6 +81,20 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
         }
     };
 
+    const handleResetTour = async () => {
+        try {
+            await supabase.auth.updateUser({
+                data: { has_completed_tour: false }
+            });
+            showToast('success', "Interactive onboarding tour reset! Starting tour...");
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 800);
+        } catch (e: any) {
+            showToast('error', e.message);
+        }
+    };
+
     return (
         <Card className="dark:bg-slate-900/80 dark:border-white/10 shadow-sm">
             <CardHeader>
@@ -107,31 +121,58 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                             className="hidden"
                         />
                         <button
+                            type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="absolute bottom-0 right-0 p-1.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition shadow-sm cursor-pointer"
-                            title="Upload Avatar"
+                            className="absolute bottom-0 right-0 p-1.5 rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-colors"
                         >
                             <Camera className="w-4 h-4" />
                         </button>
                     </div>
+
                     <div>
-                        <h3 className="font-bold text-lg text-slate-900 dark:text-white">{currentUser.name || 'User'}</h3>
-                        <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">{currentUser.role} {currentUser.branch_name ? `• ${currentUser.branch_name}` : ''}</p>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{currentUser.name || 'User'}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">{currentUser.role} • {currentUser.branch_name || 'Head Office'}</p>
                     </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Name</label>
-                        <Input value={profileData.name} onChange={e => setProfileData({ ...profileData, name: e.target.value })} />
+                        <Input
+                            value={profileData.name}
+                            onChange={e => setProfileData({ ...profileData, name: e.target.value })}
+                            className="bg-background dark:bg-slate-950 text-foreground dark:text-white"
+                        />
                     </div>
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Email</label>
-                        <Input value={profileData.email} disabled className="bg-slate-100 dark:bg-slate-950/60 text-slate-500 dark:text-slate-400 cursor-not-allowed border-slate-200 dark:border-white/10" />
+                        <Input
+                            value={profileData.email}
+                            disabled
+                            className="bg-slate-100 dark:bg-slate-900/50 text-slate-500 cursor-not-allowed"
+                        />
                     </div>
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Mobile Number</label>
-                        <Input value={profileData.phone_number} onChange={e => setProfileData({ ...profileData, phone_number: e.target.value })} placeholder="+91..." />
+                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Phone Number</label>
+                        <Input
+                            value={profileData.phone_number}
+                            onChange={e => setProfileData({ ...profileData, phone_number: e.target.value })}
+                            placeholder="+91..."
+                            className="bg-background dark:bg-slate-950 text-foreground dark:text-white"
+                        />
+                    </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-4">
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">System Guided Tour</h4>
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-white/10">
+                        <div>
+                            <span className="text-sm font-semibold text-slate-900 dark:text-white block">Platform Onboarding Tour</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Restart the interactive walkthrough of key features.</span>
+                        </div>
+                        <Button type="button" variant="outline" size="sm" onClick={handleResetTour} className="border-slate-200 dark:border-white/10 dark:text-white text-xs">
+                            Restart Tour
+                        </Button>
                     </div>
                 </div>
 
