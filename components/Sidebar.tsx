@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Users, Briefcase, LogOut, Settings, BarChart3,
   LayoutDashboard, DollarSign, Clock, FileUp, ShieldCheck, ChevronLeft, Target, Bell, FileCheck, Layers, Package, PlusCircle, Tag,
-  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building, MapPin, Calendar, Megaphone
+  Globe, ChevronDown, ChevronUp, FileText, MessageSquare, Building, MapPin, Calendar, Megaphone, UserCheck
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { Button } from './ui/Button';

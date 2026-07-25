@@ -8,7 +8,7 @@ import {
     UserCheck, Target, AlertCircle, CheckCircle2, 
     ArrowRight, Building2, Search, Filter, Phone, Mail, Calendar, ShieldCheck
 } from 'lucide-react';
-import { useToast } from '../components/ui/Toast';
+import { useToast } from '../components/Toast';
 import { useNavigate } from 'react-router-dom';
 
 interface LeadAssignmentsProps {
