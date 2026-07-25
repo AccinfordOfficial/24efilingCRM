@@ -727,22 +727,16 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
   }, [profile, users, addLead, toast, navigate]);
 
   const handleUpdateLead = useCallback(async (leadData: Lead) => {
-    const originalLead = leads.find(l => l.id === leadData.id);
-
     setIsLeadFormOpen(false);
     setEditingLead(null);
 
-    if (originalLead && originalLead.status !== 'Success' && leadData.status === 'Success') {
-      setLeadForCustomerCreation(leadData);
-    } else {
-      try {
-        await updateLead(leadData);
-        toast.addToast('Lead updated successfully!', 'success');
-      } catch (error: any) {
-        toast.addToast(`Error: ${error.message}`, 'error');
-      }
+    try {
+      await updateLead(leadData);
+      toast.addToast('Lead updated successfully!', 'success');
+    } catch (error: any) {
+      toast.addToast(`Error: ${error.message}`, 'error');
     }
-  }, [leads, updateLead, toast]);
+  }, [updateLead, toast]);
 
   const handleConfirmCustomerCreation = useCallback(async (dob: string, pan: string, aadhar: string) => {
     if (!leadForCustomerCreation) return;

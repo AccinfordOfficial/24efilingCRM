@@ -215,16 +215,20 @@ export const getStatusColor = (status: Lead['status']) => {
   }
 };
 
-export const getPriorityColor = (priority: Lead['priority']) => {
+export const getPriorityColor = (priority: Lead['priority'] | string) => {
   switch (priority) {
     case 'Hot':
-      return 'bg-red-500';
+    case 'Urgent':
+    case 'High':
+      return 'bg-red-500/20 text-red-400 border border-red-500/30';
     case 'Warm':
-      return 'bg-yellow-500';
+    case 'Medium':
+      return 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30';
     case 'Cold':
-      return 'bg-blue-500';
+    case 'Low':
+      return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
     default:
-      return 'bg-gray-500';
+      return 'bg-slate-500/20 text-slate-400 border border-slate-500/30';
   }
 };
 

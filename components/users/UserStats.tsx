@@ -51,12 +51,12 @@ export const UserStats: React.FC<UserStatsProps> = ({
   }, [filteredUsers, allUsers, branches, cities, selectedCity, selectedBranch]);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
       <StatCard title="Total Users" value={stats.total} icon={Users} />
       <StatCard title="Active Users" value={stats.active} icon={UserCheck} />
       <StatCard title="Total Branches" value={stats.branches} icon={Building2} />
       <StatCard title="Total Cities" value={stats.cities} icon={Map} />
-      <StatCard title="Managers/Admins" value={stats.managers} icon={ShieldCheck} />
+      <StatCard title="Managers & Admins" value={stats.managers} icon={ShieldCheck} />
       <StatCard title="New This Month" value={stats.newThisMonth} icon={UserPlus} />
     </div>
   );

@@ -49,7 +49,7 @@ export const StatCard: React.FC<StatCardProps> = ({
     >
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">{title}</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate max-w-[120px] sm:max-w-none" title={title}>{title}</p>
           <h3 className="text-2xl font-bold tracking-tight text-white mt-2">
             {typeof value === 'number' ? (
               <span>{formatter(value)}</span>
