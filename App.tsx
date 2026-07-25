@@ -35,6 +35,7 @@ const ClientDocuments = lazy(() => import('./pages/ClientDocuments'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const LeadDetail = lazy(() => import('./pages/LeadDetail'));
 const CreateLead = lazy(() => import('./pages/CreateLead'));
+const LeadAssignments = lazy(() => import('./pages/LeadAssignments'));
 const LeadWorkflow = lazy(() => import('./pages/LeadWorkflow'));
 const Customers = lazy(() => import('./pages/Customers'));
 const CustomerDetail = lazy(() => import('./pages/CustomerDetail'));
@@ -1125,6 +1126,13 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             services={services} 
             leads={leads} 
             offers={offers} 
+          />
+        } />
+        <Route path="/lead-assignments" element={
+          <LeadAssignments
+            leads={leads}
+            users={users}
+            onUpdateLead={handleUpdateLead}
           />
         } />
         <Route path="/leads/:id" element={<LeadDetailRoute />} />

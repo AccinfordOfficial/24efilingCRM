@@ -45,7 +45,7 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
 
   const branchOptions = useMemo(() => {
     if (selectedCity === 'All Cities') {
-      return ['All Branches'];
+      return ['All Branches', ...branches.map(b => b.name)];
     }
     const cityId = cities.find(c => c.city_name === selectedCity)?.id;
     const filteredBranches = branches.filter(b => b.city_id === cityId).map(b => b.name);
@@ -129,13 +129,11 @@ export const UserFilterBar: React.FC<UserFilterBarProps> = ({
 
         {/* Branch Filter */}
         <div className="relative">
-          <Building className={`absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none ${selectedCity === 'All Cities' ? 'text-slate-700' : 'text-slate-500'}`} />
+          <Building className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 pointer-events-none" />
           <select
-            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200 disabled:bg-slate-950/40 disabled:text-slate-500 disabled:cursor-not-allowed"
+            className="w-full pl-9 pr-8 py-2 bg-slate-900 border border-white/10 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none appearance-none text-sm text-slate-200"
             value={selectedBranch}
             onChange={(e) => setSelectedBranch(e.target.value)}
-            disabled={selectedCity === 'All Cities'}
-            title={selectedCity === 'All Cities' ? "Select a city first" : ""}
           >
             {branchOptions.map((branch, idx) => (
               <option key={idx} value={branch} className="bg-slate-950 text-white">{branch}</option>

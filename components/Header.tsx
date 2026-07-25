@@ -21,6 +21,7 @@ const PAGE_CONFIG: Record<string, { title: string, subtitle: string }> = {
   '/users': { title: 'User Management', subtitle: 'Manage system users and their roles.' },
   '/leads': { title: 'Leads Overview', subtitle: 'Manage and track all leads in the system.' },
   '/leads/new': { title: 'Create New Lead', subtitle: 'Add a new potential customer to the system.' },
+  '/lead-assignments': { title: 'Lead Assignments', subtitle: 'Review and route Head Office pending leads to sales executives.' },
   '/my-leads': { title: 'My Leads', subtitle: 'View and manage leads created by you.' },
   '/lead-workflow': { title: 'Lead Workflow', subtitle: 'Visualize and manage your sales pipeline.' },
   '/customers': { title: 'Customers', subtitle: 'View all converted leads and manage customer relationships.' },

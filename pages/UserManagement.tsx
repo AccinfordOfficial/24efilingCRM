@@ -12,6 +12,7 @@ import { UserGrid } from '../components/users/UserGrid';
 import { UserTable } from '../components/users/UserTable';
 import { UserTreeView } from '../components/users/UserTreeView';
 import { TransferUserModal } from '../components/users/TransferUserModal';
+import { UserDetailDrawer } from '../components/users/UserDetailDrawer';
 
 interface UserManagementProps {
   users: User[];
@@ -324,15 +325,15 @@ const UserManagement: React.FC<UserManagementProps> = ({
         cancelButtonText="Cancel"
       />
 
-      {/* Activity History Modal */}
-      <Dialog isOpen={!!viewingUser} onClose={() => setViewingUser(null)} title={viewingUser ? `${viewingUser.name}'s Activity` : 'Activity History'} maxWidth="600px">
-        <div className="mt-4 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
-          {viewingUser && <UserActivityTimeline activities={selectedUserActivities} />}
-        </div>
-        <div className="mt-6 flex justify-end">
-          <Button onClick={() => setViewingUser(null)}>Close</Button>
-        </div>
-      </Dialog>
+      {/* User Detail Right Side Drawer */}
+      <UserDetailDrawer
+        user={viewingUser}
+        onClose={() => setViewingUser(null)}
+        userActivities={userActivities}
+        onEdit={handleEdit}
+        onTransfer={handleTransferClick}
+        canManage={currentUserRole === 'Super Admin' || currentUserRole === 'Admin'}
+      />
 
       {/* Transfer User Modal */}
       <TransferUserModal

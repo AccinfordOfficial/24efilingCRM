@@ -244,13 +244,15 @@ export const getTaskPriorityColor = (priority: TaskPriority) => {
 export const getRoleColor = (role: User['role']) => {
   switch (role) {
     case 'Super Admin':
-      return 'bg-purple-100 text-purple-800';
+      return 'bg-purple-500/15 text-purple-400 border border-purple-500/30 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/30';
     case 'Admin':
-      return 'bg-pink-100 text-pink-800';
+      return 'bg-amber-500/15 text-amber-400 border border-amber-500/30 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30';
+    case 'Branch Manager':
+      return 'bg-blue-500/15 text-blue-400 border border-blue-500/30 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30';
     case 'Sales Executive':
-      return 'bg-green-100 text-green-800';
+      return 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30';
     default:
-      return 'bg-gray-100 text-gray-800';
+      return 'bg-slate-500/15 text-slate-400 border border-slate-500/30 dark:bg-slate-500/20 dark:text-slate-300 dark:border-slate-500/30';
   }
 };
 

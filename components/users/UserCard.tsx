@@ -31,7 +31,10 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onEdit, onToggleStatus
   })();
 
   return (
-    <div className="glass-card border border-white/5 hover:border-primary/20 transition-all duration-300 flex flex-col group overflow-hidden">
+    <div 
+      onClick={() => onViewActivity(user)}
+      className="glass-card border border-white/5 hover:border-primary/30 transition-all duration-300 flex flex-col group overflow-hidden cursor-pointer"
+    >
       {/* Top Banner (Color bar based on role) */}
       <div className={`h-2 w-full ${roleColor.replace('text-', 'bg-').replace('bg-opacity-10', '')}`} style={{ backgroundColor: user.role === 'Super Admin' ? '#8b5cf6' : user.role === 'Admin' ? '#f59e0b' : '#3b82f6' }} />
       

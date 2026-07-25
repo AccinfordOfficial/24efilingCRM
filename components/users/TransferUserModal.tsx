@@ -68,62 +68,62 @@ export const TransferUserModal: React.FC<TransferUserModalProps> = ({ isOpen, on
             isOpen={isOpen}
             onClose={onClose}
             title={`Transfer ${user.name}`}
-            description="Transfer this user to a new branch or city."
+            description="Transfer this employee to a new branch or city."
             maxWidth="max-w-md"
         >
-            <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-5 mt-2">
+                <div className="p-4 rounded-xl bg-slate-900/80 dark:bg-slate-950/80 border border-slate-200 dark:border-white/10 space-y-3">
                     <div className="grid grid-cols-2 gap-3 text-xs">
                         <div>
-                            <span className="text-slate-400 font-semibold block uppercase tracking-wider">Employee Name</span>
-                            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{user.name}</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium block uppercase tracking-wider text-[10px]">Employee Name</span>
+                            <span className="font-bold text-slate-900 dark:text-white text-sm mt-0.5 block">{user.name}</span>
                         </div>
                         <div>
-                            <span className="text-slate-400 font-semibold block uppercase tracking-wider">Current Role</span>
-                            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{user.role}</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium block uppercase tracking-wider text-[10px]">Current Role</span>
+                            <span className="font-bold text-slate-900 dark:text-white text-sm mt-0.5 block">{user.role}</span>
                         </div>
                         <div>
-                            <span className="text-slate-400 font-semibold block uppercase tracking-wider">Current City</span>
-                            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{user.city_name || 'N/A'}</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium block uppercase tracking-wider text-[10px]">Current City</span>
+                            <span className="font-bold text-slate-900 dark:text-white text-sm mt-0.5 block">{user.city_name || 'N/A'}</span>
                         </div>
                         <div>
-                            <span className="text-slate-400 font-semibold block uppercase tracking-wider">Current Branch</span>
-                            <span className="font-bold text-slate-800 text-sm mt-0.5 block">{user.branch_name || 'N/A'}</span>
+                            <span className="text-slate-500 dark:text-slate-400 font-medium block uppercase tracking-wider text-[10px]">Current Branch</span>
+                            <span className="font-bold text-slate-900 dark:text-white text-sm mt-0.5 block">{user.branch_name || 'N/A'}</span>
                         </div>
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Transfer Type</label>
-                    <Select value={transferType} onChange={handleTransferTypeChange} className="bg-white">
-                        <option value="Branch Transfer">Branch Transfer (Same City)</option>
-                        <option value="City Transfer">City Transfer</option>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Transfer Type</label>
+                    <Select value={transferType} onChange={handleTransferTypeChange} className="bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                        <option value="Branch Transfer" className="bg-slate-950 text-white">Branch Transfer (Same City)</option>
+                        <option value="City Transfer" className="bg-slate-950 text-white">City Transfer</option>
                     </Select>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Target City</label>
-                    <Select value={selectedCityId} onChange={handleCityChange} disabled={transferType === 'Branch Transfer'} className="bg-white">
-                        <option value="" disabled>-- Select City --</option>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target City</label>
+                    <Select value={selectedCityId} onChange={handleCityChange} disabled={transferType === 'Branch Transfer'} className="bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                        <option value="" disabled className="bg-slate-950 text-white">-- Select City --</option>
                         {cities.map(c => (
-                            <option key={c.id} value={c.id}>{c.city_name}</option>
+                            <option key={c.id} value={c.id} className="bg-slate-950 text-white">{c.city_name}</option>
                         ))}
                     </Select>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Target Branch</label>
-                    <Select value={selectedBranchId} onChange={handleBranchChange} disabled={!selectedCityId} className="bg-white">
-                        <option value="" disabled>-- Select Branch --</option>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Target Branch</label>
+                    <Select value={selectedBranchId} onChange={handleBranchChange} disabled={!selectedCityId} className="bg-background dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10">
+                        <option value="" disabled className="bg-slate-950 text-white">-- Select Branch --</option>
                         {availableBranches.map(b => (
-                            <option key={b.id} value={b.id} disabled={b.id === user.branch_id}>{b.name} {b.code ? `(${b.code})` : ''}</option>
+                            <option key={b.id} value={b.id} disabled={b.id === user.branch_id} className="bg-slate-950 text-white">{b.name} {b.code ? `(${b.code})` : ''}</option>
                         ))}
                     </Select>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                    <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
-                    <Button type="submit" disabled={!selectedCityId || !selectedBranchId}>Transfer</Button>
+                <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-white/10">
+                    <Button type="button" variant="ghost" onClick={onClose} className="dark:text-slate-400 dark:hover:text-white">Cancel</Button>
+                    <Button type="submit" disabled={!selectedCityId || !selectedBranchId} className="bg-primary hover:bg-primary/95 text-white">Complete Transfer</Button>
                 </div>
             </form>
         </Dialog>

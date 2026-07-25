@@ -94,6 +94,7 @@ const superAdminNav: NavSection[] = [
     items: [
       { path: '/my-day', label: 'My Day', icon: Calendar },
       { path: '/leads', label: 'All Leads', icon: Briefcase },
+      { path: '/lead-assignments', label: 'Lead Assignments', icon: UserCheck },
       { path: '/customers', label: 'Customers', icon: Users },
       { path: '/services', label: 'Services Catalog', icon: Layers },
       { path: '/targets', label: 'Sales Targets', icon: Target },
@@ -175,6 +176,7 @@ const adminNav: NavSection[] = [
     title: 'Sales',
     items: [
       { path: '/leads', label: 'All Leads', icon: Briefcase },
+      { path: '/lead-assignments', label: 'Lead Assignments', icon: UserCheck },
       { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
       { path: '/my-leads', label: 'My Leads', icon: Target },
       { path: '/lead-workflow', label: 'Lead Workflow', icon: Target },
@@ -240,6 +242,7 @@ const salesExecNav: NavSection[] = [
   {
     title: 'Sales',
     items: [
+      { path: '/lead-assignments', label: 'Lead Assignments', icon: UserCheck },
       { path: '/leads/new', label: 'Create New Lead', icon: PlusCircle },
       { path: '/my-leads', label: 'My Leads', icon: Target },
       { path: '/customers', label: 'Customers', icon: Users },
