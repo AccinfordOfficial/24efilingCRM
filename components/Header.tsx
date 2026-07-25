@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { MenuIcon, SearchIcon, BellIcon } from './icons';
+import { MenuIcon, SearchIcon, BellIcon, PlusIcon } from './icons';
 import { Button } from './ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 
