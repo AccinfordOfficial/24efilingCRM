@@ -379,15 +379,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       break;
   }
 
+  const roleScopedLeads = React.useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'Super Admin') return leads;
+
+    return leads.filter(lead => {
+      const assignedId = typeof lead.assigned_to === 'object' && lead.assigned_to !== null 
+        ? (lead.assigned_to as any).id 
+        : lead.assigned_to;
+      const createdId = typeof lead.created_by === 'object' && lead.created_by !== null 
+        ? (lead.created_by as any).id 
+        : lead.created_by;
+
+      const assignedUser = users.find(u => u.id === assignedId);
+      const leadBranchId = lead.branch_id || assignedUser?.branch_id;
+      const leadBranchName = lead.branch_name || assignedUser?.branch_name;
+
+      if (currentUser.role === 'Admin' || currentUser.role === 'Branch Manager') {
+        if (!currentUser.branch_id && !currentUser.branch_name) return true;
+        return leadBranchId === currentUser.branch_id || leadBranchName === currentUser.branch_name;
+      }
+
+      // Sales Executive and other roles
+      const isAssignedToUser = assignedId === currentUser.id;
+      const isCreatedByUser = createdId === currentUser.id;
+      const isUserBranch = currentUser.branch_id 
+        ? leadBranchId === currentUser.branch_id 
+        : (currentUser.branch_name ? leadBranchName === currentUser.branch_name : true);
+
+      return isAssignedToUser || isCreatedByUser || isUserBranch;
+    });
+  }, [leads, users, currentUser]);
+
   const handleNavClick = () => {
     if (window.innerWidth < 768) onClose();
   }
 
   const getPageCount = (path: string): number | null => {
     if (path === '/users') return users.length;
-    if (path === '/leads') return leads.length;
+    if (path === '/leads') return roleScopedLeads.length > 0 ? roleScopedLeads.length : null;
     if (path === '/my-leads') {
-      const myLeadsCount = leads.filter(l => l.created_by === currentUser?.id).length;
+      const myLeadsCount = roleScopedLeads.filter(l => {
+        const createdId = typeof l.created_by === 'object' && l.created_by !== null ? (l.created_by as any).id : l.created_by;
+        const assignedId = typeof l.assigned_to === 'object' && l.assigned_to !== null ? (l.assigned_to as any).id : l.assigned_to;
+        return createdId === currentUser?.id || assignedId === currentUser?.id;
+      }).length;
       return myLeadsCount > 0 ? myLeadsCount : null;
     }
     
@@ -397,7 +433,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       const now = new Date();
       now.setHours(23, 59, 59, 999);
       
-      const relevantLeads = leads.filter(l => ['Super Admin', 'Admin'].includes(userRole) || l.assigned_to?.id === currentUser?.id || l.created_by === currentUser?.id);
+      const relevantLeads = roleScopedLeads.filter(l => {
+        const assignedId = typeof l.assigned_to === 'object' && l.assigned_to !== null ? (l.assigned_to as any).id : l.assigned_to;
+        const createdId = typeof l.created_by === 'object' && l.created_by !== null ? (l.created_by as any).id : l.created_by;
+        return ['Super Admin', 'Admin'].includes(userRole) || assignedId === currentUser?.id || createdId === currentUser?.id;
+      });
       relevantLeads.forEach(lead => {
         if (lead.next_follow_up) {
            const d = new Date(lead.next_follow_up);

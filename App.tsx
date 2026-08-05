@@ -348,14 +348,34 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
   const roleScopedLeads = React.useMemo(() => {
     if (!viewProfile) return [];
     if (viewProfile.role === 'Super Admin') return leads;
-    if (viewProfile.role === 'Admin' || viewProfile.role === 'Branch Manager') {
-      return leads.filter(lead => lead.branch_id === viewProfile.branch_id || lead.assigned_to?.branch_id === viewProfile.branch_id || lead.branch_name === viewProfile.branch_name);
-    }
-    return leads.filter(lead =>
-      lead.assigned_to?.id === viewProfile.id ||
-      lead.created_by === viewProfile.id
-    );
-  }, [leads, viewProfile]);
+
+    return leads.filter(lead => {
+      const assignedId = typeof lead.assigned_to === 'object' && lead.assigned_to !== null 
+        ? (lead.assigned_to as any).id 
+        : lead.assigned_to;
+      const createdId = typeof lead.created_by === 'object' && lead.created_by !== null 
+        ? (lead.created_by as any).id 
+        : lead.created_by;
+
+      const assignedUser = users.find(u => u.id === assignedId);
+      const leadBranchId = lead.branch_id || assignedUser?.branch_id;
+      const leadBranchName = lead.branch_name || assignedUser?.branch_name;
+
+      if (viewProfile.role === 'Admin' || viewProfile.role === 'Branch Manager') {
+        if (!viewProfile.branch_id && !viewProfile.branch_name) return true;
+        return leadBranchId === viewProfile.branch_id || leadBranchName === viewProfile.branch_name;
+      }
+
+      // Sales Executive and other roles
+      const isAssignedToUser = assignedId === viewProfile.id;
+      const isCreatedByUser = createdId === viewProfile.id;
+      const isUserBranch = viewProfile.branch_id 
+        ? leadBranchId === viewProfile.branch_id 
+        : (viewProfile.branch_name ? leadBranchName === viewProfile.branch_name : true);
+
+      return isAssignedToUser || isCreatedByUser || isUserBranch;
+    });
+  }, [leads, users, viewProfile]);
 
   const roleScopedCustomers = React.useMemo(() => {
     if (!viewProfile) return [];

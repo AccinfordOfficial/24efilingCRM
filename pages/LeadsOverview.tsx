@@ -128,13 +128,21 @@ const LeadsOverview: React.FC<LeadsOverviewProps> = ({
             const statusMatch = statusFilter === 'All' || lead.status === statusFilter;
             const priorityMatch = priorityFilter === 'All' || lead.priority === priorityFilter;
             const serviceMatch = serviceFilter === 'All' || (lead.service_requested && lead.service_requested.includes(serviceFilter));
+            
+            const assignedId = typeof lead.assigned_to === 'object' && lead.assigned_to !== null 
+                ? (lead.assigned_to as any).id 
+                : lead.assigned_to;
+            const createdId = typeof lead.created_by === 'object' && lead.created_by !== null 
+                ? (lead.created_by as any).id 
+                : lead.created_by;
+
             const assigneeMatch = assigneeFilter === 'All'
                 ? true
                 : assigneeFilter === 'Unassigned'
-                    ? !lead.assigned_to
-                    : lead.assigned_to?.id === assigneeFilter;
+                    ? !assignedId
+                    : assignedId === assigneeFilter;
             const scoreMatch = scoreFilter === 'All' || getScoreCategory(lead.score || 0).category === scoreFilter;
-            const createdByMatch = createdByFilter === 'All' || lead.created_by === createdByFilter;
+            const createdByMatch = createdByFilter === 'All' || createdId === createdByFilter;
             return statusMatch && priorityMatch && serviceMatch && assigneeMatch && scoreMatch && createdByMatch;
         });
     }, [leads, statusFilter, priorityFilter, serviceFilter, assigneeFilter, scoreFilter, createdByFilter]);

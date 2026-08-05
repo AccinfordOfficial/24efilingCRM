@@ -434,26 +434,35 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                         {lead.service_requested}
                       </td>
                       <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-600 dark:text-slate-300">
-                        {lead.assigned_to ? (
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-2">
-                              <img src={lead.assigned_to.avatar_url} alt={lead.assigned_to.name} className="w-6 h-6 rounded-full" />
-                              <span className="text-sm text-slate-700 dark:text-slate-200">{lead.assigned_to.name}</span>
+                        {(() => {
+                          const assignedUser = typeof lead.assigned_to === 'object' && lead.assigned_to !== null 
+                            ? lead.assigned_to 
+                            : users.find(u => u.id === lead.assigned_to);
+                          const createdId = typeof lead.created_by === 'object' && lead.created_by !== null 
+                            ? (lead.created_by as any).id 
+                            : lead.created_by;
+
+                          return assignedUser ? (
+                            <div className="flex flex-col">
+                              <div className="flex items-center gap-2">
+                                <img src={assignedUser.avatar_url} alt={assignedUser.name} className="w-6 h-6 rounded-full" />
+                                <span className="text-sm text-slate-700 dark:text-slate-200">{assignedUser.name}</span>
+                              </div>
+                              {lead.assigned_at && (
+                                <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-8">
+                                  {new Date(lead.assigned_at).toLocaleDateString()}
+                                </span>
+                              )}
+                              {createdId === currentUser.id && assignedUser.id !== currentUser.id && (
+                                <span className="text-[10px] text-primary font-medium ml-8">
+                                  Shared (Owned by you)
+                                </span>
+                              )}
                             </div>
-                            {lead.assigned_at && (
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400 ml-8">
-                                {new Date(lead.assigned_at).toLocaleDateString()}
-                              </span>
-                            )}
-                            {lead.created_by === currentUser.id && lead.assigned_to.id !== currentUser.id && (
-                              <span className="text-[10px] text-primary font-medium ml-8">
-                                Shared (Owned by you)
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-slate-500 dark:text-slate-400">Unassigned</span>
-                        )}
+                          ) : (
+                            <span className="text-slate-500 dark:text-slate-400">Unassigned</span>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-4 md:px-6 hidden lg:table-cell text-slate-600 dark:text-slate-300">
                         {(() => {
