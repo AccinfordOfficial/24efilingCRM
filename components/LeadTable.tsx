@@ -10,6 +10,7 @@ import { Input } from './ui/Input';
 import { Select } from './ui/Select';
 import { getScoreCategory } from '../lib/scoring';
 import { usePagination } from '../hooks/usePagination';
+import { useToast } from './Toast';
 
 
 interface LeadTableProps {
@@ -239,10 +240,18 @@ export const LeadTable: React.FC<LeadTableProps> = ({
     setSelectedLeadIds([]);
   };
 
-  const handleConfirmDelete = () => {
-    onDeleteMultipleLeads(selectedLeadIds);
-    setSelectedLeadIds([]);
-    setIsDeleteConfirmOpen(false);
+  const toast = useToast();
+
+  const handleConfirmDelete = async () => {
+    try {
+      await onDeleteMultipleLeads(selectedLeadIds);
+      toast.addToast(`${selectedLeadIds.length} lead(s) deleted successfully`, 'success');
+      setSelectedLeadIds([]);
+    } catch (err: any) {
+      toast.addToast(`Failed to delete lead: ${err.message || 'Permission denied'}`, 'error');
+    } finally {
+      setIsDeleteConfirmOpen(false);
+    }
   };
 
   const statusOptions = LEAD_STATUSES.map(status => ({ value: status, label: status }));
@@ -492,9 +501,23 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                         })()}
                       </td>
                       <td className="px-4 py-4 md:px-6 text-right" onClick={(e) => e.stopPropagation()}>
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(lead)}>
-                          <MoreVerticalIcon className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button variant="ghost" size="icon" title="Edit Lead" onClick={() => handleEdit(lead)}>
+                            <MoreVerticalIcon className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            title="Delete Lead"
+                            className="text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors"
+                            onClick={() => {
+                              setSelectedLeadIds([lead.id]);
+                              setIsDeleteConfirmOpen(true);
+                            }}
+                          >
+                            <Trash2Icon className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </td>
                     </tr>
                   )

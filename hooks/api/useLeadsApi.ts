@@ -470,10 +470,21 @@ export function useLeadsApi(core: {
     }, [fetchData]);
 
     const deleteMultipleLeads = useCallback(async (leadIds: string[]) => {
-        const { error } = await supabase.from('leads').delete().in('id', leadIds);
-        if (error) throw error;
-        await fetchData();
-    }, [fetchData]);
+        try {
+            const { error } = await supabase.from('leads').delete().in('id', leadIds);
+            if (error) {
+                console.error('[Leads API] Delete lead error:', error);
+                throw new Error(error.message || 'Permission denied or database error during deletion.');
+            }
+            if (setLeads) {
+                setLeads(prev => prev.filter(l => !leadIds.includes(l.id)));
+            }
+            await fetchData();
+        } catch (err: any) {
+            console.error('[Leads API] Failed to delete leads:', err);
+            throw err;
+        }
+    }, [setLeads, fetchData]);
 
     const fetchLeadsPaginated = useCallback(async (page: number, pageSize: number, filters: {
         status?: string;
