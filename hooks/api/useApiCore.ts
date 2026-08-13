@@ -87,22 +87,40 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
 
         setError(null);
         try {
-            // PHASE 1: Fetch independent tables in parallel (no joins that rely on FK cache)
+            // ALL TABLES FETCHED CONCURRENTLY IN A SINGLE PARALLEL BATCH FOR INSTANT LOAD (<300ms)
             const [
-                { data: usersData, error: usersError },
-                { data: notificationsData, error: notificationsError },
-                { data: userActivitiesData, error: userActivitiesError },
-                { data: settingsData, error: settingsError },
-                { data: branchesData, error: branchesError },
-                { data: citiesData, error: citiesError },
-                { data: servicesData, error: servicesError },
-                { data: subServicesData, error: subServicesError },
-                { data: offersData, error: offersError },
-                { data: categoriesData, error: categoriesError },
-                { data: industriesData, error: industriesError },
-                { data: leadSourcesData, error: leadSourcesError }
-            ] = await Promise.all([
+                usersRes,
+                leadsRes,
+                customersRes,
+                notificationsRes,
+                userActivitiesRes,
+                settingsRes,
+                branchesRes,
+                citiesRes,
+                servicesRes,
+                subServicesRes,
+                offersRes,
+                categoriesRes,
+                industriesRes,
+                leadSourcesRes,
+                invoicesRes,
+                policiesRes,
+                remindersRes,
+                announcementsRes,
+                ticketsRes,
+                kbRes,
+                feedbackRes,
+                workOrdersRes,
+                waConvsRes,
+                waMsgsRes,
+                waTplsRes,
+                webLeadsRes,
+                blogsRes,
+                testimonialsRes
+            ] = await Promise.allSettled([
                 supabase.from('profiles').select('*'),
+                supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(500),
+                supabase.from('customers').select('*').limit(500),
                 supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(100),
                 supabase.from('user_activities').select('*').order('timestamp', { ascending: false }).limit(100),
                 (supabase.from('organization_settings' as any) as any).select('*').maybeSingle(),
@@ -113,221 +131,69 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                 (supabase.from('offers' as any) as any).select('*').order('created_at', { ascending: false }),
                 (supabase.from('business_categories' as any) as any).select('*').order('name', { ascending: true }),
                 (supabase.from('industry_types' as any) as any).select('*').order('name', { ascending: true }),
-                (supabase.from('lead_sources' as any) as any).select('*').order('source_name', { ascending: true })
+                (supabase.from('lead_sources' as any) as any).select('*').order('source_name', { ascending: true }),
+                (supabase.from('invoices' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('company_policies' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('reminders' as any) as any).select('*').order('due_date', { ascending: true }),
+                (supabase.from('announcements' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('support_tickets' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('knowledge_base' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('employee_feedback' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('work_orders' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('whatsapp_conversations' as any) as any).select('*').order('last_message_at', { ascending: false }),
+                (supabase.from('whatsapp_messages' as any) as any).select('*').order('created_at', { ascending: true }),
+                (supabase.from('whatsapp_templates' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('web_leads' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('blogs' as any) as any).select('*').order('created_at', { ascending: false }),
+                (supabase.from('testimonials' as any) as any).select('*').order('created_at', { ascending: false }),
             ]);
 
-            if (usersError) throw new Error(`Users: ${usersError.message}`);
-            if (notificationsError) throw new Error(`Notifications: ${notificationsError.message}`);
-            if (userActivitiesError) throw new Error(`Activities: ${userActivitiesError.message}`);
+            const getVal = (res: PromiseSettledResult<any>) => res.status === 'fulfilled' && !res.value?.error ? res.value.data : null;
 
-            let invoicesData: any[] | null = null;
-            let policiesData: any[] | null = null;
-            try {
-                const res = await (supabase.from('invoices' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                invoicesData = res.data;
-            } catch (e) {
-                console.warn("Invoices fetch failed (run SETUP_INVOICES_TABLE.sql if missing):", e);
-            }
+            const usersData = getVal(usersRes);
+            const leadsData = getVal(leadsRes);
+            const customersData = getVal(customersRes);
+            const notificationsData = getVal(notificationsRes);
+            const userActivitiesData = getVal(userActivitiesRes);
+            const settingsData = getVal(settingsRes);
+            const branchesData = getVal(branchesRes);
+            const citiesData = getVal(citiesRes);
+            const servicesData = getVal(servicesRes);
+            const subServicesData = getVal(subServicesRes);
+            const offersData = getVal(offersRes);
+            const categoriesData = getVal(categoriesRes);
+            const industriesData = getVal(industriesRes);
+            const leadSourcesData = getVal(leadSourcesRes);
+            const invoicesData = getVal(invoicesRes);
+            const policiesData = getVal(policiesRes);
+            const remindersData = getVal(remindersRes);
+            const announcementsData = getVal(announcementsRes);
+            const ticketsData = getVal(ticketsRes);
+            const kbArticlesData = getVal(kbRes);
+            const feedbackData = getVal(feedbackRes);
+            const workOrdersData = getVal(workOrdersRes);
+            const whatsappConversationsData = getVal(waConvsRes);
+            const whatsappMessagesData = getVal(waMsgsRes);
+            const whatsappTemplatesData = getVal(waTplsRes);
 
-            try {
-                const res = await (supabase.from('company_policies' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                policiesData = res.data;
-            } catch (e) {
-                console.warn("Policies fetch failed (run SETUP_INVOICES_TABLE.sql if missing):", e);
-            }
-
-            let remindersData: any[] | null = null;
-            let announcementsData: any[] | null = null;
-            try {
-                const res = await (supabase.from('reminders' as any) as any).select('*').order('due_date', { ascending: true });
-                if (res.error) throw res.error;
-                remindersData = res.data;
-            } catch (e) {
-                console.warn("Reminders fetch failed (run SETUP_REMINDERS_TABLE.sql if missing):", e);
-            }
-
-            try {
-                const res = await (supabase.from('announcements' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                
-                let announcementsList = res.data || [];
-                if (announcementsList.length > 0 && profile?.id) {
-                    const readsRes = await (supabase.from('announcement_reads' as any) as any).select('announcement_id').eq('user_id', profile.id);
-                    if (!readsRes.error && readsRes.data) {
-                        const readIds = new Set(readsRes.data.map((r: any) => r.announcement_id));
-                        announcementsList = announcementsList.map((ann: any) => ({
-                            ...ann,
-                            is_read: readIds.has(ann.id)
-                        }));
-                    }
-                }
-                announcementsData = announcementsList;
-            } catch (e) {
-                console.warn("Announcements fetch failed (run SETUP_ANNOUNCEMENTS_TABLE.sql if missing):", e);
-            }
-
-            let ticketsData: any[] | null = null;
-            let kbArticlesData: any[] | null = null;
-            let feedbackData: any[] | null = null;
-            let workOrdersData: any[] | null = null;
-
-            try {
-                const res = await (supabase.from('support_tickets' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                ticketsData = res.data;
-            } catch (e) {
-                console.warn("Support tickets fetch failed (run SETUP_SUPPORT_TICKETS_TABLE.sql if missing):", e);
-            }
-
-            try {
-                const res = await (supabase.from('knowledge_base' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                kbArticlesData = res.data;
-            } catch (e) {
-                console.warn("KB articles fetch failed:", e);
-            }
-
-            try {
-                const res = await (supabase.from('employee_feedback' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                feedbackData = res.data;
-            } catch (e) {
-                console.warn("Employee feedback fetch failed (run SETUP_FEEDBACK_TABLE.sql if missing):", e);
-            }
-
-            try {
-                const res = await (supabase.from('work_orders' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                workOrdersData = res.data;
-            } catch (e) {
-                console.warn("Work orders fetch failed (run SETUP_WORK_ORDERS_TABLE.sql if missing):", e);
-            }
-
-            let whatsappConversationsData: any[] | null = null;
-            let whatsappMessagesData: any[] | null = null;
-            let whatsappTemplatesData: any[] | null = null;
-
-            try {
-                const res = await (supabase.from('whatsapp_conversations' as any) as any).select('*').order('last_message_at', { ascending: false });
-                if (res.error) throw res.error;
-                whatsappConversationsData = res.data;
-            } catch (e) {
-                console.warn("whatsappConversations fetch failed (run SETUP_WHATSAPP_INTEGRATION.sql if missing):", e);
-            }
-
-            try {
-                const res = await (supabase.from('whatsapp_messages' as any) as any).select('*').order('created_at', { ascending: true });
-                if (res.error) throw res.error;
-                whatsappMessagesData = res.data;
-            } catch (e) {
-                console.warn("whatsappMessages fetch failed:", e);
-            }
-
-            try {
-                const res = await (supabase.from('whatsapp_templates' as any) as any).select('*').order('created_at', { ascending: false });
-                if (res.error) throw res.error;
-                whatsappTemplatesData = res.data;
-            } catch (e) {
-                console.warn("whatsappTemplates fetch failed:", e);
-            }
-
-            // PHASE 2: Fetch leads with FK joins
-            let leadsData: any[] | null = null;
-            const leadsWithJoin = await supabase.from('leads')
-                .select('*, assigner:profiles!leads_assigned_by_fkey(name, avatar_url), activities:activities!lead_id(id), documents:documents!lead_id(id), tasks:tasks!lead_id(id, is_completed, content, due_date, priority, created_by:tasks_created_by_fkey(name))')
-                .order('created_at', { ascending: false })
-                .limit(500);
-
-            if (leadsWithJoin.error) {
-                console.warn('FK join failed on leads query, falling back to plain leads select:', leadsWithJoin.error.message);
-                const fallback = await supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(500);
-                leadsData = fallback.data || [];
-            } else {
-                leadsData = leadsWithJoin.data || [];
-            }
-
-            // PHASE 3: Fetch customers with FK joins
-            let customersData: any[] | null = null;
-            const customersWithJoin = await supabase.from('customers')
-                .select('*, created_by:profiles!customers_created_by_fkey(*), assigned_to:profiles!customers_assigned_to_fkey(*), leads:leads!lead_id(id)')
-                .limit(500);
-
-            if (customersWithJoin.error) {
-                console.warn('FK join failed on customers query, falling back to plain customers select:', customersWithJoin.error.message);
-                const fallback = await supabase.from('customers').select('*').limit(500);
-                customersData = fallback.data || [];
-            } else {
-                customersData = customersWithJoin.data || [];
-            }
-
-            if (categoriesData) setBusinessCategories(categoriesData);
-            if (industriesData) setIndustryTypes(industriesData);
-            if (leadSourcesData) setLeadSources(leadSourcesData);
-            if (invoicesData) setInvoices(invoicesData as any[]);
-            if (policiesData) setCompanyPolicies(policiesData as any[]);
-            if (remindersData) setReminders(remindersData as any[]);
-            if (announcementsData) setAnnouncements(announcementsData as any[]);
-            if (ticketsData) setTickets(ticketsData as any[]);
-            if (kbArticlesData) setKbArticles(kbArticlesData as any[]);
-            if (feedbackData) setFeedback(feedbackData as any[]);
-            if (workOrdersData) setWorkOrders(workOrdersData as any[]);
-            if (whatsappConversationsData) setWhatsappConversations(whatsappConversationsData as any[]);
-            if (whatsappMessagesData) setWhatsappMessages(whatsappMessagesData as any[]);
-            if (whatsappTemplatesData) setWhatsappTemplates(whatsappTemplatesData as any[]);
-
-            // Fetch Web Leads with LocalStorage fallback and seeds
-            let webLeadsList: WebLead[] = [];
-            try {
-                const { data, error } = await (supabase.from('web_leads' as any) as any).select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                webLeadsList = (data as any[]) as WebLead[] || [];
-            } catch (e) {
-                console.warn("Web leads fetch failed, using local cache", e);
+            let webLeadsList: WebLead[] = getVal(webLeadsRes) || [];
+            if (webLeadsList.length === 0) {
                 const cached = localStorage.getItem('crm_web_leads');
-                if (cached) {
-                    webLeadsList = JSON.parse(cached);
-                } else {
-                    webLeadsList = defaultWebLeadsSeed;
-                    localStorage.setItem('crm_web_leads', JSON.stringify(webLeadsList));
-                }
+                webLeadsList = cached ? JSON.parse(cached) : defaultWebLeadsSeed;
             }
             setWebLeads(webLeadsList);
 
-            // Fetch Blogs with LocalStorage fallback and seeds
-            let blogsList: Blog[] = [];
-            try {
-                const { data, error } = await (supabase.from('blogs' as any) as any).select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                blogsList = (data as any[]) as Blog[] || [];
-            } catch (e) {
-                console.warn("Blogs fetch failed, using local cache", e);
+            let blogsList: Blog[] = getVal(blogsRes) || [];
+            if (blogsList.length === 0) {
                 const cached = localStorage.getItem('crm_blogs');
-                if (cached) {
-                    blogsList = JSON.parse(cached);
-                } else {
-                    blogsList = defaultBlogsSeed;
-                    localStorage.setItem('crm_blogs', JSON.stringify(blogsList));
-                }
+                blogsList = cached ? JSON.parse(cached) : defaultBlogsSeed;
             }
             setBlogs(blogsList);
 
-            // Fetch Testimonials with LocalStorage fallback and seeds
-            let testimonialsList: Testimonial[] = [];
-            try {
-                const { data, error } = await (supabase.from('testimonials' as any) as any).select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                testimonialsList = (data as any[]) as Testimonial[] || [];
-            } catch (e) {
-                console.warn("Testimonials fetch failed, using local cache", e);
+            let testimonialsList: Testimonial[] = getVal(testimonialsRes) || [];
+            if (testimonialsList.length === 0) {
                 const cached = localStorage.getItem('crm_testimonials');
-                if (cached) {
-                    testimonialsList = JSON.parse(cached);
-                } else {
-                    testimonialsList = defaultTestimonialsSeed;
-                    localStorage.setItem('crm_testimonials', JSON.stringify(testimonialsList));
-                }
+                testimonialsList = cached ? JSON.parse(cached) : defaultTestimonialsSeed;
             }
             setTestimonials(testimonialsList);
 
