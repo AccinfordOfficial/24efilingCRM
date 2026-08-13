@@ -1031,6 +1031,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   const isAdminOrAbove = viewProfile?.role === 'Super Admin' || viewProfile?.role === 'Admin' || viewProfile?.role === 'Branch Manager';
   const isSuperAdmin = viewProfile?.role === 'Super Admin';
+  const canAssignLeads = isAdminOrAbove || (viewProfile?.role === 'Sales Executive' && (viewProfile?.branch_name === 'Head Office' || viewProfile?.branch_name?.toLowerCase().includes('head office')));
   const AccessDenied = ({ requiredRole }: { requiredRole: string }) => (
     <div className="p-8 text-center text-red-500">
       <h2 className="text-xl font-bold">Access Denied</h2>
@@ -1118,20 +1119,22 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
         <Route path="/leads" element={
-          <LeadsOverview
-            leads={roleScopedLeads}
-            users={users}
-            currentUser={viewProfile!}
-            onAddLead={handleNavigateToCreateLead}
-            onUpdateLead={handleUpdateLead}
-            onUpdateMultipleLeads={updateMultipleLeads}
-            onDeleteMultipleLeads={deleteMultipleLeads}
-            onViewLead={handleViewLead}
-            onAddActivity={addActivityToLead}
-            dateRange={dateRange}
-            services={services}
-            offers={offers}
-          />
+          isAdminOrAbove ? (
+            <LeadsOverview
+              leads={roleScopedLeads}
+              users={users}
+              currentUser={viewProfile!}
+              onAddLead={handleNavigateToCreateLead}
+              onUpdateLead={handleUpdateLead}
+              onUpdateMultipleLeads={updateMultipleLeads}
+              onDeleteMultipleLeads={deleteMultipleLeads}
+              onViewLead={handleViewLead}
+              onAddActivity={addActivityToLead}
+              dateRange={dateRange}
+              services={services}
+              offers={offers}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/leads/new" element={
           <CreateLead 
@@ -1144,11 +1147,13 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
         <Route path="/lead-assignments" element={
-          <LeadAssignments
-            leads={leads}
-            users={users}
-            onUpdateLead={handleUpdateLead}
-          />
+          canAssignLeads ? (
+            <LeadAssignments
+              leads={leads}
+              users={users}
+              onUpdateLead={handleUpdateLead}
+            />
+          ) : <AccessDenied requiredRole="Admin, Super Admin, or Head Office Sales Executive" />
         } />
         <Route path="/leads/:id" element={<LeadDetailRoute />} />
         <Route path="/my-leads" element={
@@ -1176,17 +1181,19 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
         <Route path="/lead-workflow" element={
-          <LeadWorkflow
-            leads={roleScopedLeads}
-            currentUser={viewProfile!}
-            onUpdateLead={handleUpdateLead}
-            onViewLead={handleViewLead}
-            onAddLead={() => setIsLeadFormOpen(true)}
-            onDeleteLeads={handleBulkDeleteLeads}
-            dateRange={dateRange}
-            setDateRange={setDateRange}
-            onOpenLeadForm={handleOpenLeadForm}
-          />
+          isAdminOrAbove ? (
+            <LeadWorkflow
+              leads={roleScopedLeads}
+              currentUser={viewProfile!}
+              onUpdateLead={handleUpdateLead}
+              onViewLead={handleViewLead}
+              onAddLead={() => setIsLeadFormOpen(true)}
+              onDeleteLeads={handleBulkDeleteLeads}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              onOpenLeadForm={handleOpenLeadForm}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/customers" element={
           <Customers
@@ -1200,13 +1207,15 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         } />
         <Route path="/customers/:id" element={<CustomerDetailRoute />} />
         <Route path="/reports" element={
-          <Reports
-            leads={roleScopedLeads}
-            users={roleScopedUsers}
-            currentUser={viewProfile!}
-            dateRange={dateRange}
-            services={services}
-          />
+          isAdminOrAbove ? (
+            <Reports
+              leads={roleScopedLeads}
+              users={roleScopedUsers}
+              currentUser={viewProfile!}
+              dateRange={dateRange}
+              services={services}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/payments" element={
           <PaymentTracker
@@ -1246,13 +1255,15 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/revenue" element={
-          <RevenueDashboard
-            leads={roleScopedLeads}
-            users={users}
-            customers={customers}
-            branches={branches}
-            currentUser={viewProfile!}
-          />
+          isAdminOrAbove ? (
+            <RevenueDashboard
+              leads={roleScopedLeads}
+              users={users}
+              customers={customers}
+              branches={branches}
+              currentUser={viewProfile!}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/performance" element={
           <EmployeePerformance

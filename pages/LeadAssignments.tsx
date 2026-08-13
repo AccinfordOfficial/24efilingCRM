@@ -31,10 +31,9 @@ export const LeadAssignments: React.FC<LeadAssignmentsProps> = ({
 
     // Get active sales executives
     const salesExecutives = useMemo(() => {
-        return users.filter(u => {
-            const roleNorm = (u.role || '').toLowerCase().replace(/_/g, ' ');
-            return (roleNorm.includes('sales') || roleNorm.includes('executive') || roleNorm.includes('admin') || roleNorm.includes('manager')) && u.is_active;
-        });
+        return users.filter(u => 
+            (u.role === 'Sales Executive' || u.role === 'Admin' || u.role === 'Super Admin') && u.is_active
+        );
     }, [users]);
 
     // Head Office unassigned/pending pool leads
