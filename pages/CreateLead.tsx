@@ -60,7 +60,6 @@ const CreateLead: React.FC<CreateLeadProps> = (props) => {
                         getSubServicesForSelection={form.getSubServicesForSelection}
                         handleSubserviceDetailChange={form.handleSubserviceDetailChange}
                         handleRemoveSubservice={form.handleRemoveSubservice}
-                        handleServiceFeeChange={form.handleServiceFeeChange}
                         handleDiscountChange={form.handleDiscountChange}
                         handleRemovePromoCode={form.handleRemovePromoCode}
                         handleApplyPromoCode={form.handleApplyPromoCode}

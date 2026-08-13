@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Lead, Activity, Document, Task, Payment, TaskPriority } from '../types';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -56,7 +56,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
     onUpdateTask,
     onDeleteTask
 }) => {
-    const fetchLeadDetails = async (leadId: string) => {
+    const fetchLeadDetails = useCallback(async (leadId: string) => {
         const { data: actData } = await supabase.from('activities').select('*').eq('lead_id', leadId).order('created_at', { ascending: false });
         const { data: docData } = await supabase.from('documents').select('*').eq('lead_id', leadId).order('uploaded_at', { ascending: false });
         const { data: taskData } = await supabase.from('tasks').select('*, created_by:profiles!tasks_created_by_fkey(name)').eq('lead_id', leadId).order('due_date', { ascending: true });
@@ -65,7 +65,7 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
             documents: docData || [],
             tasks: taskData || []
         };
-    };
+    }, []);
 
     // Local state for tabs
     const [activeTab, setActiveTab] = useState<'overview' | 'activities' | 'documents' | 'tasks' | 'payments'>('overview');
@@ -336,7 +336,9 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
         };
         const updatedPayments = [...(lead.payments || []), newPayment];
         
-        onUpdateLead({ ...lead, payments: updatedPayments });
+        await onUpdateLead({ ...lead, payments: updatedPayments });
+        const refreshedDetails = await fetchLeadDetails(lead.id);
+        setDetails(refreshedDetails);
         setNewPaymentAmount('');
         setNewPaymentServiceId('');
     };

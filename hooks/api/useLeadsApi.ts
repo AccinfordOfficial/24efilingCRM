@@ -88,6 +88,8 @@ export function useLeadsApi(core: {
             total_amount: totalAmount,
             paid_amount: paidAmount,
             due_amount: dueAmount,
+            created_by: typeof lead.created_by === 'object' ? (lead.created_by as any)?.id : lead.created_by,
+            assigned_to: typeof lead.assigned_to === 'object' && lead.assigned_to !== null ? (lead.assigned_to as any).id : (lead.assigned_to as any) || null,
             branch_id: lead.branch_id || profile?.branch_id
         } as any;
     }, [profile]);

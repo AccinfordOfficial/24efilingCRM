@@ -115,8 +115,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
           }
 
           const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-          const serviceFee = Number(set.service_fee) || 0;
-          const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+          const subtotalBeforeDiscount = subservicesTotal;
 
           let discountVal = 0;
           if (matchedOffer.discount_type === 'percentage') {
@@ -332,8 +331,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
       if (!matchedOffer) return;
 
       const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-      const serviceFee = Number(set.service_fee) || 0;
-      const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+      const subtotalBeforeDiscount = subservicesTotal;
 
       let discountVal = 0;
       if (matchedOffer.discount_type === 'percentage') {
@@ -391,8 +389,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
       }
 
       const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-      const serviceFee = Number(set.service_fee) || 0;
-      const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+      const subtotalBeforeDiscount = subservicesTotal;
 
       let discountVal = 0;
       if (matchedOffer.discount_type === 'percentage') {
@@ -434,7 +431,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
       });
   };
 
-  const handleSetChange = (setId: string, field: 'mainService' | 'service_fee' | 'discount' | 'advance_amount' | 'promo_code', value: string) => {
+  const handleSetChange = (setId: string, field: 'mainService' | 'discount' | 'advance_amount' | 'promo_code', value: string) => {
     setServiceSets(prev => recalculateDiscounts(prev.map(s => {
         if (s.id === setId) {
             if (field === 'mainService') {
@@ -442,14 +439,12 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
                 return {
                     ...s,
                     mainService: value,
-                    subservices: [],
                     promo_code: promo ? promo.promo_code : '',
                     discount: 0,
                     promo_discount_type: promo ? promo.discount_type : undefined,
                     promo_discount_value: promo ? promo.discount_value : undefined
                 };
             }
-            if (field === 'service_fee') return { ...s, service_fee: Number(value) };
             if (field === 'discount') return { ...s, discount: Number(value) };
             if (field === 'advance_amount') return { ...s, advance_amount: Number(value) };
             if (field === 'promo_code') return { ...s, promo_code: value };
@@ -834,16 +829,6 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
               </CardContent>
               <CardContent className="flex flex-col gap-4 border-t border-slate-200 dark:border-white/10 pt-2">
                   <div className="flex flex-wrap items-center justify-end gap-4">
-                      <div className="w-32">
-                        <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Service Fee (₹)</label>
-                        <Input
-                           type="number"
-                           value={set.service_fee || ''}
-                           onChange={(e) => handleSetChange(set.id, 'service_fee', e.target.value)}
-                           placeholder="0"
-                           className="h-8 text-right bg-white dark:bg-slate-950 text-slate-900 dark:text-white border-slate-300 dark:border-white/10"
-                        />
-                      </div>
                       <div className="w-32">
                         <label className="text-xs font-medium text-slate-600 dark:text-slate-400 block mb-1">Advance (₹)</label>
                         <Input

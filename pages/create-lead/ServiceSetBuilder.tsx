@@ -15,7 +15,6 @@ interface ServiceSetBuilderProps {
     getSubServicesForSelection: (mainServiceName: string) => string[];
     handleSubserviceDetailChange: (setId: string, subserviceName: string, field: 'quantity' | 'amount' | 'is_tax_applicable' | 'tax_amount', value: string) => void;
     handleRemoveSubservice: (setId: string, subserviceNameToRemove: string) => void;
-    handleServiceFeeChange: (setId: string, value: string) => void;
     handleDiscountChange: (setId: string, value: string) => void;
     handleRemovePromoCode: (setId: string) => void;
     handleApplyPromoCode: (setId: string) => void;
@@ -33,7 +32,6 @@ export const ServiceSetBuilder: React.FC<ServiceSetBuilderProps> = ({
     getSubServicesForSelection,
     handleSubserviceDetailChange,
     handleRemoveSubservice,
-    handleServiceFeeChange,
     handleDiscountChange,
     handleRemovePromoCode,
     handleApplyPromoCode,
@@ -172,19 +170,6 @@ export const ServiceSetBuilder: React.FC<ServiceSetBuilderProps> = ({
                     </CardContent>
                     <CardFooter className="flex flex-col gap-4 bg-slate-50/50 dark:bg-slate-950/40 p-4 rounded-b-xl border-t border-slate-200 dark:border-white/10">
                         <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-3 w-full border-b pb-4 border-slate-200 dark:border-white/10">
-                            <div className="flex items-center gap-2">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Service Fee:</label>
-                                <div className="relative w-32">
-                                    <span className="absolute left-3 top-2 text-slate-500 dark:text-slate-400 text-sm">₹</span>
-                                    <Input
-                                        type="number"
-                                        value={set.service_fee || ''}
-                                        onChange={(e) => handleServiceFeeChange(set.id, e.target.value)}
-                                        className="pl-6 h-9 bg-white dark:bg-slate-950 text-foreground dark:text-white border-input dark:border-white/10"
-                                        placeholder="0"
-                                    />
-                                </div>
-                            </div>
                             <div className="flex items-center gap-2">
                                 <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Discount:</label>
                                 <div className="relative w-32">

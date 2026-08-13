@@ -197,8 +197,7 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
             }
 
             const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-            const serviceFee = Number(set.service_fee) || 0;
-            const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+            const subtotalBeforeDiscount = subservicesTotal;
 
             let discountVal = 0;
             if (matchedOffer.discount_type === 'percentage') {
@@ -394,8 +393,7 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
         if (!matchedOffer) return;
 
         const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-        const serviceFee = Number(set.service_fee) || 0;
-        const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+        const subtotalBeforeDiscount = subservicesTotal;
 
         let discountVal = 0;
         if (matchedOffer.discount_type === 'percentage') {
@@ -453,8 +451,7 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
         }
 
         const subservicesTotal = set.subservices.reduce((acc, sub) => acc + (sub.amount * sub.quantity), 0);
-        const serviceFee = Number(set.service_fee) || 0;
-        const subtotalBeforeDiscount = subservicesTotal + serviceFee;
+        const subtotalBeforeDiscount = subservicesTotal;
 
         let discountVal = 0;
         if (matchedOffer.discount_type === 'percentage') {
@@ -504,7 +501,6 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
                     return {
                         ...s,
                         mainService: value,
-                        subservices: [],
                         promo_code: promo ? promo.promo_code : '',
                         discount: 0,
                         promo_discount_type: promo ? promo.discount_type : undefined,
@@ -564,11 +560,6 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
             }
             return set;
         })));
-    };
-
-    const handleServiceFeeChange = (setId: string, value: string) => {
-        const fee = value === '' ? 0 : Number(value);
-        setServiceSets(prev => recalculateDiscounts(prev.map(s => s.id === setId ? { ...s, service_fee: fee } : s)));
     };
 
     const handleDiscountChange = (setId: string, value: string) => {
@@ -802,7 +793,6 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
         handleAddSubservice,
         handleRemoveSubservice,
         handleSubserviceDetailChange,
-        handleServiceFeeChange,
         handleDiscountChange,
         getSubServicesForSelection,
         handleSubmit,
