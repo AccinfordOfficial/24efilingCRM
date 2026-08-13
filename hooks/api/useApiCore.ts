@@ -60,6 +60,9 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                     setBranches(d.branches || []);
                     setCities(d.cities || []);
                     setOffers(d.offers || []);
+                    setBusinessCategories(d.businessCategories || []);
+                    setIndustryTypes(d.industryTypes || []);
+                    setLeadSources(d.leadSources || []);
                     setWebLeads(d.webLeads || []);
                     setBlogs(d.blogs || []);
                     setTestimonials(d.testimonials || []);
@@ -241,11 +244,15 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                     const catObj = (categoriesData || []).find((cat: any) => cat.id === c.business_category_id);
                     const indObj = (industriesData || []).find((ind: any) => ind.id === c.industry_type_id);
                     const srcObj = (leadSourcesData || []).find((s: any) => s.id === c.lead_source_id);
+                    const assignedUser = safeUsers.find(u => u.id === c.assigned_to) || null;
+                    const createdUser = safeUsers.find(u => u.id === c.created_by) || null;
                     return {
                         ...rest,
                         business_category: catObj ? catObj.name : 'Other',
                         industry_type: indObj ? indObj.name : 'Other',
                         source: srcObj ? srcObj.source_name : (c.lead_source || 'Other'),
+                        assigned_to: assignedUser,
+                        created_by: createdUser,
                         documents: uploaded_documents
                     };
                 });
@@ -280,6 +287,11 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
             if (offersData) setOffers(offersData as Offer[]);
             if (notificationsData) setNotifications(notificationsData as Notification[]);
             if (userActivitiesData) setUserActivities(userActivitiesData as UserActivity[]);
+            
+            if (categoriesData) setBusinessCategories(categoriesData);
+            if (industriesData) setIndustryTypes(industriesData);
+            if (leadSourcesData) setLeadSources(leadSourcesData);
+
 
             // CACHE PERSISTENCE
             const cachePayload = {
@@ -296,6 +308,9 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                 branches: branchesData || [],
                 cities: citiesData || [],
                 offers: offersData || [],
+                businessCategories: categoriesData || [],
+                industryTypes: industriesData || [],
+                leadSources: leadSourcesData || [],
                 webLeads: webLeadsList,
                 blogs: blogsList,
                 testimonials: testimonialsList,
