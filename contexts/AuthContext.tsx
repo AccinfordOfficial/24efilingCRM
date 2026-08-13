@@ -449,24 +449,45 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const signOut = async (): Promise<void> => {
-    // Set user to offline before signing out
-    if (session?.user) {
-      try {
+    try {
+      if (session?.user?.id) {
         await supabase
           .from('profiles')
-          .update({ is_online: false } as any)
+          .update({ is_online: false, last_seen: new Date().toISOString() } as any)
           .eq('id', session.user.id);
-      } catch (err) {
-        console.warn("Failed to set offline status on logout", err);
       }
-    }
+    } catch (err) {
+      console.warn("Failed to set offline status on logout", err);
+    } finally {
+      // Clear React auth state
+      setSession(null);
+      setProfile(null);
 
-    localStorage.removeItem('crm_user_profile');
-    localStorage.removeItem('crm_api_cache');
-    setSession(null);
-    setProfile(null);
-    const { error } = await supabase.auth.signOut();
-    if (error) console.error("SignOut error:", error);
+      // Clear local storage CRM caches
+      localStorage.removeItem('crm_user_profile');
+      localStorage.removeItem('crm_api_cache');
+
+      // Clear Supabase session tokens from localStorage
+      try {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-') || key.includes('supabase')) {
+            localStorage.removeItem(key);
+          }
+        });
+      } catch (e) {
+        console.warn("Storage clear notice:", e);
+      }
+
+      // Execute Supabase signOut
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.warn("Supabase auth signOut error:", err);
+      }
+
+      // Redirect to root login view
+      window.location.href = '/';
+    }
   };
 
   const sendPasswordResetEmail = async (email: string): Promise<void> => {
