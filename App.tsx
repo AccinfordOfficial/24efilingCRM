@@ -1153,7 +1153,15 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/leads/:id" element={<LeadDetailRoute />} />
         <Route path="/my-leads" element={
           <LeadsOverview
-            leads={roleScopedLeads.filter(l => l.assigned_to?.id === viewProfile?.id)}
+            leads={roleScopedLeads.filter(l => {
+              const assignedId = typeof l.assigned_to === 'object' && l.assigned_to !== null 
+                ? (l.assigned_to as any).id 
+                : l.assigned_to;
+              const createdId = typeof l.created_by === 'object' && l.created_by !== null 
+                ? (l.created_by as any).id 
+                : l.created_by;
+              return assignedId === viewProfile?.id || createdId === viewProfile?.id;
+            })}
             users={users}
             currentUser={viewProfile!}
             onAddLead={handleNavigateToCreateLead}
