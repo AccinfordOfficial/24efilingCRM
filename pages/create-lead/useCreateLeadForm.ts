@@ -621,8 +621,15 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
         return [];
     };
 
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isSubmitting) {
+            console.warn("Prevented duplicate lead submission attempt.");
+            return;
+        }
 
         // Validate Business Information
         const newBusinessErrors = {
@@ -633,6 +640,7 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
 
         if (newBusinessErrors.business_name || newBusinessErrors.business_category || newBusinessErrors.industry_type) {
             setBusinessErrors(newBusinessErrors);
+            alert('Please fill all mandatory Business Details.');
             const firstErrorEl = document.querySelector('.border-red-500');
             if (firstErrorEl) {
                 firstErrorEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -745,10 +753,12 @@ export function useCreateLeadForm({ onAddLead, onCancel, salesExecutives, servic
             business_country: businessAddress.country || null,
             business_zip_code: businessAddress.zipCode || null,
         };
+        setIsSubmitting(true);
         onAddLead(leadData as any, assignedToId || null);
     };
 
     return {
+        isSubmitting,
         leadSources,
         allCustomers,
         allUsers,

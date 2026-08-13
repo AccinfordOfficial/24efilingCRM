@@ -103,8 +103,10 @@ const CreateLead: React.FC<CreateLeadProps> = (props) => {
                         <p className="text-2xl font-bold text-primary">₹{form.grandTotal.toLocaleString('en-IN')}</p>
                     </div>
                     <div className="flex gap-4">
-                        <Button type="button" variant="outline" onClick={onCancel} className="dark:bg-slate-900 dark:border-white/10 dark:text-slate-300">Cancel</Button>
-                        <Button type="submit" className="bg-primary text-primary-foreground hover:opacity-90 font-semibold">Create Lead</Button>
+                        <Button type="button" variant="outline" onClick={onCancel} disabled={form.isSubmitting} className="dark:bg-slate-900 dark:border-white/10 dark:text-slate-300">Cancel</Button>
+                        <Button type="submit" disabled={form.isSubmitting} className="bg-primary text-primary-foreground hover:opacity-90 font-semibold disabled:opacity-50">
+                            {form.isSubmitting ? 'Creating Lead...' : 'Create Lead'}
+                        </Button>
                     </div>
                 </div>
             </form>

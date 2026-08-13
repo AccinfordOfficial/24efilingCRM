@@ -513,8 +513,21 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
     return service.sub_services.filter(sub => sub.is_active).map(sub => sub.name);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSubmitting) {
+      console.warn("Prevented duplicate submission attempt in LeadForm.");
+      return;
+    }
 
     const newBusinessErrors = {
       business_name: !formData.business_name?.trim() ? 'Business Name is mandatory' : '',
@@ -557,6 +570,7 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
 
     delete saveData.assignedToId;
 
+    setIsSubmitting(true);
     onSave(saveData);
   };
 
@@ -1012,8 +1026,10 @@ export const LeadForm: React.FC<LeadFormProps> = ({ isOpen, onClose, onSave, lea
         )}
 
         <div className="flex justify-end gap-2 pt-4 border-t border-slate-100 dark:border-white/10">
-          <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-          <Button type="submit">Save Changes</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
+          <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50">
+            {isSubmitting ? 'Saving...' : (lead ? 'Save Changes' : 'Create Lead')}
+          </Button>
         </div>
       </form>
     </Dialog>
