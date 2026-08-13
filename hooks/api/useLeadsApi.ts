@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabaseClient';
 import { Lead, User } from '../../types';
 import { Database } from '../../types/database.types';
 import { autoAssignLead } from '../../lib/leadAssignment';
+import { calculateLeadScore } from '../../lib/scoring';
 
 
 const UUID_KEYS = [
@@ -175,45 +176,63 @@ export function useLeadsApi(core: {
         }
         if (error || !data) throw error || new Error("Lead creation failed");
 
-        if (assigned_to) {
-            await addNotification({
-                user_id: assigned_to.id,
-                type: 'Lead Assigned',
-                title: 'New Lead Assigned',
-                message: `You have been assigned a new lead: ${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}.`,
-                link: { page: 'Lead Detail', id: (data as any).id }
-            });
-        } else {
-            // Notify Head Office Sales Executives and Admins to route the new Head Office lead
-            console.log('[NOTIF] Head Office branch triggered. Total users available:', users.length);
-            const recipients = users.filter(u => {
-                const r = (u.role || '').toLowerCase().replace(/_/g, ' ');
-                return r.includes('sales') || r.includes('admin') || r.includes('manager') || r.includes('super');
-            });
-            console.log('[NOTIF] Matched recipients:', recipients.length, recipients.map(u => `${u.name} (${u.role})`));
-            if (recipients.length === 0) {
-                console.warn('[NOTIF] No recipients found! Users array:', users.map(u => `${u.name}:${u.role}`));
-            }
-            for (const exec of recipients) {
-                console.log('[NOTIF] Sending notification to:', exec.name, exec.id);
-                await addNotification({
-                    user_id: exec.id,
-                    type: 'Lead Assigned',
-                    title: 'New Head Office Lead - Pending Assignment',
-                    message: `New lead (${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}) assigned to Head Office. Please follow up and assign to a sales executive.`,
-                    link: { page: 'Lead Detail', id: (data as any).id }
-                });
-            }
+        // Construct lead item and update React state IMMEDIATELY (Instant UI Reflection)
+        const foundCat = (businessCategories || []).find((c: any) => c.id === data.business_category_id);
+        const foundInd = (industryTypes || []).find((i: any) => i.id === data.industry_type_id);
+        const foundSrc = (leadSources || []).find((s: any) => s.id === data.lead_source_id);
+
+        const newLeadItem: Lead = {
+            ...(data as any),
+            business_category: foundCat ? foundCat.name : 'Other',
+            industry_type: foundInd ? foundInd.name : 'Other',
+            source: foundSrc ? foundSrc.source_name : (data.source || 'Other'),
+            assigned_to: assigned_to || null,
+            created_by: profile.id,
+            activities: [],
+            documents: [],
+            tasks: [],
+            score: calculateLeadScore(data as unknown as Lead)
+        };
+
+        if (setLeads) {
+            setLeads(prev => [newLeadItem, ...prev]);
         }
-        await addActivityToLead((data as any).id, {
-            type: 'Status Change',
-            content: `created the lead and assigned it to ${assigned_to?.name || 'Unassigned'}.`,
-        }, profile);
-        await logUserActivity('Lead Created', `Created new lead: ${leadData.business_name} (${leadData.service_requested})`);
-        if (setLeads && data) {
-            setLeads(prev => [(data as unknown as Lead), ...prev]);
-        }
-        await fetchData();
+
+        // Run notifications and activity logs asynchronously in background (Non-blocking)
+        (async () => {
+            try {
+                if (assigned_to) {
+                    await addNotification({
+                        user_id: assigned_to.id,
+                        type: 'Lead Assigned',
+                        title: 'New Lead Assigned',
+                        message: `You have been assigned a new lead: ${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}.`,
+                        link: { page: 'Lead Detail', id: (data as any).id }
+                    });
+                } else {
+                    const recipients = users.filter(u => {
+                        const r = (u.role || '').toLowerCase().replace(/_/g, ' ');
+                        return r.includes('sales') || r.includes('admin') || r.includes('manager') || r.includes('super');
+                    });
+                    await Promise.allSettled(recipients.map(exec => 
+                        addNotification({
+                            user_id: exec.id,
+                            type: 'Lead Assigned',
+                            title: 'New Head Office Lead - Pending Assignment',
+                            message: `New lead (${leadData.business_name || `${leadData.first_name} ${leadData.last_name}`.trim()}) assigned to Head Office. Please follow up and assign to a sales executive.`,
+                            link: { page: 'Lead Detail', id: (data as any).id }
+                        })
+                    ));
+                }
+                await addActivityToLead((data as any).id, {
+                    type: 'Status Change',
+                    content: `created the lead and assigned it to ${assigned_to?.name || 'Unassigned'}.`,
+                }, profile);
+                await logUserActivity('Lead Created', `Created new lead: ${leadData.business_name} (${leadData.service_requested})`);
+            } catch (bgErr) {
+                console.warn('[Leads API] Background notification/logging notice:', bgErr);
+            }
+        })();
     }, [profile, leads, users, setLeads, businessCategories, industryTypes, leadSources, addNotification, addActivityToLead, logUserActivity, fetchData]);
 
     const updateLead = useCallback(async (leadData: Lead, convertToCustomer: boolean = false, dateOfBirth?: string, aadharNumber?: string) => {
@@ -471,20 +490,22 @@ export function useLeadsApi(core: {
 
     const deleteMultipleLeads = useCallback(async (leadIds: string[]) => {
         try {
-            const { error } = await supabase.from('leads').delete().in('id', leadIds);
+            const { data, error } = await supabase.from('leads').delete().in('id', leadIds).select('id');
             if (error) {
                 console.error('[Leads API] Delete lead error:', error);
                 throw new Error(error.message || 'Permission denied or database error during deletion.');
             }
+            if (!data || data.length === 0) {
+                throw new Error('Permission denied: You do not have authorization to delete this lead.');
+            }
             if (setLeads) {
                 setLeads(prev => prev.filter(l => !leadIds.includes(l.id)));
             }
-            await fetchData();
         } catch (err: any) {
             console.error('[Leads API] Failed to delete leads:', err);
             throw err;
         }
-    }, [setLeads, fetchData]);
+    }, [setLeads]);
 
     const fetchLeadsPaginated = useCallback(async (page: number, pageSize: number, filters: {
         status?: string;
