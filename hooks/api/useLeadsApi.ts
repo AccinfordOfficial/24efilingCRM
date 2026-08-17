@@ -269,14 +269,6 @@ export function useLeadsApi(core: {
         delete dbLeadData.business_category;
         delete dbLeadData.industry_type;
 
-        // Sync financial summary from recorded payments so overview/list/tracker/performance stay consistent
-        const recordedPayments = payments || [];
-        if (recordedPayments.length > 0) {
-            const computedAdvance = recordedPayments.reduce((acc, curr) => acc + (Number((curr as any).received) || Number((curr as any).amount) || 0), 0);
-            dbLeadData.advance_amount = computedAdvance;
-            dbLeadData.remaining_amount = Math.max(0, (Number(leadData.total_payment) || 0) - computedAdvance);
-        }
-
         // Convert any empty string UUID fields to null to prevent Postgres UUID syntax errors
         for (const key of UUID_KEYS) {
             if (dbLeadData[key] === '' || (typeof dbLeadData[key] === 'string' && !dbLeadData[key].trim())) {
@@ -373,12 +365,7 @@ export function useLeadsApi(core: {
                     customerData.due_amount = (updatedLeadWithRef.total_payment || 0) - updatedLeadWithRef.advance_amount;
 
                     try {
-                        const autoAdvanceTotal = paymentsList.reduce((acc, curr) => acc + (Number((curr as any).received) || Number((curr as any).amount) || 0), 0);
-                        await supabase.from('leads').update({
-                            payments: paymentsList as any,
-                            advance_amount: autoAdvanceTotal,
-                            remaining_amount: Math.max(0, (Number(updatedLeadWithRef.total_payment) || 0) - autoAdvanceTotal)
-                        }).eq('id', leadData.id);
+                        await supabase.from('leads').update({ payments: paymentsList as any }).eq('id', leadData.id);
                     } catch (e) {
                         console.warn("Could not sync initialized payments back to lead:", e);
                     }

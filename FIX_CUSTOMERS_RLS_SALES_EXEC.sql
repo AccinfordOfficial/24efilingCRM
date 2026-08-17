@@ -1,73 +1,83 @@
--- FIX_CUSTOMERS_RLS_SALES_EXEC.sql
--- Run this script in your Supabase SQL Editor.
--- Resolves the "converted customer not visible to Sales Executive" issue.
--- Replaces the overly-restrictive "Sales Exec Assigned Customers" policy
--- (assigned_to = auth.uid() only) with one that also covers customers the
--- Sales Executive created or owns through the linked lead (assigned_to OR
--- created_by OR lead ownership). Super Admin / Admin access is preserved.
+-- Fix Customer RLS for Sales Executives
+-- Grants read/write access to Sales Execs if they own the customer or the source lead.
 
-BEGIN;
+-- Enable RLS on customers if not already enabled
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 
--- 0. Ensure ownership columns exist before policies reference them
-ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS assigned_to UUID;
-ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS created_by UUID;
-ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS branch_id TEXT;
-ALTER TABLE public.customers ADD COLUMN IF NOT EXISTS lead_id UUID;
+-- Drop previous broad/restrictive policies
+DROP POLICY IF EXISTS "Enable read access for all users" ON customers;
+DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON customers;
+DROP POLICY IF EXISTS "Enable update for users based on email" ON customers;
+DROP POLICY IF EXISTS "Enable delete for users based on email" ON customers;
+DROP POLICY IF EXISTS "Customers_Role_Based_Select" ON customers;
+DROP POLICY IF EXISTS "Customers_Role_Based_Insert" ON customers;
+DROP POLICY IF EXISTS "Customers_Role_Based_Update" ON customers;
+DROP POLICY IF EXISTS "Customers_Role_Based_Delete" ON customers;
+DROP POLICY IF EXISTS "Customers_SuperAdmin_All" ON customers;
+DROP POLICY IF EXISTS "Customers_Admin_All" ON customers;
+DROP POLICY IF EXISTS "Customers_SalesExec_Select" ON customers;
+DROP POLICY IF EXISTS "Customers_SalesExec_Insert" ON customers;
+DROP POLICY IF EXISTS "Customers_SalesExec_Update" ON customers;
 
--- 1. Drop every existing policy on the customers table for a clean slate
-DO $$
-DECLARE
-    pol record;
-BEGIN
-    FOR pol IN
-        SELECT policyname
-        FROM pg_policies
-        WHERE schemaname = 'public' AND tablename = 'customers'
-    LOOP
-        EXECUTE format('DROP POLICY IF EXISTS %I ON public.customers', pol.policyname);
-    END LOOP;
-END $$;
-
--- 2. Ensure RLS is enabled
-ALTER TABLE public.customers ENABLE ROW LEVEL SECURITY;
-
--- 3. Recreate policies
-
--- Super Admin: full access on all customers
-CREATE POLICY "Super Admin Full Access Customers" ON public.customers FOR ALL USING (
-  (COALESCE(get_my_claim('user_role'), '')::text = 'Super Admin'::text) OR
-  public.check_user_is_super_admin(auth.uid())
-);
-
--- Admin: full access scoped to their branch
-CREATE POLICY "Admin Branch Access Customers" ON public.customers FOR ALL USING (
-  ((COALESCE(get_my_claim('user_role'), '')::text = 'Admin'::text) AND
-   (branch_id = get_my_claim('user_branch_id') OR branch_id = get_my_claim('user_branch'))) OR
-  (
-    public.check_user_is_admin(auth.uid()) AND
-    (branch_id = public.get_user_branch_id(auth.uid()) OR branch_id = public.get_user_branch_name(auth.uid()))
+-- 1. SUPER ADMIN: Full Access
+CREATE POLICY "Customers_SuperAdmin_All" ON customers
+AS PERMISSIVE FOR ALL
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'super_admin'
   )
 );
 
--- Sales Executive / other staff: select, insert, and update only customers they
--- were assigned, they created, or whose source lead they own. No delete access.
-CREATE POLICY "Sales Exec Assigned Customers" ON public.customers FOR ALL USING (
-  assigned_to = auth.uid()
-  OR created_by = auth.uid()
-  OR lead_id IN (
-    SELECT id FROM public.leads
-    WHERE assigned_to = auth.uid() OR created_by = auth.uid()
+-- 2. ADMIN: Branch Access
+CREATE POLICY "Customers_Admin_All" ON customers
+AS PERMISSIVE FOR ALL
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin' AND (
+      profiles.branch_id IS NULL OR customers.branch_id = profiles.branch_id
+    )
   )
 );
 
--- Delete: restricted to Admin and Super Admin only
-CREATE POLICY "Customers Admin Delete" ON public.customers FOR DELETE TO authenticated USING (
-  (COALESCE(get_my_claim('user_role'), '')::text IN ('Admin', 'Super Admin')) OR
-  public.check_user_is_admin(auth.uid()) OR
-  public.check_user_is_super_admin(auth.uid())
+-- 3. SALES EXEC (And general owners): Assigned to them OR created by them OR converted from a lead they owned
+CREATE POLICY "Customers_Owner_Select" ON customers
+AS PERMISSIVE FOR SELECT
+TO authenticated
+USING (
+  assigned_to = auth.uid() OR 
+  created_by = auth.uid() OR
+  lead_id IN (
+    SELECT id FROM leads WHERE assigned_to = auth.uid() OR created_by = auth.uid()
+  )
 );
 
--- 4. Reload schema cache so the change is effective immediately
-NOTIFY pgrst, 'reload config';
+CREATE POLICY "Customers_Owner_Insert" ON customers
+AS PERMISSIVE FOR INSERT
+TO authenticated
+WITH CHECK (
+  assigned_to = auth.uid() OR 
+  created_by = auth.uid() OR
+  lead_id IN (
+    SELECT id FROM leads WHERE assigned_to = auth.uid() OR created_by = auth.uid()
+  )
+);
 
-COMMIT;
+CREATE POLICY "Customers_Owner_Update" ON customers
+AS PERMISSIVE FOR UPDATE
+TO authenticated
+USING (
+  assigned_to = auth.uid() OR 
+  created_by = auth.uid() OR
+  lead_id IN (
+    SELECT id FROM leads WHERE assigned_to = auth.uid() OR created_by = auth.uid()
+  )
+)
+WITH CHECK (
+  assigned_to = auth.uid() OR 
+  created_by = auth.uid() OR
+  lead_id IN (
+    SELECT id FROM leads WHERE assigned_to = auth.uid() OR created_by = auth.uid()
+  )
+);

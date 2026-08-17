@@ -336,7 +336,15 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
         };
         const updatedPayments = [...(lead.payments || []), newPayment];
         
-        await onUpdateLead({ ...lead, payments: updatedPayments });
+        const newAdvance = updatedPayments.reduce((sum, p) => sum + (p.received || p.amount || 0), 0);
+        const newRemaining = Math.max(0, (lead.total_payment || 0) - newAdvance);
+
+        await onUpdateLead({ 
+            ...lead, 
+            payments: updatedPayments,
+            advance_amount: newAdvance,
+            remaining_amount: newRemaining
+        });
         const refreshedDetails = await fetchLeadDetails(lead.id);
         setDetails(refreshedDetails);
         setNewPaymentAmount('');
@@ -362,7 +370,15 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
         const logContent = `Payment Receipt Edited (${updatedPayment.receipt_number}). ${changes.join(', ')}. Audit Note: ${remarks}`;
         onAddActivity(logContent);
         
-        onUpdateLead({ ...lead, payments: updatedPayments });
+        const newAdvance = updatedPayments.reduce((sum, p) => sum + (p.received || p.amount || 0), 0);
+        const newRemaining = Math.max(0, (lead.total_payment || 0) - newAdvance);
+
+        onUpdateLead({ 
+            ...lead, 
+            payments: updatedPayments,
+            advance_amount: newAdvance,
+            remaining_amount: newRemaining
+        });
         setEditingPayment(null);
     };
 
