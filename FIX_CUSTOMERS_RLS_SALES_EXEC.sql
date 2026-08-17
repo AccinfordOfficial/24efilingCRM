@@ -25,7 +25,7 @@ AS PERMISSIVE FOR ALL
 TO authenticated
 USING (
   EXISTS (
-    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'super_admin'
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin'
   )
 );
 
@@ -35,7 +35,7 @@ AS PERMISSIVE FOR ALL
 TO authenticated
 USING (
   EXISTS (
-    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin' AND (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin' AND (
       profiles.branch_id IS NULL OR customers.branch_id = profiles.branch_id
     )
   )
