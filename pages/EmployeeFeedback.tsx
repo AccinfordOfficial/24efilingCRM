@@ -146,14 +146,14 @@ export default function EmployeeFeedback({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 text-slate-100">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 dark:text-slate-100">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
             Employee Performance Feedback
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="dark:text-slate-400 text-sm mt-1">
             Conduct manager assessments, complete self-evaluations, track ratings trends, and build key competencies.
           </p>
         </div>
@@ -315,7 +315,7 @@ export default function EmployeeFeedback({
 
             {/* List of received reviews */}
             <div className="space-y-4">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">Quarterly Assessment Feed</h3>
+              <h3 className="text-xs font-bold uppercase tracking-wider dark:text-slate-300">Quarterly Assessment Feed</h3>
               {myReviews.length === 0 ? (
                 <p className="text-xs text-slate-500 text-center py-6">No performance feedback reviews published.</p>
               ) : (

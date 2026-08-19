@@ -234,14 +234,14 @@ export default function WorkOrders({
   };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 text-slate-100">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 dark:text-slate-100">
       {/* Top Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-indigo-300 bg-clip-text text-transparent">
             Work Orders Lifecycle
           </h1>
-          <p className="text-slate-400 text-sm mt-1">
+          <p className="dark:text-slate-400 text-sm mt-1">
             Dispatch customer service assignments, track operational SLA progress, and auto-convert to invoices.
           </p>
         </div>
