@@ -525,3 +525,48 @@ html.se-brand:not(.dark) .glass-sidebar button {
   color: rgba(255, 255, 255, 0.78);
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* --- Glass-card light-mode override ----------------------------------------
+   Every Card on dark-themed pages uses bg-slate-900/xx which overrides
+   glass-card's white background. This forces glass-card back to white
+   and inverts all dark-themed content inside it for light mode. ---------- */
+
+html.se-brand:not(.dark) .glass-card {
+  background: rgba(255, 255, 255, 0.92) !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Remove dark-bg overrides inside glass-card */
+html.se-brand:not(.dark) .glass-card [class*="bg-slate-9"],
+html.se-brand:not(.dark) .glass-card [class*="bg-slate-8"] {
+  background-color: transparent !important;
+}
+
+/* Light text → dark inside glass-card */
+html.se-brand:not(.dark) .glass-card .text-slate-100 { color: #0f172a !important; }
+html.se-brand:not(.dark) .glass-card .text-slate-200 { color: #1e293b !important; }
+html.se-brand:not(.dark) .glass-card .text-slate-300 { color: #334155 !important; }
+html.se-brand:not(.dark) .glass-card .text-white { color: #0f172a !important; }
+html.se-brand:not(.dark) .glass-card .text-slate-400 { color: #475569 !important; }
+
+/* Headings inside glass-card: override the restore list to dark */
+html.se-brand:not(.dark) .glass-card :is(h2, h3, h4).text-white {
+  color: #0f172a !important;
+}
+
+/* Inputs/selects inside glass-card → light bg + dark text */
+html.se-brand:not(.dark) .glass-card input,
+html.se-brand:not(.dark) .glass-card select,
+html.se-brand:not(.dark) .glass-card textarea {
+  background-color: white !important;
+  color: #0f172a !important;
+  border-color: rgba(226, 232, 240, 0.8) !important;
+}
+
+/* Hover state for glass-card */
+html.se-brand:not(.dark) .glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-color: rgba(203, 213, 225, 1) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08) !important;
+}

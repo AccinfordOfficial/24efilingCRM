@@ -182,7 +182,7 @@ export default function EmployeePerformance({
   }, [compareList, executivesPerformance]);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 text-slate-100">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 md:p-6 dark:text-slate-100">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
