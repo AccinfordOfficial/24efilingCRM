@@ -11,6 +11,7 @@ interface EditPaymentDialogProps {
   onClose: () => void;
   payment: Payment;
   onSave: (updatedPayment: Payment, remarks: string) => void;
+  totalInvoiceValue?: number;
 }
 
 export const EditPaymentDialog: React.FC<EditPaymentDialogProps> = ({ isOpen, onClose, payment, onSave }) => {

@@ -11,7 +11,7 @@ interface LeadScoreBreakdownProps {
     };
     scoreBreakdown: Array<{
         label: string;
-        points: string;
+        points: number;
     }>;
 }
 

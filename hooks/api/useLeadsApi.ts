@@ -313,7 +313,7 @@ export function useLeadsApi(core: {
             try {
                 const { data: existingCustomer } = await supabase.from('customers').select('id').eq('lead_id', leadData.id).maybeSingle();
                 
-                let updatedLeadWithRef = { ...leadData };
+                const updatedLeadWithRef = { ...leadData };
                 if (isChangingToSuccess) {
                     updatedLeadWithRef.status = 'Success';
                     updatedLeadWithRef.next_follow_up = undefined;
@@ -373,7 +373,7 @@ export function useLeadsApi(core: {
 
                 let customerError: any = null;
                 if (!existingCustomer) {
-                    let { error } = await (supabase.from('customers') as any).insert([customerData]);
+                    const { error } = await (supabase.from('customers') as any).insert([customerData]);
                     customerError = error;
                     if (customerError && (customerError.message.includes('reference_number') || customerError.message.includes('schema cache') || customerError.code === '42703')) {
                         console.warn("Database missing 'reference_number' column on customers, retrying customer insert without it.", customerError.message);
@@ -382,7 +382,7 @@ export function useLeadsApi(core: {
                         customerError = retryRes.error;
                     }
                 } else {
-                    let { error } = await supabase.from('customers').update(customerData).eq('id', existingCustomer.id);
+                    const { error } = await supabase.from('customers').update(customerData).eq('id', existingCustomer.id);
                     customerError = error;
                     if (customerError && (customerError.message.includes('reference_number') || customerError.message.includes('schema cache') || customerError.code === '42703')) {
                         console.warn("Database missing 'reference_number' column on customers update, retrying without it.", customerError.message);

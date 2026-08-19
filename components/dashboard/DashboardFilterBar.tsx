@@ -128,7 +128,7 @@ export const DashboardFilterBar: React.FC<DashboardFilterBarProps> = ({ currentU
                   {dateRange.from ? (dateRange.to ? `${formatDate(dateRange.from)} – ${formatDate(dateRange.to)}` : formatDate(dateRange.from)) : 'Pick dates'}
                 </Button>
               } 
-              content={<Calendar dateRange={dateRange} onDateChange={setDateRange} />} 
+              content={<Calendar dateRange={{ from: dateRange.from ? dateRange.from.toISOString().split('T')[0] : '', to: dateRange.to ? dateRange.to.toISOString().split('T')[0] : '' }} onDateChange={(range) => setDateRange({ from: range.from ? new Date(`${range.from}T00:00:00`) : undefined, to: range.to ? new Date(`${range.to}T00:00:00`) : undefined })} />} 
             />
           </div>
         )}

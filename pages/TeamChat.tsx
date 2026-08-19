@@ -106,7 +106,7 @@ export const TeamChat: React.FC = () => {
                 {/* Chat Feed */}
                 <Card className="bg-white dark:bg-slate-900/60 border-slate-200 dark:border-white/10 md:col-span-3 flex flex-col h-[500px]">
                     <CardHeader className="border-b border-slate-200 dark:border-white/10 pb-3">
-                        <CardTitle className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <CardTitle className="se-data text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                             <MessageSquare className="h-4 w-4 text-primary" /> #{activeChannel}
                         </CardTitle>
                     </CardHeader>

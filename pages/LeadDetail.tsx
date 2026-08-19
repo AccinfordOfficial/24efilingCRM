@@ -61,9 +61,9 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
         const { data: docData } = await supabase.from('documents').select('*').eq('lead_id', leadId).order('uploaded_at', { ascending: false });
         const { data: taskData } = await supabase.from('tasks').select('*, created_by:profiles!tasks_created_by_fkey(name)').eq('lead_id', leadId).order('due_date', { ascending: true });
         return {
-            activities: actData || [],
-            documents: docData || [],
-            tasks: taskData || []
+            activities: (actData || []) as unknown as Activity[],
+            documents: (docData || []) as unknown as Document[],
+            tasks: (taskData || []) as unknown as Task[]
         };
     }, []);
 
@@ -411,7 +411,9 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                 description: `${set.mainService} - Surcharges`,
                 quantity: 1,
                 rate: set.service_fee,
-                total: set.service_fee
+                taxAmount: 0,
+                total: set.service_fee,
+                date: new Date(lead.created_at).toLocaleDateString('en-GB')
             });
         }
         return items;
@@ -681,9 +683,9 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                         name: lead.first_name + ' ' + lead.last_name,
                         email: lead.email,
                         phone: lead.phone_number,
-                        address: lead.address,
+                        address: lead.residential_address || lead.business_address || '',
                         business_name: lead.business_name || '',
-                        business_address: lead.address,
+                        business_address: lead.business_address || lead.residential_address || '',
                         id: lead.id,
                         reference_number: lead.reference_number,
                         branch_name: '',
@@ -694,10 +696,8 @@ const LeadDetail: React.FC<LeadDetailProps> = ({
                     date={new Date().toLocaleDateString('en-GB')}
                     items={invoiceItems}
                     subtotal={receiptSubtotal}
-                    tax={0}
-                    total={receiptSubtotal}
-                    paid={advance_paid}
-                    due={receiptSubtotal - advance_paid}
+                    advanceAmount={advance_paid}
+                    grandTotal={receiptSubtotal}
                 />
             </Dialog>
 

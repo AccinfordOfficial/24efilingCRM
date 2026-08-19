@@ -130,7 +130,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({ currentUser, s
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{currentUser.name || 'User'}</h3>
+                        <h3 className="se-data text-lg font-bold text-slate-900 dark:text-white">{currentUser.name || 'User'}</h3>
                         <p className="text-sm text-slate-500 dark:text-slate-400">{currentUser.role} • {currentUser.branch_name || 'Head Office'}</p>
                     </div>
                 </div>

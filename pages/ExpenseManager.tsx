@@ -68,7 +68,7 @@ export const ExpenseManager: React.FC = () => {
                 date: date,
                 branch_id: profile?.branch_id,
                 submitted_by: profile?.id,
-                status: 'approved'
+                status: 'pending'
             }]);
 
             if (error) throw error;

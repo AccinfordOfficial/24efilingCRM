@@ -5,19 +5,21 @@ interface SwitchProps {
   checked: boolean;
   onChange?: (checked: boolean) => void;
   onCheckedChange?: (checked: boolean) => void;
+  disabled?: boolean;
   id?: string;
   className?: string; // Add className prop for flexibility
 }
 
-export const Switch: React.FC<SwitchProps> = ({ checked, onChange, onCheckedChange, id, className }) => {
+export const Switch: React.FC<SwitchProps> = ({ checked, onChange, onCheckedChange, disabled, id, className }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     if (onChange) onChange(e.target.checked);
     if (onCheckedChange) onCheckedChange(e.target.checked);
   };
 
   return (
-    <label htmlFor={id} className={cn("inline-flex items-center cursor-pointer", className)}>
-      <input id={id} type="checkbox" checked={checked} onChange={handleChange} className="sr-only peer" />
+    <label htmlFor={id} className={cn("inline-flex items-center cursor-pointer", disabled && "opacity-50 cursor-not-allowed", className)}>
+      <input id={id} type="checkbox" checked={checked} disabled={disabled} onChange={handleChange} className="sr-only peer" />
       <div className="relative w-11 h-6 bg-input rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ring peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-background"></div>
     </label>
   );

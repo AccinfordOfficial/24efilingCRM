@@ -2,6 +2,13 @@ import { useCallback } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { OrganizationSettings, CompanyPolicy, Reminder } from '../../types';
 
+type SettingsPatch = Partial<OrganizationSettings> & {
+    company_meta?: unknown;
+    regional_settings?: unknown;
+    lead_settings?: unknown;
+    notification_rules?: unknown;
+};
+
 export function useSettingsApi(core: {
     settings: OrganizationSettings | null;
     fetchData: () => Promise<void>;
@@ -9,7 +16,7 @@ export function useSettingsApi(core: {
 }) {
     const { settings, fetchData, logUserActivity } = core;
 
-    const updateOrganizationSettings = useCallback(async (newSettings: Partial<OrganizationSettings>) => {
+    const updateOrganizationSettings = useCallback(async (newSettings: SettingsPatch) => {
         if (!settings?.id) {
             const { error } = await (supabase.from('organization_settings' as any) as any).insert([newSettings]);
             if (error) throw error;

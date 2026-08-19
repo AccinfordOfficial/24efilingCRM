@@ -236,7 +236,6 @@ export const SalesExecutivePerformanceModal: React.FC<SalesExecutivePerformanceM
             record.dueAmount.toLocaleString(),
         ]);
 
-        // @ts-ignore
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,

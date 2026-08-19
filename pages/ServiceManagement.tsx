@@ -375,7 +375,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
                                         <Layers className="h-5 w-5" />
                                     </div>
                                     <div>
-                                        <CardTitle className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 group-hover:text-[#1c398e] dark:group-hover:text-blue-400 transition-colors">
+                                        <CardTitle className="se-data text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 group-hover:text-[#1c398e] dark:group-hover:text-blue-400 transition-colors">
                                             {service.name}
                                             <Badge variant="secondary" className="text-[10px] bg-blue-500/10 text-[#1c398e] dark:text-blue-300 border border-blue-500/20">
                                                 {service.sub_services?.length || 0} Sub-services
@@ -489,7 +489,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
                 ) : (
                     <div className="text-center py-12 bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-white/10 p-8">
                         <Layers className="h-12 w-12 mx-auto text-slate-400 mb-3" />
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">No services found</h3>
+                        <h3 className="se-data text-lg font-bold text-slate-900 dark:text-white">No services found</h3>
                         <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Try adjusting your search filter or select another main category tab above.</p>
                     </div>
                 )}
@@ -517,7 +517,7 @@ const ServiceManagement: React.FC<ServiceManagementProps> = ({
                                         <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">
                                             Category: {drawerItem.mainCategory}
                                         </span>
-                                        <h2 className="text-xl font-extrabold text-slate-900 dark:text-white">
+                                        <h2 className="se-data text-xl font-extrabold text-slate-900 dark:text-white">
                                             {drawerItem.subService ? drawerItem.subService.name : drawerItem.mainCategory}
                                         </h2>
                                     </div>

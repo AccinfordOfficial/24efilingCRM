@@ -54,29 +54,32 @@ export default function OffersManagement({ offers, services, onAddOffer, onUpdat
         start = format(today, 'yyyy-MM-dd');
         end = format(today, 'yyyy-MM-dd');
         break;
-      case 'yesterday':
+      case 'yesterday': {
         const yesterday = subDays(today, 1);
         start = format(yesterday, 'yyyy-MM-dd');
         end = format(yesterday, 'yyyy-MM-dd');
         break;
+      }
       case 'this_week':
         start = format(startOfWeek(today, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         end = format(today, 'yyyy-MM-dd');
         break;
-      case 'last_week':
+      case 'last_week': {
         const lastWeek = subWeeks(today, 1);
         start = format(startOfWeek(lastWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         end = format(endOfWeek(lastWeek, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         break;
+      }
       case 'this_month':
         start = format(startOfMonth(today), 'yyyy-MM-dd');
         end = format(today, 'yyyy-MM-dd');
         break;
-      case 'last_month':
+      case 'last_month': {
         const lastMonth = subMonths(today, 1);
         start = format(startOfMonth(lastMonth), 'yyyy-MM-dd');
         end = format(endOfMonth(lastMonth), 'yyyy-MM-dd');
         break;
+      }
       case 'this_quarter':
         start = format(startOfQuarter(today), 'yyyy-MM-dd');
         end = format(today, 'yyyy-MM-dd');

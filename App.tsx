@@ -366,9 +366,15 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         return leadBranchId === viewProfile.branch_id || leadBranchName === viewProfile.branch_name;
       }
 
-      // Sales Executive and other roles
       const isAssignedToUser = assignedId === viewProfile.id;
       const isCreatedByUser = createdId === viewProfile.id;
+
+      // Sales Executive: only leads assigned to or created by the user
+      if (viewProfile.role === 'Sales Executive') {
+        return isAssignedToUser || isCreatedByUser;
+      }
+
+      // Other roles
       const isUserBranch = viewProfile.branch_id 
         ? leadBranchId === viewProfile.branch_id 
         : (viewProfile.branch_name ? leadBranchName === viewProfile.branch_name : true);
@@ -778,7 +784,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   const handleCancelCustomerCreation = useCallback(() => {
     setLeadForCustomerCreation(null);
-    toast.addToast('Conversion cancelled. Date of birth is mandatory for Success stage.', 'warning');
+    toast.addToast('Conversion cancelled. Date of birth is mandatory for Success stage.', 'info');
     refreshData();
   }, [refreshData, toast]);
 
@@ -1041,7 +1047,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   const LeadDetailRoute = () => {
     const { id } = useParams();
-    const lead = leads.find(l => l.id === id);
+    const lead = roleScopedLeads.find(l => l.id === id);
     if (!lead) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
@@ -1068,7 +1074,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
 
   const CustomerDetailRoute = () => {
     const { id } = useParams();
-    const customer = customers.find(c => c.id === id) || customers.find(c => c.lead_id === id);
+    const customer = roleScopedCustomers.find(c => c.id === id) || roleScopedCustomers.find(c => c.lead_id === id);
     if (!customer) {
       return (
         <div className="flex flex-col items-center justify-center min-h-[60vh] text-center gap-4">
@@ -1082,7 +1088,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
     return <CustomerDetail 
       customer={customer} 
       onBack={() => navigate(-1)} 
-      leads={leads} 
+      leads={roleScopedLeads} 
       onAddActivityToLead={addActivityToLead} 
       refreshData={refreshData} 
       onUpdateCustomer={updateCustomer}
@@ -1098,11 +1104,11 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/" element={
           <DashboardOverview
             leads={roleScopedLeads}
-            users={users}
-            customers={customers}
+            users={roleScopedUsers}
+            customers={roleScopedCustomers}
             branches={branches}
             cities={cities}
-            userActivities={userActivities}
+            userActivities={roleScopedActivities}
             currentUser={viewProfile!}
             dateRange={dateRange}
             setDateRange={setDateRange}
@@ -1112,10 +1118,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             services={services}
             onAddActivityToLead={addActivityToLead}
             refreshData={refreshData}
-            onUpdateLead={handleUpdateLead}
-            onUpdateCustomer={updateCustomer}
             announcements={announcements}
             reminders={reminders}
+            testimonials={testimonials}
           />
         } />
         <Route path="/leads" element={
@@ -1129,8 +1134,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
               onUpdateMultipleLeads={updateMultipleLeads}
               onDeleteMultipleLeads={deleteMultipleLeads}
               onViewLead={handleViewLead}
-              onAddActivity={addActivityToLead}
               dateRange={dateRange}
+              setDateRange={setDateRange}
               services={services}
               offers={offers}
             />
@@ -1174,8 +1179,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             onUpdateMultipleLeads={updateMultipleLeads}
             onDeleteMultipleLeads={deleteMultipleLeads}
             onViewLead={handleViewLead}
-            onAddActivity={addActivityToLead}
             dateRange={dateRange}
+            setDateRange={setDateRange}
             services={services}
             offers={offers}
           />
@@ -1201,8 +1206,8 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
             leads={roleScopedLeads}
             users={users}
             onViewCustomer={handleViewCustomer}
-            onUpdateCustomer={updateCustomer}
-            currentUser={viewProfile!}
+            onViewLead={handleViewLead}
+            services={services}
           />
         } />
         <Route path="/customers/:id" element={<CustomerDetailRoute />} />
@@ -1212,7 +1217,7 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
               leads={roleScopedLeads}
               users={roleScopedUsers}
               currentUser={viewProfile!}
-              dateRange={dateRange}
+              dateRange={{ from: dateRange.from ? new Date(dateRange.from) : null, to: dateRange.to ? new Date(dateRange.to) : null }}
               services={services}
             />
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
@@ -1220,19 +1225,17 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/payments" element={
           <PaymentTracker
             leads={roleScopedLeads}
-            customers={roleScopedCustomers}
             users={users}
             currentUser={viewProfile!}
-            onUpdateLead={handleUpdateLead}
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+            onViewLead={handleViewLead}
           />
         } />
         <Route path="/activity" element={
           <ActivityFeed
             userActivities={roleScopedActivities}
             users={users}
-            leads={leads}
-            customers={customers}
-            currentUser={viewProfile!}
           />
         } />
         <Route path="/users" element={
@@ -1367,19 +1370,21 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
         <Route path="/whatsapp" element={
-          <WhatsAppDashboard
-            conversations={whatsappConversations}
-            messages={whatsappMessages}
-            templates={whatsappTemplates}
-            onSendMessage={sendWhatsAppMessage}
-            onAddTemplate={addWhatsAppTemplate}
-            onSync={syncWhatsAppConversations}
-            customers={customers}
-            users={users}
-            currentUser={viewProfile!}
-            onAddWorkOrder={addWorkOrder}
-            services={services}
-          />
+          isAdminOrAbove ? (
+            <WhatsAppDashboard
+              conversations={whatsappConversations}
+              messages={whatsappMessages}
+              templates={whatsappTemplates}
+              onSendMessage={sendWhatsAppMessage}
+              onAddTemplate={addWhatsAppTemplate}
+              onSync={syncWhatsAppConversations}
+              customers={customers}
+              users={users}
+              currentUser={viewProfile!}
+              onAddWorkOrder={addWorkOrder}
+              services={services}
+            />
+          ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
         <Route path="/cities" element={
           isSuperAdmin ? (
@@ -1408,10 +1413,11 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
         <Route path="/team" element={
           isAdminOrAbove ? (
             <TeamManagement
-              users={roleScopedUsers}
-              currentUser={viewProfile!}
-              leads={roleScopedLeads}
-              onUpdateUser={updateUser}
+              teamMembers={roleScopedUsers}
+              allLeads={roleScopedLeads}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
+              onDeleteUsers={deleteMultipleUsers}
             />
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
@@ -1419,8 +1425,9 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           isAdminOrAbove ? (
             <DocumentVerification
               leads={roleScopedLeads}
+              dateRange={dateRange}
+              setDateRange={setDateRange}
               onUpdateDocumentStatus={updateDocumentStatus}
-              currentUser={viewProfile!}
             />
           ) : <AccessDenied requiredRole="Admin or Super Admin" />
         } />
@@ -1543,19 +1550,41 @@ function FilteredAppContent({ authData, apiData }: { authData: any, apiData: any
           />
         } />
         <Route path="/my-day" element={<MyDay />} />
-        <Route path="/auto-assignment" element={<AutoAssignmentSettings />} />
-        <Route path="/targets" element={<TargetsDashboard />} />
-        <Route path="/service-delivery" element={<ServiceDelivery />} />
-        <Route path="/renewals" element={<RenewalsPipeline />} />
-        <Route path="/client-portal" element={<ClientPortalView />} />
+        <Route path="/auto-assignment" element={
+          isAdminOrAbove ? <AutoAssignmentSettings /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/targets" element={
+          isAdminOrAbove ? <TargetsDashboard /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/service-delivery" element={
+          isAdminOrAbove ? <ServiceDelivery /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/renewals" element={
+          isAdminOrAbove ? <RenewalsPipeline /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/client-portal" element={
+          isAdminOrAbove ? <ClientPortalView /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/expenses" element={<ExpenseManager />} />
-        <Route path="/automation" element={<AutomationRules />} />
-        <Route path="/templates" element={<DocumentTemplates />} />
-        <Route path="/integrations" element={<IntegrationsCenter />} />
-        <Route path="/forecast" element={<RevenueForecasting />} />
-        <Route path="/churn" element={<ChurnPrediction />} />
-        <Route path="/gst-calendar" element={<GstComplianceCalendar />} />
+        <Route path="/automation" element={
+          isAdminOrAbove ? <AutomationRules /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/templates" element={
+          isAdminOrAbove ? <DocumentTemplates /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/integrations" element={
+          isAdminOrAbove ? <IntegrationsCenter /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/forecast" element={
+          isAdminOrAbove ? <RevenueForecasting /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/churn" element={
+          isAdminOrAbove ? <ChurnPrediction /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
+        <Route path="/gst-calendar" element={
+          isAdminOrAbove ? <GstComplianceCalendar /> : <AccessDenied requiredRole="Admin or Super Admin" />
+        } />
         <Route path="/team-chat" element={<TeamChat />} />
       </Route>
         </Routes>

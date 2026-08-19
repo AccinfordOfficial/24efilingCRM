@@ -125,7 +125,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
   };
 
   const processedLeads = useMemo(() => {
-    let sortableLeads = leads.filter(lead => {
+    const sortableLeads = leads.filter(lead => {
       const statusMatch = statusFilter === 'All' || lead.status === statusFilter;
       const priorityMatch = priorityFilter === 'All' || lead.priority === priorityFilter;
       const assigneeMatch = assigneeFilter === 'All'
@@ -446,7 +446,7 @@ export const LeadTable: React.FC<LeadTableProps> = ({
                         {(() => {
                           const assignedUser = typeof lead.assigned_to === 'object' && lead.assigned_to !== null 
                             ? lead.assigned_to 
-                            : users.find(u => u.id === lead.assigned_to);
+                            : users.find(u => u.id === (lead.assigned_to as unknown as string));
                           const createdId = typeof lead.created_by === 'object' && lead.created_by !== null 
                             ? (lead.created_by as any).id 
                             : lead.created_by;

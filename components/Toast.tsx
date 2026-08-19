@@ -12,6 +12,7 @@ interface ToastMessage {
 
 interface ToastContextType {
   addToast: (message: string, type?: ToastType) => void;
+  add: (input: { title?: string; message: string; type?: ToastType }) => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
@@ -69,8 +70,12 @@ export const ToastProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }, 5000);
   }, [removeToast]);
 
+  const add = useCallback(({ title, message, type = 'info' }: { title?: string; message: string; type?: ToastType }) => {
+    addToast(title ? `${title}: ${message}` : message, type);
+  }, [addToast]);
+
   return (
-    <ToastContext.Provider value={{ addToast }}>
+    <ToastContext.Provider value={{ addToast, add }}>
       {children}
       <div className="fixed top-5 right-5 z-50 space-y-3 w-80">
         {toasts.map((toast) => (

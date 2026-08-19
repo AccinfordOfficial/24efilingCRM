@@ -290,3 +290,238 @@ body {
     transform: scale(1);
   }
 }
+
+/* =============================================================================
+   SALES EXECUTIVE BRANDED LIGHT THEME  (role-scoped via .se-brand)
+   Applied only when role = 'Sales Executive' AND theme is light.
+   primary: #22367d (blue)  |  secondary: #dc464c (red)
+   ============================================================================= */
+
+html.se-brand:not(.dark) {
+  --primary: 227 57% 31%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 357.6 68% 56.9%;
+  --secondary-foreground: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --ring: 227 57% 31%;
+}
+
+/* Sub-headings: always brand red */
+html.se-brand:not(.dark) h2,
+html.se-brand:not(.dark) h3,
+html.se-brand:not(.dark) h4 {
+  color: var(--secondary);
+}
+
+/* Except headings that already carry an explicit color (stat values, dark hero
+   card titles, gray field labels) — those keep their intended color */
+html.se-brand:not(.dark) :is(h2, h3, h4).text-white {
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-100 {
+  color: #f1f5f9;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-200 {
+  color: #e2e8f0;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-300 {
+  color: #cbd5e1;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-400 {
+  color: #94a3b8;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-500 {
+  color: #64748b;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-600 {
+  color: #475569;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-700 {
+  color: #334155;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-slate-800 {
+  color: #1e293b;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-emerald-400 {
+  color: #34d399;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-indigo-400 {
+  color: #818cf8;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-rose-400 {
+  color: #fb7185;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-blue-400 {
+  color: #60a5fa;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-amber-400 {
+  color: #fbbf24;
+}
+
+html.se-brand:not(.dark) :is(h2, h3, h4).text-transparent {
+  color: transparent;
+}
+
+/* Dialog titles stay black under the SE theme, unless the caller set an
+   explicit color (dark panels keep white-ish, gradients keep the clip) */
+html.se-brand:not(.dark) .se-dialog-title:not(.text-slate-100):not(.text-slate-200):not(.text-slate-300):not(.text-white):not(.text-transparent) {
+  color: var(--foreground);
+}
+
+/* Data-value headings (names, labels, empty states) keep slate-900 */
+html.se-brand:not(.dark) :is(h2, h3, h4).se-data {
+  color: #0f172a;
+}
+
+/* Headings on solid color card backgrounds stay white */
+html.se-brand:not(.dark) :is(h2, h3, h4).se-on-color {
+  color: #ffffff;
+}
+
+/* Exceptions: invoice print content stays black */
+html.se-brand:not(.dark) #printable-invoice h2,
+html.se-brand:not(.dark) #printable-invoice h3,
+html.se-brand:not(.dark) #printable-invoice h4,
+html.se-brand:not(.dark) #service-invoice-content h2,
+html.se-brand:not(.dark) #service-invoice-content h3,
+html.se-brand:not(.dark) #service-invoice-content h4 {
+  color: #0f172a;
+}
+
+/* --- Top bar: deep blue + red strip + red accents -------------------------- */
+html.se-brand:not(.dark) .se-header {
+  background: #22367d;
+  border-bottom: 3px solid #dc464c;
+}
+
+html.se-brand:not(.dark) .se-header h1 {
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header p {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html.se-brand:not(.dark) .se-header-burger {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-burger:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-search {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-search:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-search kbd {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+html.se-brand:not(.dark) .se-header-theme {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-theme:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-create {
+  background: #dc464c;
+}
+
+html.se-brand:not(.dark) .se-header-create:hover {
+  background: #c73a40;
+}
+
+html.se-brand:not(.dark) .se-header-bell {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html.se-brand:not(.dark) .se-header-bell:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+html.se-brand:not(.dark) .se-header-user {
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-user:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+html.se-brand:not(.dark) .se-header-user .text-slate-900 {
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .se-header-user .text-slate-500 {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* --- Sidebar: deep blue bar, red active state ------------------------------ */
+html.se-brand:not(.dark) .glass-sidebar {
+  background: #22367d;
+  border-right-color: rgba(255, 255, 255, 0.08);
+}
+
+html.se-brand:not(.dark) .glass-sidebar a {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+html.se-brand:not(.dark) .glass-sidebar a:not(.bg-primary) svg {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+html.se-brand:not(.dark) .glass-sidebar a:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+html.se-brand:not(.dark) .glass-sidebar a.bg-primary {
+  background: #dc464c;
+  color: #ffffff;
+  border-left-color: rgba(255, 255, 255, 0.6);
+}
+
+html.se-brand:not(.dark) .glass-sidebar a span.bg-slate-800 {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+html.se-brand:not(.dark) .glass-sidebar h4.text-slate-500 {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+html.se-brand:not(.dark) .glass-sidebar button {
+  color: rgba(255, 255, 255, 0.78);
+  border-color: rgba(255, 255, 255, 0.08);
+}

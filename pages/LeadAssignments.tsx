@@ -110,7 +110,7 @@ export const LeadAssignments: React.FC<LeadAssignmentsProps> = ({
         }
     };
 
-    const highPriorityCount = headOfficeLeads.filter(l => l.priority === 'High' || l.priority === 'Urgent').length;
+    const hotPriorityCount = headOfficeLeads.filter(l => l.priority === 'Hot').length;
 
     return (
         <div className="space-y-6 pb-8 text-foreground max-w-7xl mx-auto p-4 md:p-6">
@@ -145,8 +145,8 @@ export const LeadAssignments: React.FC<LeadAssignmentsProps> = ({
                             <AlertCircle className="h-6 w-6" />
                         </div>
                         <div>
-                            <span className="text-2xl font-black text-slate-900 dark:text-white">{highPriorityCount}</span>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">High / Urgent Priority</p>
+                            <span className="text-2xl font-black text-slate-900 dark:text-white">{hotPriorityCount}</span>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Hot Priority</p>
                         </div>
                     </CardContent>
                 </Card>
@@ -240,15 +240,15 @@ export const LeadAssignments: React.FC<LeadAssignmentsProps> = ({
                                             className="h-4 w-4 rounded border-slate-300 dark:border-white/20 text-primary focus:ring-primary"
                                         />
                                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                                            lead.priority === 'High' || lead.priority === 'Urgent' 
+                                            lead.priority === 'Hot' 
                                                 ? 'bg-red-500/20 text-red-400 border border-red-500/30' 
                                                 : 'bg-slate-500/20 text-slate-400 border border-slate-500/30'
                                         }`}>
-                                            {lead.priority || 'Medium'} Priority
+                                            {lead.priority || 'Cold'} Priority
                                         </span>
                                     </div>
 
-                                    <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug">
+                                    <h3 className="se-data font-bold text-slate-900 dark:text-white text-base leading-snug">
                                         {lead.business_name || `${lead.first_name} ${lead.last_name}`}
                                     </h3>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium flex items-center gap-1.5">
@@ -293,7 +293,7 @@ export const LeadAssignments: React.FC<LeadAssignmentsProps> = ({
                 <Card className="dark:bg-slate-900/60 dark:border-white/10 text-center py-16">
                     <CardContent className="space-y-3">
                         <CheckCircle2 className="h-12 w-12 text-emerald-500 mx-auto opacity-80" />
-                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">All Head Office Leads Assigned!</h3>
+                        <h3 className="se-data text-xl font-bold text-slate-900 dark:text-white">All Head Office Leads Assigned!</h3>
                         <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-sm">
                             There are currently no pending Head Office leads waiting for routing. All incoming leads have been assigned.
                         </p>

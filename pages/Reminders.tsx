@@ -426,7 +426,7 @@ export default function Reminders({
             <Card className="glass-card border-slate-200 dark:border-white/5 bg-white dark:bg-slate-900/30 backdrop-blur-md p-6">
               {/* Calendar Month Selector */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-200">
+                <h3 className="se-data font-bold text-lg text-slate-900 dark:text-slate-200">
                   {format(currentMonth, 'MMMM yyyy')}
                 </h3>
                 <div className="flex items-center gap-1">
@@ -536,7 +536,7 @@ export default function Reminders({
                           onClick={() => handleEdit(reminder)}
                           className="bg-slate-50 dark:bg-slate-950/40 hover:bg-slate-100 dark:hover:bg-slate-950/70 p-3 rounded-lg border border-slate-200 dark:border-white/5 cursor-pointer transition-all space-y-2 hover:translate-y-[-2px] shadow-sm"
                         >
-                          <h4 className="font-bold text-xs text-slate-900 dark:text-slate-200 line-clamp-1">{reminder.title}</h4>
+                          <h4 className="se-data font-bold text-xs text-slate-900 dark:text-slate-200 line-clamp-1">{reminder.title}</h4>
                           {reminder.description && <p className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-2">{reminder.description}</p>}
                           
                           <div className="flex justify-between items-center pt-1 text-[9px] text-slate-500 font-semibold border-t border-slate-200 dark:border-white/5">

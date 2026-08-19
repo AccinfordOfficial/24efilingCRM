@@ -136,12 +136,15 @@ export const Attendance: React.FC = () => {
 
         try {
             setIsSubmittingLeave(true);
+            const start = new Date(`${startDate}T00:00:00`);
+            const end = new Date(`${endDate}T00:00:00`);
+            const dayCount = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
             const { error } = await (supabase.from('leave_requests') as any).insert([{
                 user_id: profile?.id,
                 leave_type: leaveType,
                 start_date: startDate,
                 end_date: endDate,
-                days: 1,
+                days: dayCount,
                 reason: reason.trim(),
                 status: 'pending'
             }]);

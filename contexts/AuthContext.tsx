@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (profileData) {
         console.log(`[AuthContext] Profile successfully loaded for: ${profileData.email}`);
-        setProfileAndRef(profileData);
+        setProfileAndRef(profileData as unknown as AppUser);
       }
     } catch (err: any) {
       console.error("[AuthContext] Profile fetch unexpected error:", err);

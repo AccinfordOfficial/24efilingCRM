@@ -43,9 +43,7 @@ export const CompanySettings: React.FC<CompanySettingsProps> = ({ showToast }) =
                 company_address: companyInfo.address,
                 company_email: companyInfo.email,
                 company_phone: companyInfo.phone,
-                // @ts-ignore
                 company_meta: companyInfo.meta,
-                // @ts-ignore
                 regional_settings: companyInfo.regional
             });
             showToast('success', "Company profile updated");

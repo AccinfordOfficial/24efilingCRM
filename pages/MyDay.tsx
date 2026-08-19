@@ -19,7 +19,7 @@ export const MyDay: React.FC = () => {
     }, [leads, profile]);
 
     const myTasks = useMemo(() => {
-        return tasks.filter(t => t.assigned_to === profile?.id);
+        return tasks.filter(t => t.assigned_to?.id === profile?.id);
     }, [tasks, profile]);
 
     // High priority follow-ups
@@ -30,7 +30,7 @@ export const MyDay: React.FC = () => {
 
     const overdueFollowUps = useMemo(() => {
         const today = new Date().toISOString().split('T')[0];
-        return myLeads.filter(l => l.next_follow_up && l.next_follow_up < today && l.status !== 'Converted' && l.status !== 'Closed Lost');
+        return myLeads.filter(l => l.next_follow_up && l.next_follow_up < today && l.status !== 'Success' && l.status !== 'Lost');
     }, [myLeads]);
 
     const handleLogQuickCall = (leadName: string) => {
@@ -121,7 +121,7 @@ export const MyDay: React.FC = () => {
                             myTasks.map(task => (
                                 <div key={task.id} className="p-3 bg-slate-950/40 border border-white/5 rounded-lg flex items-center justify-between">
                                     <div>
-                                        <p className="text-sm font-semibold text-white">{task.title}</p>
+                                        <p className="text-sm font-semibold text-white">{task.content}</p>
                                         <p className="text-xs text-slate-400">Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'Today'}</p>
                                     </div>
                                     <Badge variant="outline" className="text-[10px] bg-blue-500/10 text-blue-400 border-blue-500/20">

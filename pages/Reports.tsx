@@ -229,7 +229,7 @@ export default function Reports({
   // ── EXPORT ENGINE ──
   const handleExportExcel = () => {
     let exportRows: any[] = [];
-    let filename = `report_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`;
+    const filename = `report_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`;
 
     if (activeTab === 'sales') {
       exportRows = periodLeads.map(l => ({

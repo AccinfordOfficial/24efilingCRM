@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { User, City, Branch } from '../../types';
 import { X, MapPin, Building, User as UserIcon, BarChart } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { ReactFlow, Controls, Background, useNodesState, useEdgesState, Panel, MiniMap, Node, Edge, MarkerType } from '@xyflow/react';
+import { ReactFlow, Controls, Background, useNodesState, useEdgesState, Panel, MiniMap, Node, Edge, MarkerType, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
 import { CityNode, BranchNode, UserNode } from './CustomTreeNodes';
@@ -50,8 +50,8 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[], direction = 'TB') => 
     
     return {
       ...node,
-      targetPosition: isHorizontal ? 'left' : 'top',
-      sourcePosition: isHorizontal ? 'right' : 'bottom',
+      targetPosition: isHorizontal ? Position.Left : Position.Top,
+      sourcePosition: isHorizontal ? Position.Right : Position.Bottom,
       position: {
         x: nodeWithPosition.x - width / 2,
         y: nodeWithPosition.y - height / 2,

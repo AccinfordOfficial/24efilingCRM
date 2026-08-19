@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '../icons';
 
 interface CalendarProps {
-  dateRange: { from: string; to: string };
+  dateRange?: { from?: string; to?: string };
   onDateChange: (range: { from: string; to: string }) => void;
 }
 
@@ -21,8 +21,9 @@ const PRESET_RANGES = [
 
 const getISODateString = (date: Date) => date.toISOString().split('T')[0];
 
-export const Calendar: React.FC<CalendarProps> = ({ dateRange, onDateChange }) => {
+export const Calendar: React.FC<CalendarProps> = ({ dateRange = { from: '', to: '' }, onDateChange }) => {
   const [currentDate, setCurrentDate] = useState(dateRange.from ? new Date(`${dateRange.from}T00:00:00`) : new Date());
+  const { from = '', to = '' } = dateRange;
 
   const handlePrevMonth = () => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -36,8 +37,6 @@ export const Calendar: React.FC<CalendarProps> = ({ dateRange, onDateChange }) =
     const selectedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
     const isoString = selectedDate.toISOString().split('T')[0];
 
-    const { from, to } = dateRange;
-    
     if (!from || (from && to)) {
       onDateChange({ from: isoString, to: '' });
     } else {
@@ -59,12 +58,12 @@ export const Calendar: React.FC<CalendarProps> = ({ dateRange, onDateChange }) =
 
     switch(presetValue) {
         case 'today':
-            // 'from' is already today
             break;
-        case 'this_week':
+        case 'this_week': {
             const dayOfWeek = from.getDay();
-            from.setDate(from.getDate() - dayOfWeek); // Start of week (Sunday)
+            from.setDate(from.getDate() - dayOfWeek);
             break;
+        }
         case 'this_month':
             from = new Date(to.getFullYear(), to.getMonth(), 1);
             break;
@@ -90,8 +89,8 @@ export const Calendar: React.FC<CalendarProps> = ({ dateRange, onDateChange }) =
       days.push(<div key={`empty-start-${i}`} className="text-center"></div>);
     }
     
-    const fromDate = dateRange.from ? new Date(`${dateRange.from}T00:00:00`) : null;
-    const toDate = dateRange.to ? new Date(`${dateRange.to}T00:00:00`) : null;
+    const fromDate = from ? new Date(`${from}T00:00:00`) : null;
+    const toDate = to ? new Date(`${to}T00:00:00`) : null;
 
     for (let day = 1; day <= daysInMonth; day++) {
       const dayDate = new Date(year, month, day);

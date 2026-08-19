@@ -49,7 +49,6 @@ export const LeadSettings: React.FC<LeadSettingsProps> = ({ showToast }) => {
         setSaving(true);
         try {
             await updateOrganizationSettings({
-                // @ts-ignore
                 lead_settings: leadSettings
             });
             // Don't toast on every little change, maybe?

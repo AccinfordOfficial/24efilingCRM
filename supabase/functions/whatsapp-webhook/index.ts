@@ -51,7 +51,7 @@ serve(async (req) => {
 
       if (messageContent) {
         // Find or create WhatsApp Conversation
-        let { data: conversation, error: convError } = await supabase
+        const { data: conversation, error: convError } = await supabase
           .from('whatsapp_conversations')
           .select('*')
           .eq('customer_phone', fromPhone)

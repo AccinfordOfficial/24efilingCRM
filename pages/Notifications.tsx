@@ -3,7 +3,7 @@
 
 
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '../components/ui/Card';
 import { BellIcon, BriefcaseIcon, UserIcon, FileTextIcon, FileUpIcon } from '../components/icons';
 import { Notification } from '../types';
@@ -57,12 +57,6 @@ const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({ type }) =>
 };
 
 const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllRead, onNavigate }) => {
-    useEffect(() => {
-        // Mark as read when the page is viewed, after a short delay
-        const timeoutId = setTimeout(onMarkAllRead, 1000);
-        return () => clearTimeout(timeoutId);
-    }, [onMarkAllRead]);
-    
     const unreadCount = notifications.filter(n => !n.is_read).length;
 
     return (
@@ -112,7 +106,7 @@ const Notifications: React.FC<NotificationsProps> = ({ notifications, onMarkAllR
                     ) : (
                         <div className="text-center py-12 text-slate-500">
                             <BellIcon className="h-10 w-10 mx-auto text-slate-300" />
-                            <h3 className="mt-2 text-lg font-semibold">No notifications yet</h3>
+                            <h3 className="se-data mt-2 text-lg font-semibold">No notifications yet</h3>
                             <p className="text-sm">When there's new activity, you'll see it here.</p>
                         </div>
                     )}

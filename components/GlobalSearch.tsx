@@ -92,7 +92,7 @@ const APP_PAGES: AppPage[] = [
 
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
-    const { currentUser } = useAuth();
+    const { profile } = useAuth();
     const { leads, customers, users } = useApi();
 
     const [query, setQuery] = useState('');
@@ -101,7 +101,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({ isOpen, onClose }) =
     const inputRef = useRef<HTMLInputElement>(null);
     const resultsContainerRef = useRef<HTMLDivElement>(null);
 
-    const userRole = currentUser?.role || 'Sales Executive';
+    const userRole = profile?.role || 'Sales Executive';
 
     // Filter pages by current user's role
     const allowedPages = useMemo(() => {

@@ -40,6 +40,38 @@ serve(async (req) => {
       });
     }
 
+    // --- Step 0: Authorize the caller (must be a Super Admin) ---
+    const callerToken = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+    if (!callerToken) {
+      return new Response(JSON.stringify({ error: 'Permission denied: Missing auth token.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const callerClient = createClient(supabaseUrl, anonKey ?? '', {
+      global: { headers: { Authorization: `Bearer ${callerToken}` } },
+    });
+    const { data: callerUser, error: callerUserError } = await callerClient.auth.getUser(callerToken);
+    if (callerUserError || !callerUser?.user) {
+      return new Response(JSON.stringify({ error: 'Permission denied: Invalid or expired session.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+    const { data: callerProfile, error: callerProfileError } = await callerClient
+      .from('profiles')
+      .select('role, is_active')
+      .eq('id', callerUser.user.id)
+      .maybeSingle();
+    if (callerProfileError || !callerProfile || callerProfile.role !== 'Super Admin') {
+      return new Response(JSON.stringify({ error: 'Permission denied: Only Super Admins can create users.' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200,
+      });
+    }
+
     // Create a Supabase admin client with the service_role key
     const supabaseAdmin = createClient(supabaseUrl, serviceKey);
 

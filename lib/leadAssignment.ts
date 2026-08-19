@@ -58,7 +58,7 @@ export async function autoAssignLead(leadData: {
 
             if (rule.rule_type === 'load_balanced') {
                 const targetBranch = rule.target_branch_id || leadData.branch_id;
-                let query = supabase.from('profiles').select('id, role, branch_id').eq('status', 'Active');
+                let query = supabase.from('profiles').select('id, role, branch_id').eq('is_active', true);
                 if (targetBranch) {
                     query = query.eq('branch_id', targetBranch);
                 }
@@ -70,7 +70,7 @@ export async function autoAssignLead(leadData: {
                         .from('leads')
                         .select('assigned_to')
                         .in('assigned_to', userIds)
-                        .not('status', 'in', '("Converted","Closed Lost")');
+                        .not('status', 'in', '("Success","Lost")');
 
                     const countMap: Record<string, number> = {};
                     userIds.forEach(id => countMap[id] = 0);

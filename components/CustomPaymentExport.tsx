@@ -41,7 +41,6 @@ const CustomPaymentExport: React.FC<CustomPaymentExportProps> = ({ transactions,
             tableRows.push(txnData);
         });
 
-        // @ts-ignore
         autoTable(doc, {
             head: [tableColumn],
             body: tableRows,

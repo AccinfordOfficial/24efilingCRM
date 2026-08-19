@@ -130,6 +130,7 @@ export default function BranchManagement({ branches, users, cities = [], onAddBr
       const payloadToSave = {
         ...formData,
         city_id: finalCityId,
+        city_name: cities.find(c => c.id === finalCityId)?.city_name ?? null,
         manager_id: formData.manager_id || null,  // Explicitly null when not assigned
       };
 

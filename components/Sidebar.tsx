@@ -31,6 +31,7 @@ interface NavLinkItem {
   path: string;
   label: string;
   icon: React.ElementType;
+  badge?: string;
 }
 
 interface NavSection {
@@ -45,7 +46,8 @@ const NavLink: React.FC<{
   active?: boolean;
   onClick: () => void;
   count?: number | null;
-}> = ({ path, label, icon: Icon, active, onClick, count }) => {
+  badge?: string;
+}> = ({ path, label, icon: Icon, active, onClick, count, badge }) => {
   const tourId = `tour-sidebar-${path === '/' ? 'dashboard' : path.replace(/^\//, '').replace(/\//g, '-')}`;
   const aliasId = path === '/branch-management' ? 'tour-sidebar-branches' : tourId;
 
@@ -63,6 +65,11 @@ const NavLink: React.FC<{
     >
       <Icon className={cn("h-4 w-4", active ? "text-white" : "text-slate-400")} />
       <span className="flex-1 truncate">{label}</span>
+      {badge && (
+        <span className="text-[10px] font-bold uppercase tracking-wide text-amber-300 bg-amber-500/10 border border-amber-500/30 rounded-full px-2 py-0.5">
+          {badge}
+        </span>
+      )}
       {count != null && (
         <span className={cn(
           "text-xs font-semibold rounded-full px-2 py-0.5",
@@ -110,8 +117,8 @@ const superAdminNav: NavSection[] = [
     title: 'Analytics',
     items: [
       { path: '/revenue', label: 'Revenue Dashboard', icon: DollarSign },
-      { path: '/forecast', label: 'Revenue & Pipeline Forecast', icon: DollarSign },
-      { path: '/churn', label: 'Churn Prediction', icon: ShieldCheck },
+      { path: '/forecast', label: 'Revenue & Pipeline Forecast', icon: DollarSign, badge: 'Soon' },
+      { path: '/churn', label: 'Churn Prediction', icon: ShieldCheck, badge: 'Soon' },
       { path: '/performance', label: 'Employee Performance', icon: BarChart3 },
       { path: '/reports', label: 'Reports & Analytics', icon: FileText },
     ]
@@ -122,7 +129,7 @@ const superAdminNav: NavSection[] = [
       { path: '/invoices', label: 'Invoices & Policies', icon: FileText },
       { path: '/templates', label: 'Document Templates', icon: FileText },
       { path: '/expenses', label: 'Expense Manager', icon: DollarSign },
-      { path: '/client-portal', label: 'Client Portal Simulator', icon: Users },
+      { path: '/client-portal', label: 'Client Portal Simulator', icon: Users, badge: 'Soon' },
     ]
   },
   {
@@ -152,15 +159,15 @@ const superAdminNav: NavSection[] = [
   {
     title: 'Communication',
     items: [
-      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare },
+      { path: '/whatsapp', label: 'WhatsApp Chats', icon: MessageSquare, badge: 'Soon' },
       { path: '/team-chat', label: 'Internal Team Chat', icon: MessageSquare },
-      { path: '/automation', label: 'Workflow Automations', icon: Layers }
+      { path: '/automation', label: 'Workflow Automations', icon: Layers, badge: 'Soon' }
     ]
   },
   {
     title: 'System',
     items: [
-      { path: '/integrations', label: 'Integrations & APIs', icon: Settings },
+      { path: '/integrations', label: 'Integrations & APIs', icon: Settings, badge: 'Soon' },
       { path: '/activity', label: 'Activity Feed', icon: Clock },
       { path: '/notifications', label: 'Notifications', icon: Bell },
       { path: '/settings', label: 'System Settings', icon: Settings },
@@ -499,6 +506,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       active={active}
                       onClick={handleNavClick}
                       count={getPageCount(link.path)}
+                      badge={link.badge}
                     />
                   );
                 })}

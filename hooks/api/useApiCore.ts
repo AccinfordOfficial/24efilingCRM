@@ -43,10 +43,12 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
 
     const hasLoaded = useRef(false);
 
+    const CACHE_KEY = profile?.id ? `crm_api_cache_v2_${profile.id}` : 'crm_api_cache_v2_anon';
+
     const fetchData = useCallback(async () => {
         // SWR (Stale-While-Revalidate) Logic
         if (!hasLoaded.current) {
-            const cached = localStorage.getItem('crm_api_cache');
+            const cached = localStorage.getItem(CACHE_KEY);
             if (cached) {
                 try {
                     const d = JSON.parse(cached);
@@ -122,8 +124,8 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
                 testimonialsRes
             ] = await Promise.allSettled([
                 supabase.from('profiles').select('*'),
-                supabase.from('leads').select('*').order('created_at', { ascending: false }).limit(500),
-                supabase.from('customers').select('*').limit(500),
+                supabase.from('leads').select('*').order('created_at', { ascending: false }),
+                supabase.from('customers').select('*').order('created_at', { ascending: false }),
                 supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(100),
                 supabase.from('user_activities').select('*').order('timestamp', { ascending: false }).limit(100),
                 (supabase.from('organization_settings' as any) as any).select('*').maybeSingle(),
@@ -329,9 +331,15 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
 
             const serialized = JSON.stringify(cachePayload);
             if (serialized.length < 4.5 * 1024 * 1024) {
-                localStorage.setItem('crm_api_cache', serialized);
+                localStorage.setItem(CACHE_KEY, serialized);
             } else {
                 console.warn("API Cache payload exceeds 4.5MB quota limit, skipping LocalStorage cache write.");
+            }
+
+            try {
+                localStorage.removeItem('crm_api_cache');
+            } catch (e) {
+                console.warn("Failed to remove legacy API cache:", e);
             }
 
             hasLoaded.current = true;
@@ -341,9 +349,10 @@ export function useApiCore(options: { fetchOnMount?: boolean } = { fetchOnMount:
         } finally {
             setLoading(false);
         }
-    }, [profile?.id, options.fetchOnMount]);
+    }, [profile?.id, options.fetchOnMount, CACHE_KEY]);
 
     useEffect(() => {
+        hasLoaded.current = false;
         if (options.fetchOnMount && profile?.id) {
             fetchData();
         } else if (!profile) {

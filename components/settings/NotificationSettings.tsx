@@ -40,7 +40,6 @@ export const NotificationSettings: React.FC<NotificationSettingsProps> = ({ show
         setSaving(true);
         try {
             await updateOrganizationSettings({
-                // @ts-ignore
                 notification_rules: rules
             });
             showToast('success', "Notification rules updated");

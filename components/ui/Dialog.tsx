@@ -86,7 +86,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight text-foreground",
+      "se-dialog-title text-lg font-semibold leading-none tracking-tight text-foreground",
       className
     )}
     {...props}
@@ -108,20 +108,29 @@ DialogDescription.displayName = DialogPrimitive.Description.displayName
 
 // --- Compatible Wrapper ---
 interface DialogProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen?: boolean;
+  open?: boolean;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
-  title: string;
+  title?: string;
   description?: string;
   maxWidth?: string; // Additional prop often used
 }
 
-const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, title, description, maxWidth }) => {
+const Dialog: React.FC<DialogProps> = ({ isOpen, open, onClose, onOpenChange, children, title, description, maxWidth }) => {
+  const resolvedOpen = isOpen ?? open ?? false;
+  const handleClose = (nextOpen: boolean) => {
+    if (!nextOpen) {
+      if (onClose) onClose();
+      else onOpenChange?.(false);
+    }
+  };
   return (
-    <DialogRoot open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <DialogRoot open={resolvedOpen} onOpenChange={handleClose}>
       <DialogContent className={maxWidth ? `max-w-[${maxWidth}]` : ""}>
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          {title && <DialogTitle>{title}</DialogTitle>}
           {description && <DialogDescription>{description}</DialogDescription>}
         </DialogHeader>
         <div className="mt-4">

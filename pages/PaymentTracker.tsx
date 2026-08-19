@@ -53,7 +53,7 @@ interface Transaction {
 const MetricCard: React.FC<{ title: string, value: string | number, description: string, color: string, icon: React.ElementType }> = ({ title, value, description, color, icon: Icon }) => (
     <div className={`${color} text-white p-6 rounded-xl shadow-md flex flex-col`}>
         <div className="flex items-start justify-between">
-            <h3 className="text-base font-medium">{title}</h3>
+            <h3 className="se-on-color text-base font-medium">{title}</h3>
             <Icon className="h-6 w-6 opacity-80" />
         </div>
         <div className="mt-auto">
@@ -118,6 +118,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ leads, users, currentUs
                 aadharDoc: lead.documents?.find(d => d.type === 'Aadhar Card'),
                 lead: lead,
                 serviceFee, // Mapped to calculated sum
+                subTotal: serviceFee + tax - discount,
                 tax,
                 discount,
                 totalAmount,
@@ -524,7 +525,7 @@ const PaymentTracker: React.FC<PaymentTrackerProps> = ({ leads, users, currentUs
                                 phone: selectedServiceSet.lead.phone_number,
                                 email: selectedServiceSet.lead.email,
                                 lead_id: selectedServiceSet.lead.id,
-                                business_address: selectedServiceSet.lead.address
+                                business_address: selectedServiceSet.lead.business_address || selectedServiceSet.lead.residential_address || ''
                             } as any} 
                             lead={selectedServiceSet.lead as any}
                             serviceSet={selectedServiceSet.set} 

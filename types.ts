@@ -123,7 +123,7 @@ export type Activity = {
   type: 'Note' | 'Status Change' | 'Document Upload' | 'Call' | 'Email';
   content: string;
   created_at: string;
-  user: User;
+  user?: User;
 }
 
 export type UserActivity = {

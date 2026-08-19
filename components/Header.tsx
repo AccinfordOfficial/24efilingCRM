@@ -74,6 +74,18 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
   };
 
   useEffect(() => {
+    // Role-scoped branded light theme: enable .se-brand on <html> only for
+    // Sales Executives while the app is in light mode.
+    const isSalesExec = currentUser?.role === 'Sales Executive';
+    if (isSalesExec && !isDark) {
+      document.documentElement.classList.add('se-brand');
+    } else {
+      document.documentElement.classList.remove('se-brand');
+    }
+    return () => document.documentElement.classList.remove('se-brand');
+  }, [currentUser?.role, isDark]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setDropdownOpen(false);
@@ -105,12 +117,12 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
   }
 
   return (
-    <header className="sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 bg-white/80 dark:bg-slate-950/20 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
+    <header className="se-header sticky top-0 z-30 flex h-20 items-center justify-between gap-4 border-b border-slate-200 dark:border-white/5 bg-white/80 dark:bg-slate-950/20 backdrop-blur-lg px-4 sm:px-6 lg:px-8">
       <div className="flex items-center gap-4">
         <Button
           variant="outline"
           size="icon"
-          className="shrink-0 md:hidden bg-slate-100 dark:bg-slate-900/50 hover:bg-slate-200 dark:hover:bg-slate-800/50 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white"
+          className="se-header-burger shrink-0 md:hidden bg-slate-100 dark:bg-slate-900/50 hover:bg-slate-200 dark:hover:bg-slate-800/50 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white"
           onClick={onMenuClick}
         >
           <MenuIcon className="h-5 w-5" />
@@ -125,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
       <div className="flex items-center gap-2 sm:gap-4 flex-1 justify-end">
         <button 
           onClick={onSearchClick}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-xs font-medium cursor-pointer"
+          className="se-header-search flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-900/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-colors text-xs font-medium cursor-pointer"
         >
           <SearchIcon className="h-4 w-4" />
           <span className="hidden sm:inline">Search...</span>
@@ -137,7 +149,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
         <button 
           onClick={toggleTheme}
           title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-          className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 transition-colors text-xs font-medium cursor-pointer"
+          className="se-header-theme p-2 rounded-lg bg-slate-100 dark:bg-slate-900/60 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 transition-colors text-xs font-medium cursor-pointer"
         >
           {isDark ? <Sun className="h-4 w-4 text-amber-400" /> : <Moon className="h-4 w-4 text-slate-700" />}
         </button>
@@ -146,14 +158,14 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
           <Button 
             id="tour-header-create-lead"
             size="sm" 
-            className="hidden sm:flex gap-1.5 bg-primary hover:bg-primary/95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm"
+            className="se-header-create hidden sm:flex gap-1.5 bg-primary hover:bg-primary/95 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-sm"
           >
             <PlusIcon className="h-3.5 w-3.5" /> Create Lead
           </Button>
         </Link>
 
         <Link id="tour-header-notifications" to="/notifications" className="relative">
-          <Button variant="ghost" size="icon" className="rounded-full relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5">
+          <Button variant="ghost" size="icon" className="se-header-bell rounded-full relative text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5">
             <BellIcon className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute -top-1 -right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white shadow-lg animate-pulse">
@@ -167,7 +179,7 @@ export const Header: React.FC<HeaderProps> = ({ onMenuClick, onSearchClick, unre
         <div className="relative" ref={dropdownRef}>
           <div 
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-3 p-1 rounded-full text-slate-800 dark:text-slate-100 select-none cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            className="se-header-user flex items-center gap-3 p-1 rounded-full text-slate-800 dark:text-slate-100 select-none cursor-pointer hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
           >
             <Avatar className="h-9 w-9 border border-slate-200 dark:border-white/10">
               <AvatarImage src={currentUser?.avatar_url} alt={currentUser?.name} className="object-cover animate-fade-in" />
