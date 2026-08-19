@@ -232,7 +232,7 @@ export default function BlogsManagement({
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto dark:text-white">
       {/* Header Panel */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -240,7 +240,7 @@ export default function BlogsManagement({
             <FileText className="h-6 w-6 text-indigo-400" />
             Website Blogs & Content Manager
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Compose educational resources, startup insights, and company updates to publish directly to the main website.</p>
+          <p className="text-sm dark:text-slate-400 mt-1">Compose educational resources, startup insights, and company updates to publish directly to the main website.</p>
         </div>
         <Button
           onClick={handleOpenCreateModal}
@@ -259,7 +259,7 @@ export default function BlogsManagement({
             className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
               selectedCategory === 'All'
                 ? 'bg-primary border-primary/50 text-white shadow-md'
-                : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+                : 'bg-slate-900/80 border-white/10 dark:text-slate-400 dark:hover:text-white hover:bg-white/5'
             }`}
           >
             All Categories
@@ -271,7 +271,7 @@ export default function BlogsManagement({
               className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all border whitespace-nowrap ${
                 selectedCategory === cat
                   ? 'bg-primary border-primary/50 text-white shadow-md'
-                  : 'bg-slate-900/80 border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'bg-slate-900/80 border-white/10 dark:text-slate-400 dark:hover:text-white hover:bg-white/5'
               }`}
             >
               {cat}

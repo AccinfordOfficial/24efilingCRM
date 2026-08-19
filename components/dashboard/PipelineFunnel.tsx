@@ -23,10 +23,10 @@ export const PipelineFunnel: React.FC<PipelineFunnelProps> = ({ pending, inProgr
       <Card className="glass-card border-white/5">
           <CardHeader className="pb-3 border-b border-white/5 bg-white/5">
               <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
-                      <BarChart2 className="h-4 w-4 text-slate-400" /> Pipeline Overview
+                  <CardTitle className="text-sm font-bold dark:text-white flex items-center gap-2">
+                      <BarChart2 className="h-4 w-4 dark:text-slate-400" /> Pipeline Overview
                   </CardTitle>
-                  <span className="text-xs font-semibold text-slate-400">{total} Total Leads</span>
+                  <span className="text-xs font-semibold dark:text-slate-400">{total} Total Leads</span>
               </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -47,12 +47,12 @@ export const PipelineFunnel: React.FC<PipelineFunnelProps> = ({ pending, inProgr
                                       <Icon className="h-4 w-4" />
                                   </div>
                                   <div className="text-left">
-                                      <p className="text-xs font-bold text-white uppercase tracking-wide group-hover:text-primary transition-colors">{s.label}</p>
-                                      <p className="text-[10px] text-slate-400 font-medium">{pct}% of pipeline</p>
+                                      <p className="text-xs font-bold dark:text-white uppercase tracking-wide group-hover:text-primary transition-colors">{s.label}</p>
+                                      <p className="text-[10px] dark:text-slate-400 font-medium">{pct}% of pipeline</p>
                                   </div>
                               </div>
                               <div className="text-right">
-                                  <span className="text-xl font-extrabold text-white">{s.value}</span>
+                                  <span className="text-xl font-extrabold dark:text-white">{s.value}</span>
                               </div>
                           </button>
                       );

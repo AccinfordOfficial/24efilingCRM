@@ -99,8 +99,8 @@ const ClientDocuments: React.FC<ClientDocumentsProps> = ({
             <input type="file" ref={fileInputRef} onChange={handleFileSelected} className="hidden" />
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
                 <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-white">Client Documents</h1>
-                    <p className="text-slate-400 text-sm mt-1">Centralized document management repository for all client records.</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight dark:text-white">Client Documents</h1>
+                    <p className="dark:text-slate-400 text-sm mt-1">Centralized document management repository for all client records.</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
                     <div className="relative w-full sm:w-64">

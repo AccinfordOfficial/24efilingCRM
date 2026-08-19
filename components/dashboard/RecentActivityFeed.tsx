@@ -15,8 +15,8 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activiti
     <Card className="glass-card border border-white/5">
       <CardHeader className="flex flex-row items-center justify-between pb-3">
         <div>
-          <CardTitle className="text-sm font-bold text-white">Recent Activity</CardTitle>
-          <CardDescription className="text-xs text-slate-400">Latest updates from your team</CardDescription>
+          <CardTitle className="text-sm font-bold dark:text-white">Recent Activity</CardTitle>
+          <CardDescription className="text-xs dark:text-slate-400">Latest updates from your team</CardDescription>
         </div>
         <Button
           variant="ghost"
@@ -36,7 +36,7 @@ export const RecentActivityFeed: React.FC<RecentActivityFeedProps> = ({ activiti
                 <div key={activity.id} className="relative group">
                   <div className="absolute -left-[25px] bg-slate-800 border-2 border-white/10 w-3.5 h-3.5 rounded-full group-hover:border-primary group-hover:bg-primary/10 transition-colors" />
                   <div className="flex flex-col sm:flex-row sm:items-baseline gap-1">
-                    <p className="text-xs font-medium text-slate-300">
+                    <p className="text-xs font-medium dark:text-slate-300">
                       <span className="text-primary font-semibold">{user?.name}</span>{' '}
                       {activity.action.toLowerCase().replace('user ', '')}
                       {activity.details && <span className="text-slate-400 font-normal"> — {activity.details}</span>}

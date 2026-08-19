@@ -239,8 +239,8 @@ const FollowUps: React.FC<FollowUpsProps & { onUpdateTask?: (leadId: string, tas
         <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
                 <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-white">Follow-ups & Reminders</h1>
-                    <p className="text-slate-400 text-sm mt-1">Manage your upcoming follow-ups and lead tasks in one place.</p>
+                    <h1 className="text-3xl font-extrabold tracking-tight dark:text-white">Follow-ups & Reminders</h1>
+                    <p className="dark:text-slate-400 text-sm mt-1">Manage your upcoming follow-ups and lead tasks in one place.</p>
                 </div>
                 <div className="flex items-center gap-2 self-start sm:self-center">
                     <Popover
@@ -274,7 +274,7 @@ const FollowUps: React.FC<FollowUpsProps & { onUpdateTask?: (leadId: string, tas
                     <CalendarIcon className="h-4 w-4" />
                 </div>
                 <p>
-                    Showing <strong className="text-white">General Follow-ups</strong> (set in Lead Edit) and <strong className="text-white">Tasks</strong> (created in Lead Detail).
+                    Showing <strong className="dark:text-white">General Follow-ups</strong> (set in Lead Edit) and <strong className="dark:text-white">Tasks</strong> (created in Lead Detail).
                 </p>
             </div>
 

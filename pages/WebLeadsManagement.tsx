@@ -124,7 +124,7 @@ export default function WebLeadsManagement({
   const activeSalesExecutives = salesExecutives.filter(u => u.is_active);
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto dark:text-white">
       {/* Header Panel */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -132,7 +132,7 @@ export default function WebLeadsManagement({
             <Globe className="h-6 w-6 text-indigo-400 animate-pulse" />
             Organic Website Leads
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Review contact inquiries captured from 24efiling.com and convert them instantly to trackable CRM pipeline leads.</p>
+          <p className="text-sm dark:text-slate-400 mt-1">Review contact inquiries captured from 24efiling.com and convert them instantly to trackable CRM pipeline leads.</p>
         </div>
       </div>
 
@@ -152,7 +152,7 @@ export default function WebLeadsManagement({
                 className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
                   activeTab === tab
                     ? 'bg-primary text-white shadow-sm border border-primary/50'
-                    : 'text-slate-400 hover:text-white hover:bg-white/5'
+                    : 'dark:text-slate-400 dark:hover:text-white hover:bg-white/5'
                 }`}
               >
                 {tab}

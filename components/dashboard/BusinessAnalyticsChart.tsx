@@ -23,8 +23,8 @@ export const BusinessAnalyticsChart: React.FC<BusinessAnalyticsChartProps> = ({
     <Card className="glass-card border border-white/5">
       <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3">
         <div>
-          <CardTitle className="text-sm font-bold text-white">Business Analytics</CardTitle>
-          <CardDescription className="text-xs text-slate-400">
+          <CardTitle className="text-sm font-bold dark:text-white">Business Analytics</CardTitle>
+          <CardDescription className="text-xs dark:text-slate-400">
             {activeTab === 'leads' && 'New leads vs conversions over time'}
             {activeTab === 'revenue' && 'Total payments revenue trend'}
             {activeTab === 'services' && 'Leads by acquisition source'}

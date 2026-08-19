@@ -75,7 +75,7 @@ export const TodayAgendaCard: React.FC<TodayAgendaCardProps> = ({
       <div className="glass-card rounded-2xl flex flex-col h-full border border-white/5">
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-white/5 bg-white/5 rounded-t-2xl">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
+              <h2 className="text-sm font-bold dark:text-white flex items-center gap-2">
                   <span className="relative flex h-2 w-2">
                       {overdueCount > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />}
                       <span className={cn('relative inline-flex rounded-full h-2 w-2', overdueCount > 0 ? 'bg-red-500' : 'bg-emerald-400')} />
@@ -138,7 +138,7 @@ export const TodayAgendaCard: React.FC<TodayAgendaCardProps> = ({
                           >
                               <span className="mt-0.5 h-1.5 w-1.5 rounded-full bg-rose-500 flex-shrink-0 animate-pulse" />
                               <div className="min-w-0 flex-1">
-                                  <p className="text-xs font-semibold text-white truncate group-hover:text-rose-400">{item.title}</p>
+                                   <p className="text-xs font-semibold dark:text-white truncate group-hover:text-rose-400">{item.title}</p>
                                   <p className="text-[10px] text-rose-400 font-medium truncate">{item.subtitle}</p>
                                   <p className="text-[9px] text-rose-500/70 mt-0.5">
                                       Due {new Date(item.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
@@ -171,7 +171,7 @@ export const TodayAgendaCard: React.FC<TodayAgendaCardProps> = ({
                               >
                                   <span className={cn('mt-1 h-1.5 w-1.5 rounded-full flex-shrink-0', dot)} />
                                   <div className="min-w-0 flex-1">
-                                      <p className="text-xs font-semibold text-white truncate">{item.title}</p>
+                                       <p className="text-xs font-semibold dark:text-white truncate">{item.title}</p>
                                       <p className="text-[10px] font-medium truncate opacity-70">{item.subtitle}</p>
                                       {item.time && (
                                           <p className="text-[9px] opacity-60 mt-0.5">
@@ -189,18 +189,18 @@ export const TodayAgendaCard: React.FC<TodayAgendaCardProps> = ({
               {isEmpty && (
                   <div className="flex flex-col items-center justify-center py-10 text-center">
                       <span className="text-3xl mb-2">🎉</span>
-                      <p className="text-sm font-bold text-white">All caught up!</p>
-                      <p className="text-xs text-slate-400 mt-1">No tasks or follow-ups for today.</p>
+                      <p className="text-sm font-bold dark:text-white">All caught up!</p>
+                      <p className="text-xs dark:text-slate-400 mt-1">No tasks or follow-ups for today.</p>
                   </div>
               )}
           </div>
 
           {/* Footer */}
           <div className="border-t border-white/5 px-4 py-2.5 flex gap-2 rounded-b-2xl bg-white/5">
-              <Button variant="ghost" size="sm" onClick={() => onNavigate('Follow-ups')} className="flex-1 text-xs text-slate-300 hover:text-white hover:bg-white/5 h-7">
+              <Button variant="ghost" size="sm" onClick={() => onNavigate('Follow-ups')} className="flex-1 text-xs dark:text-slate-300 dark:hover:text-white hover:bg-white/5 h-7">
                   View Schedule
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => onNavigate('Activity Feed')} className="flex-1 text-xs text-slate-300 hover:text-white hover:bg-white/5 h-7">
+              <Button variant="ghost" size="sm" onClick={() => onNavigate('Activity Feed')} className="flex-1 text-xs dark:text-slate-300 dark:hover:text-white hover:bg-white/5 h-7">
                   Activity Feed
               </Button>
           </div>

@@ -49,8 +49,8 @@ export const StatCard: React.FC<StatCardProps> = ({
     >
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider truncate max-w-[120px] sm:max-w-none" title={title}>{title}</p>
-          <h3 className="text-2xl font-bold tracking-tight text-white mt-2">
+          <p className="text-xs font-semibold dark:text-slate-400 uppercase tracking-wider truncate max-w-[120px] sm:max-w-none" title={title}>{title}</p>
+          <h3 className="text-2xl font-bold tracking-tight dark:text-white mt-2">
             {typeof value === 'number' ? (
               <span>{formatter(value)}</span>
             ) : (
@@ -75,7 +75,7 @@ export const StatCard: React.FC<StatCardProps> = ({
               {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               <span>{trend.value}%</span>
             </div>
-            <span className="text-[10px] text-slate-400">{trend.label}</span>
+            <span className="text-[10px] dark:text-slate-400">{trend.label}</span>
           </div>
         )}
         

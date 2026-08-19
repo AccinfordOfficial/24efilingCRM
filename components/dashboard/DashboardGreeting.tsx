@@ -32,10 +32,10 @@ export const DashboardGreeting: React.FC<DashboardGreetingProps> = ({
   return (
     <div className="glass-card rounded-2xl border border-white/5 p-6 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="relative z-10">
-        <h1 className="text-2xl font-extrabold text-white mb-1">
+        <h1 className="text-2xl font-extrabold dark:text-white mb-1">
           {getGreeting()}, {currentUser.name?.split(' ')[0]}!
         </h1>
-        <p className="text-sm font-medium text-slate-400">{currentDate}</p>
+        <p className="text-sm font-medium dark:text-slate-400">{currentDate}</p>
       </div>
 
       <div className="relative z-10 flex flex-wrap items-center gap-3">

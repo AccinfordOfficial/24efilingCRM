@@ -84,7 +84,7 @@ export const DashboardFilterBar: React.FC<DashboardFilterBarProps> = ({ currentU
 
       {/* Top Row: Date filters & More Filters toggle */}
       <div className="flex flex-wrap items-center gap-3 w-full">
-        <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mr-2">
+        <div className="flex items-center gap-2 dark:text-slate-400 text-xs font-semibold mr-2">
           <Filter className="h-4 w-4 text-primary" />
           <span>Period</span>
         </div>
@@ -165,7 +165,7 @@ export const DashboardFilterBar: React.FC<DashboardFilterBarProps> = ({ currentU
               setActivePreset('all');
               setDateRange(getPresetRange('all')); 
             }} 
-            className="h-10 text-xs font-semibold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-1"
+            className="h-10 text-xs font-semibold dark:text-slate-400 dark:hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-1"
           >
             <RefreshCw className="h-3 w-3" />
             <span>Reset</span>

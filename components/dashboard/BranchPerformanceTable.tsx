@@ -11,15 +11,15 @@ export const BranchPerformanceTable: React.FC<BranchPerformanceTableProps> = ({ 
   return (
     <Card className="glass-card mt-4 border-white/5">
       <CardHeader className="pb-2 border-b border-white/5 bg-white/5">
-        <CardTitle className="text-sm font-bold text-white flex items-center gap-2">
-          <Building className="h-4 w-4 text-slate-400" />
+        <CardTitle className="text-sm font-bold dark:text-white flex items-center gap-2">
+          <Building className="h-4 w-4 dark:text-slate-400" />
           Branch Performance Overview (Selected Period)
         </CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="bg-white/5 border-b border-white/5 text-slate-400 font-semibold text-xs uppercase">
+            <thead className="bg-white/5 border-b border-white/5 dark:text-slate-400 font-semibold text-xs uppercase">
               <tr>
                 <th className="px-4 py-3">Branch</th>
                 <th className="px-4 py-3">City</th>
@@ -31,9 +31,9 @@ export const BranchPerformanceTable: React.FC<BranchPerformanceTableProps> = ({ 
             <tbody className="divide-y divide-white/5">
               {data.map((b) => (
                 <tr key={b.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="px-4 py-3 font-medium text-white">{b.name}</td>
-                  <td className="px-4 py-3 text-slate-300">{b.city}</td>
-                  <td className="px-4 py-3 text-right text-slate-300">{b.leads}</td>
+                  <td className="px-4 py-3 font-medium dark:text-white">{b.name}</td>
+                  <td className="px-4 py-3 dark:text-slate-300">{b.city}</td>
+                  <td className="px-4 py-3 text-right dark:text-slate-300">{b.leads}</td>
                   <td className="px-4 py-3 text-right text-emerald-400 font-semibold">{b.sales}</td>
                   <td className="px-4 py-3 text-right text-indigo-400 font-bold">{formatCurrency(b.revenue)}</td>
                 </tr>

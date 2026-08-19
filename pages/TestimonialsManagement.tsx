@@ -159,7 +159,7 @@ export default function TestimonialsManagement({
   };
 
   return (
-    <div className="space-y-6 p-6 max-w-7xl mx-auto text-white">
+    <div className="space-y-6 p-6 max-w-7xl mx-auto dark:text-white">
       {/* Header Panel */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -167,7 +167,7 @@ export default function TestimonialsManagement({
             <Quote className="h-6 w-6 text-indigo-400 rotate-180" />
             Client Testimonials Board
           </h1>
-          <p className="text-sm text-slate-400 mt-1">Moderate client reviews, star ratings, and success quotes. Approved testimonials display on the public website frontpage.</p>
+          <p className="text-sm dark:text-slate-400 mt-1">Moderate client reviews, star ratings, and success quotes. Approved testimonials display on the public website frontpage.</p>
         </div>
         <Button
           onClick={handleOpenModal}
@@ -191,7 +191,7 @@ export default function TestimonialsManagement({
               className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1.5 ${
                 activeFilter === tab
                   ? 'bg-primary text-white shadow-sm border border-primary/50'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  : 'dark:text-slate-400 dark:hover:text-white hover:bg-white/5'
               }`}
             >
               {tab}
