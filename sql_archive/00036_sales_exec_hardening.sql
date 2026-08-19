@@ -97,7 +97,7 @@ USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (leads.branch_id IS NULL OR leads.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (leads.branch_id IS NULL OR leads.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
     OR assigned_to = auth.uid()
     OR created_by = auth.uid()
@@ -113,7 +113,7 @@ USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (leads.branch_id IS NULL OR leads.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (leads.branch_id IS NULL OR leads.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
     OR assigned_to = auth.uid()
     OR created_by = auth.uid()
@@ -122,7 +122,7 @@ WITH CHECK (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (leads.branch_id IS NULL OR leads.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (leads.branch_id IS NULL OR leads.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
     OR assigned_to = auth.uid()
     OR created_by = auth.uid()
@@ -159,11 +159,11 @@ CREATE POLICY "Customers_Admin_All" ON public.customers
 FOR ALL TO authenticated
 USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-    AND (customers.branch_id IS NULL OR customers.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+    AND (customers.branch_id IS NULL OR customers.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
 )
 WITH CHECK (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-    AND (customers.branch_id IS NULL OR customers.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+    AND (customers.branch_id IS NULL OR customers.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
 );
 
 CREATE POLICY "Customers_Owner_Select" ON public.customers
@@ -221,7 +221,7 @@ USING (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
         AND (tasks.lead_id IS NULL OR tasks.lead_id IN (
             SELECT id FROM leads
-            WHERE branch_id IS NULL OR branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid())
+            WHERE branch_id IS NULL OR branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid())
         ))
     )
 );
@@ -243,7 +243,7 @@ USING (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
         AND (tasks.lead_id IS NULL OR tasks.lead_id IN (
             SELECT id FROM leads
-            WHERE branch_id IS NULL OR branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid())
+            WHERE branch_id IS NULL OR branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid())
         ))
     )
 )
@@ -255,7 +255,7 @@ WITH CHECK (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
         AND (tasks.lead_id IS NULL OR tasks.lead_id IN (
             SELECT id FROM leads
-            WHERE branch_id IS NULL OR branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid())
+            WHERE branch_id IS NULL OR branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid())
         ))
     )
 );
@@ -326,7 +326,7 @@ USING (
     OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (expenses.branch_id IS NULL OR expenses.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
+        AND (expenses.branch_id IS NULL OR expenses.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
@@ -350,7 +350,7 @@ USING (
     OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
+        AND (attendance.branch_id IS NULL OR attendance.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
@@ -369,7 +369,7 @@ USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
+        AND (attendance.branch_id IS NULL OR attendance.branch_id::text = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
