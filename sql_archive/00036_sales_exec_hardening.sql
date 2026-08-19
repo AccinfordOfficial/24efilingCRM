@@ -326,7 +326,7 @@ USING (
     OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (expenses.branch_id IS NULL OR expenses.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (expenses.branch_id IS NULL OR expenses.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
@@ -350,7 +350,7 @@ USING (
     OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
@@ -369,7 +369,7 @@ USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Super Admin')
     OR (
         EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'Admin')
-        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id FROM profiles WHERE id = auth.uid()))
+        AND (attendance.branch_id IS NULL OR attendance.branch_id = (SELECT branch_id::text FROM profiles WHERE id = auth.uid()))
     )
 );
 
